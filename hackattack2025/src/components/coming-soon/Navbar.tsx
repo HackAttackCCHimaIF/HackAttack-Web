@@ -31,12 +31,12 @@ const Navbar = () => {
               HACKATTACK
             </Link>
 
-            <div className="hidden md:flex items-center gap-1">
+            <div className="hidden md:flex items-center">
               {iconList.map((icon, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-full p-1 flex items-center justify-center"
-                  style={{ width: 37.4, height: 37.4 }}
+                  className="flex items-center justify-center"
+                  style={{ width: 26, height: 26 }}
                 >
                   <Image
                     src={`/icons/${icon}.svg`}

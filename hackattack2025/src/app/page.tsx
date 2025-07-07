@@ -1,3 +1,4 @@
+import CollaboratorPage from "@/components/coming-soon/Collaborator";
 import Countdown from "@/components/coming-soon/Countdown";
 import HeroSection from "@/components/coming-soon/HeroSection";
 
@@ -6,6 +7,7 @@ export default function Home() {
     <main className=" h-full w-full">
       <HeroSection/>
       <Countdown/>
+      <CollaboratorPage/>
     </main>
   );
 }

@@ -15,7 +15,7 @@ const Footer = () => {
           src="/bg.svg"
           alt="Background"
           fill
-          className="absolute inset-0 object-cover -z-10 pointer-events-none select-none"
+          className="absolute inset-0 object-cover -z-10 pointer-events-none select-none opacity-60"
           priority
       />
 

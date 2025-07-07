@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { motion } from "framer-motion";
 
 // --- Helper Component untuk setiap unit waktu (Hari, Jam, Menit) ---
 const TimeUnit = ({ value, label }: { value: string; label: string }) => (
@@ -63,33 +64,41 @@ const Countdown = () => {
             src="/bg.svg"
             alt="Background"
             fill
-            className="absolute inset-0 object-cover -z-10 pointer-events-none select-none"
+            className="absolute inset-0 object-cover -z-10 pointer-events-none select-none opacity-60"
             priority
         />
 
         {/* Lingkaran luar: gradient border */}
-        <div
-        className="
-            absolute top-[53%] md:top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2
-            w-[180px] h-[180px]
-            sm:w-[220px] sm:h-[220px]
-            md:w-[260px] md:h-[260px]
-            lg:w-[240px] lg:h-[240px]
-            rounded-full p-[3px]
-            bg-gradient-to-b from-white to-black z-20
-        "
-        >
-        {/* Lingkaran dalam: shadow biru */}
-        <div
+        <motion.div
             className="
-            w-full h-full rounded-full bg-black
-            shadow-[0_0_60px_25px_rgba(15,117,189,0.4)]
-            sm:shadow-[0_0_80px_30px_rgba(15,117,189,0.4)]
-            md:shadow-[0_0_100px_40px_rgba(15,117,189,0.4)]
-            lg:shadow-[0_0_120px_50px_rgba(15,117,189,0.4)]
+                absolute top-[53%] md:top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2
+                w-[180px] h-[180px]
+                sm:w-[220px] sm:h-[220px]
+                md:w-[260px] md:h-[260px]
+                lg:w-[240px] lg:h-[240px]
+                rounded-full p-[3px]
+                bg-gradient-to-b from-white to-black z-20
             "
-        />
-        </div>
+            animate={{
+                y: [0, -10, 0], // bergerak ke atas lalu balik
+            }}
+            transition={{
+                duration: 4, // durasi 4 detik untuk 1 loop
+                repeat: Infinity,
+                ease: "easeInOut",
+            }}
+            >
+            {/* Lingkaran dalam: shadow biru */}
+            <div
+                className="
+                w-full h-full rounded-full bg-black
+                shadow-[0_0_60px_25px_rgba(15,117,189,0.4)]
+                sm:shadow-[0_0_80px_30px_rgba(15,117,189,0.4)]
+                md:shadow-[0_0_100px_40px_rgba(15,117,189,0.4)]
+                lg:shadow-[0_0_120px_50px_rgba(15,117,189,0.4)]
+                "
+            />
+            </motion.div>
 
         {/* Lingkaran outline putih */}
         <div
