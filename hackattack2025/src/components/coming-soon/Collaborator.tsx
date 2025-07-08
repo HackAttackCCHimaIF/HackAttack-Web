@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CollaboratorOrbit } from "./planet/CollaboratorOrbit";
+import OrbitalAnimation from "./planet/CollaboratorOrbit";
 
 export default function CollaboratorPage() {
   return (
@@ -17,17 +17,8 @@ export default function CollaboratorPage() {
       </div>
 
       {/* Konten utama */}
-      <div className="relative w-full py-20 sm:py-32">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-bold text-white">
-            Our Collaborator
-          </h2>
-          <p className="text-neutral-400 mt-2">
-            Proudly working with amazing communities.
-          </p>
-        </div>
-
-        <CollaboratorOrbit />
+      <div className="relative w-full">
+        <OrbitalAnimation />
       </div>
     </div>
   );

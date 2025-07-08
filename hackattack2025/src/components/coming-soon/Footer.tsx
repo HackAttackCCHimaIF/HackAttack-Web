@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { InstagramLogo, LinkedinLogo } from 'phosphor-react';
 import { Input } from '../ui/input';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 
 const Footer = () => {
   return (
@@ -18,6 +19,34 @@ const Footer = () => {
           className="absolute inset-0 object-cover -z-10 pointer-events-none select-none opacity-60"
           priority
       />
+
+      <div className="absolute inset-0">
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              opacity: [0.3, 1, 0.3],
+              scale: [0.5, 1.2, 0.5],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+          />
+        ))}
+      </div>
+
+        {/* Glow hijau bawah kiri – lebih rendah agar sambung ke atas */}
+        {/* <div className="absolute top-[-80px] left-[0] w-[400px] h-[400px] bg-green-400 opacity-[0.08] rounded-full blur-[160px] z-0" /> */}
+
+        {/* Glow biru bawah kanan – didekatkan agar smooth fade */}
+        {/* <div className="absolute top-[-100px] right-[0] w-[500px] h-[500px] bg-blue-400 opacity-[0.08] rounded-full blur-[200px] z-0" /> */}
 
       <div className="w-[95%] mx-auto px-1">
         {/* Konten Utama */}
@@ -66,7 +95,7 @@ const Footer = () => {
         </div>
 
         {/* Footer Bottom */}
-        <div className="mt-12 border-t border-neutral-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div className="mt-12 border-t border-neutral-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4  h-full">
           <p className="text-xs text-neutral-500 text-center sm:text-left">
             © 2025 HackAttack. All rights reserved.
           </p>

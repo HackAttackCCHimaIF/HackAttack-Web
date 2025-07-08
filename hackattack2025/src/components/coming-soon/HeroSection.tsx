@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button"; 
 import Image from 'next/image';
 import { FloatingOrb } from './planet/FloatingOrb'; 
+// import StarryBackground from './planet/StarryBackground';
+import { motion } from 'framer-motion';
 
 const HeroSection = () => {
   return (
@@ -17,6 +19,28 @@ const HeroSection = () => {
         className="absolute inset-0 w-full h-full object-cover -z-20 pointer-events-none select-none opacity-60"
         priority
       />
+      {/* <StarryBackground count={20} className='absolute'/> */}
+      <div className="absolute inset-0">
+        {[...Array(50)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              opacity: [0.3, 1, 0.3],
+              scale: [0.5, 1.2, 0.5],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 3,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Central content wrapper */}
       <div className="w-[95%] mx-auto z-10">
@@ -99,20 +123,8 @@ const HeroSection = () => {
               color="#2F67B4" 
               className="w-24 h-24 top-[70%] right-[15%] absolute" 
               animationProps={{
-                animate: {
-                  x: ["0vw", "-15vw", "0vw"],  
-                  y: ["0vh", "-20vh", "0vh"],  
-                  rotate: [0, 5, -5, 0],       
-                  scale: [1, 1.1, 1],          
-                },
-                transition: { 
-                  duration: 12,
-                  ease: "easeInOut",
-                  repeat: Infinity,
-                },
               }}
             />
-
 
             {/* Email subscription form */}
             <form className="mt-6 w-full flex items-center gap-3 overflow-x-auto">
