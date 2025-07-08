@@ -10,8 +10,8 @@ const planets = [
     glow: "bg-blue-400",
     initials: "UM",
     delay: 0,
-    size: "w-10 h-10",
-    glowSize: "w-14 h-14",
+    size: "w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10",
+    glowSize: "w-10 h-10",
   },
   {
     name: "Central Computer Improvement",
@@ -20,8 +20,8 @@ const planets = [
     glow: "bg-green-400",
     initials: "CC",
     delay: 10,
-    size: "w-8 h-8",
-    glowSize: "w-12 h-12",
+    size: "w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8",
+    glowSize: "w-9 h-9",
   },
   {
     name: "Telkom",
@@ -30,14 +30,25 @@ const planets = [
     glow: "bg-red-400",
     initials: "TU",
     delay: 20,
-    size: "w-9 h-9",
-    glowSize: "w-13 h-13",
+    size: "w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10",
+    glowSize: "w-10 h-10",
   },
 ];
 
+
+const orbitClass = (index: number) => {
+  const base = 40 + index * 6;
+  return `
+    w-[${base + 5}vw] h-[${base + 5}vw]
+    sm:w-[${base + 10}vw] sm:h-[${base + 10}vw]
+    md:w-[${base + 10}vw] md:h-[${base + 10}vw]
+  `;
+};
+
+
 export default function OrbitAccurate() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-transparent">
+    <div className="relative w-full h-screen overflow-hidden bg-transparent pointer-events-none">
       {/* Starfield background */}
       <div className="absolute inset-0">
         {[...Array(50)].map((_, i) => (
@@ -62,9 +73,9 @@ export default function OrbitAccurate() {
       </div>
 
       {/* Sun in the center */}
-      <div className="absolute top-[42%] left-1/2 md:top-[32%] md:left-[43%] lg:top-[35%] lg:left-[30%] xl:top-[42%] xl:left-[32%] z-10 transform -translate-x-1/2 -translate-y-1/2">
+      <div className="absolute top-1/2 left-1/2 xl:left-1/3  z-10 transform -translate-x-1/2 -translate-y-1/2">
         <motion.div
-          className="relative w-40 h-40 rounded-full"
+          className="relative w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-52 lg:h-52 xl:w-64 xl:h-64 rounded-full"
           animate={{ rotate: [0, 360] }}
           transition={{
             duration: 30,
@@ -107,11 +118,10 @@ export default function OrbitAccurate() {
       {planets.map((planet, index) => (
         <motion.div
           key={planet.initials}
-          className="absolute top-1/6 left-[4%] md:top-1/10 md:left-1/8 xl:top-1/6 xl:left-1/5"
+          className={`absolute top-1/2 left-1/2 xl:left-1/3 transform -translate-x-1/2 -translate-y-1/2 ${orbitClass(index)}`}
           style={{
-            transform: "translate(-50%, -50%)",
-            width: `${440 + index * 40}px`,
-            height: `${440 + index * 40}px`,
+            width: `${42 + index * 5}vw`, 
+            height: `${42 + index * 5}vw`, 
           }}
           animate={{ rotate: 360 }}
           transition={{
@@ -182,17 +192,22 @@ export default function OrbitAccurate() {
 
               {/* Label */}
               <motion.div
-                className="flex items-center mt-2 text-white text-xs space-x-2"
+                className="flex items-center mt-6 sm:mt-6 px-3 py-2 w-fit bg-white/5 rounded-lg backdrop-blur-sm border border-white/20 shadow-sm space-x-3"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: planet.delay + 1 }}
               >
-                <div className="w-7 h-7 rounded-full flex items-center justify-center bg-white/10 border border-white/50 backdrop-blur-sm">
-                  <span className="text-white font-bold text-[10px]">{planet.initials}</span>
+                {/* Lingkaran Inisial */}
+                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-white/10 border border-white/30">
+                  <span className="text-white font-bold text-[10px] sm:text-xs">{planet.initials}</span>
                 </div>
+
+                {/* Teks Nama & Departemen */}
                 <div className="text-left leading-tight">
-                  <div className="font-bold text-sm">{planet.name}</div>
-                  <div className="text-gray-300 text-xs">{planet.dept}</div>
+                  <div className="text-white font-semibold text-xs sm:text-sm md:text-base truncate">
+                    {planet.name}
+                  </div>
+                  <div className="text-gray-300 text-[10px] sm:text-xs truncate">{planet.dept}</div>
                 </div>
               </motion.div>
             </div>
@@ -201,25 +216,6 @@ export default function OrbitAccurate() {
 
         </motion.div>
       ))}
-
-      <motion.div
-        className="absolute bottom-10 right-10 text-white text-right border-r-4 pr-3"
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1, duration: 1 }}
-      >
-        {/* Glow hijau kiri */}
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] bg-green-400 opacity-10 rounded-full blur-[180px] z-0" />
-
-        {/* Glow biru kanan */}
-        <div className="absolute -top-48 -right-48 w-[600px] h-[600px] bg-blue-400 opacity-10 rounded-full blur-[220px] z-0" />
-
-        <div className="text-xl sm:text-2xl font-semibold ">HackAttack2025</div>
-        <div className="text-4xl sm:text-5xl font-koulen tracking-wider">
-          COLLABORATION
-        </div>
-        <div className="text-xl sm:text-5xl font-koulen tracking-wider">PARTNERS</div>
-      </motion.div>
     </div>
   );
 }

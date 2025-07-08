@@ -5,13 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button"; 
 import Image from 'next/image';
 import { FloatingOrb } from './planet/FloatingOrb'; 
-// import StarryBackground from './planet/StarryBackground';
 import { motion } from 'framer-motion';
 
 const HeroSection = () => {
   return (
     <div className="relative w-full min-h-screen flex items-center justify-start text-white overflow-hidden">
-      {/* Full-screen SVG background for space theme */}
+      {/* Background */}
       <Image
         src="/bg.svg"
         alt="background planet"
@@ -19,8 +18,9 @@ const HeroSection = () => {
         className="absolute inset-0 w-full h-full object-cover -z-20 pointer-events-none select-none opacity-60"
         priority
       />
-      {/* <StarryBackground count={20} className='absolute'/> */}
-      <div className="absolute inset-0">
+
+      {/* Starfield */}
+      <div className="absolute inset-0 pointer-events-none z-[-10]">
         {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
@@ -42,43 +42,46 @@ const HeroSection = () => {
         ))}
       </div>
 
-      {/* Central content wrapper */}
+      {/* Central content */}
       <div className="w-[95%] mx-auto z-10">
         <div className="container px-4 w-fit">
-          <div className="max-w-4xl flex flex-col gap-1">
-
-            {/* Pre-title text */}
-            <p className="font-semibold text-lg tracking-tight text-gray-200 ">
+          <motion.div
+            className="max-w-4xl flex flex-col gap-1"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: "easeOut" }}
+          >
+            <p className="font-semibold text-lg tracking-tight text-gray-200">
               HackAttack2025
             </p>
 
-            {/* Main title with gradient "Coming Soon" effect */}
-            <h1 className="text-[160px] font-black uppercase font-koulen leading-[130px]">
-              <span className="bg-gradient-to-r from-green-400 via-green-300 to-white text-transparent bg-clip-text">
+            <motion.h1
+              className="text-[160px] font-black uppercase font-koulen leading-[130px]"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
+            >
+              <span className="bg-gradient-to-b from-[#01A850]/80 via-[#01A850] to-white  text-transparent bg-clip-text">
                 Coming
               </span>
               <br />
               <span>Soon!</span>
-            </h1>
+            </motion.h1>
 
-            {/* Description paragraph */}
-            <p className="text-base md:text-lg text-gray-300 max-w-xl font-medium">
+            <motion.p
+              className="text-base md:text-lg text-gray-300 max-w-xl font-medium"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+            >
               An exciting collaboration between HIMA IF and CCI, bringing you one of the most anticipated hackathons of the year.
-            </p>
+            </motion.p>
 
-            {/* Animated glowing orb background accent */}
+            {/* Floating Orbs */}
             <FloatingOrb 
               type="glow"
               color="#F9A318"
-              className="
-                absolute 
-                left-1/2 top-[60%] 
-                sm:left-[70%] sm:top-[30%] 
-                md:left-1/2 md:top-1/2 
-                -translate-x-1/2 -translate-y-1/2 
-                w-28 h-28 
-                -z-10 pointer-events-none
-              "
+              className="absolute left-1/2 top-[60%] sm:left-[70%] sm:top-[30%] md:left-1/2 md:top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 -z-10 pointer-events-none"
               animationProps={{
                 initial: { opacity: 0.8, scale: 1, x: 0, y: 0 },
                 animate: {
@@ -117,18 +120,19 @@ const HeroSection = () => {
               }}
             />
 
-            {/* Second floating orb with custom path and fade animation */}
             <FloatingOrb 
               type="planet"
               color="#2F67B4" 
               className="w-24 h-24 top-[70%] right-[15%] absolute" 
-              animationProps={{
-              }}
             />
 
-            {/* Email subscription form */}
-            <form className="mt-6 w-full flex items-center gap-3 overflow-x-auto">
-              {/* Wrapper for input with gradient border */}
+            {/* Form with entry animation */}
+            <motion.form
+              className="mt-6 w-full flex items-center gap-3 overflow-x-auto"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+            >
               <div className="rounded-full p-[4px] bg-gradient-to-r from-[#666666] to-[#FFFFFF]/15 flex-1 min-w-0">
                 <Input 
                   type="email" 
@@ -142,20 +146,27 @@ const HeroSection = () => {
                 />
               </div>
 
-              {/* Wrapper for submit button with gradient border */}
-              <div className="rounded-full p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0">
+              <motion.div
+                className="rounded-full p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
+                initial={{ opacity: 0, y: 20, rotateX: -15 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                viewport={{ once: true }}
+              >
                 <Button 
                   type="submit" 
-                  className="w-[142px] h-[44px] bg-[#01A850]/10 border-none 
+                  className="group w-[142px] h-[44px] bg-[#01A850]/10 border-none 
                   rounded-full text-white text-base font-semibold backdrop-blur-[18px] 
                   hover:bg-[#01A850]/40 focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  Notify me!
+                  <motion.div whileHover={{ y: -2, scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+                    Notify me!
+                  </motion.div>
                 </Button>
-              </div>
-            </form>
+              </motion.div>
+            </motion.form>
 
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

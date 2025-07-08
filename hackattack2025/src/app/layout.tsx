@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins, Koulen } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/coming-soon/Navbar";
-import Footer from "@/components/coming-soon/Footer";
+// import Navbar from "@/components/coming-soon/Navbar";
+// import Footer from "@/components/coming-soon/Footer";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -31,9 +31,9 @@ export default function RootLayout({
       <body
         className={`${poppins.variable} ${koulen.variable} font-poppins antialiased bg-[#0C0E13]`}
       >
-        <Navbar/>
+        {/* <Navbar/> */}
         {children}
-        <Footer/>
+        {/* <Footer/> */}
       </body>
     </html>
   );
