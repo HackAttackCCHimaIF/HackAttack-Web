@@ -79,9 +79,9 @@ const HeroSection = () => {
 
             {/* Floating Orbs */}
             <FloatingOrb 
-              type="glow"
+              type="planet3"
               color="#F9A318"
-              className="absolute left-1/2 top-[60%] sm:left-[70%] sm:top-[30%] md:left-1/2 md:top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 -z-10 pointer-events-none"
+              className="absolute top-[60%] left-[20%] sm:left-[70%] sm:top-[30%] md:left-1/2 md:top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 -z-10 pointer-events-none"
               animationProps={{
                 initial: { opacity: 0.8, scale: 1, x: 0, y: 0 },
                 animate: {
@@ -99,34 +99,47 @@ const HeroSection = () => {
               }}
             />
 
+            <div className="absolute w-[120px] h-[120px] top-[15%] right-[5%] sm:w-[140px] sm:h-[140px] sm:top-[20%] sm:right-[70%] md:w-[160px] md:h-[160px] md:top-[16%] md:right-[10%]lg:w-[180px] lg:h-[180px] lg:top-[15%] lg:right-[12%]xl:w-[200px] xl:h-[200px] xl:top-[16%] xl:right-[25%]">
+              <FloatingOrb 
+                type="planet1"
+                color="#047A3C"
+                className="w-24 h-24 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                animationProps={{
+                  animate: {
+                    x: [0, 5, -5, 0],
+                    y: [0, -4, 4, 0],
+                  },
+                  transition: {
+                    duration: 10,
+                    ease: "easeInOut",
+                    repeat: Infinity,
+                    repeatType: "loop",
+                  },
+                  initial: {}, 
+                }}
+              />
+            </div>
+
+
             <FloatingOrb 
-              type="planet"
-              color="#047A3CA3"
-              className="w-24 h-24 top-[30%] right-[15%] absolute" 
+              type="planet2"
+              color="#2F67B4" 
+              className="w-24 h-24 top-[60%] right-[5%] sm:top-[50%] sm:right-[10%] md:top-[45%] md:right-[12%] lg:top-[45%] lg:right-[14%] xl:top-[45%] xl:right-[15%] absolute"
               animationProps={{
-                initial: { opacity: 1, scale: 1, rotate: 0, x: 0, y: 0 },
                 animate: {
-                  rotate: [0, -10, 0, 10, 0],
-                  scale: [1, 1.15, 1],
-                  x: ["0vw", "-2vw", "0vw", "2vw", "0vw"],
-                  y: ["0vh", "-1vh", "0vh", "1vh", "0vh"],
+                  x: [0, -6, 6, 0],
+                  y: [0, 3, -3, 0],
                 },
-                transition: { 
-                  duration: 6,        
-                  ease: "easeInOut",   
-                  repeat: Infinity,     
-                  repeatType: "loop",   
-                }
+                transition: {
+                  duration: 12,
+                  ease: "easeInOut",
+                  repeat: Infinity,
+                  repeatType: "loop",
+                },
+                initial: {}, 
               }}
             />
 
-            <FloatingOrb 
-              type="planet"
-              color="#2F67B4" 
-              className="w-24 h-24 top-[70%] right-[15%] absolute" 
-            />
-
-            {/* Form with entry animation */}
             <motion.form
               className="mt-6 w-full flex items-center gap-3 overflow-x-auto"
               initial={{ opacity: 0, y: 30 }}

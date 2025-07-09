@@ -4,7 +4,7 @@ import { motion, MotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 type FloatingOrbProps = {
-  type: 'glow' | 'planet';
+  type: 'glow' | 'planet1' | 'planet2' | 'planet3';
   color: string;
   className?: string;
   animationProps?: MotionProps;
@@ -16,6 +16,25 @@ export const FloatingOrb = ({
   className,
   animationProps
 }: FloatingOrbProps) => {
+
+  const PlanetGlow = ({ color }: { color: string }) => (
+    <>
+      <div
+        style={{ backgroundColor: `${color}20` }}
+        className="absolute inset-0 rounded-full blur-[160px] scale-[1.8] pointer-events-none"
+      />
+      <div
+        style={{ backgroundColor: `${color}40` }}
+        className="absolute inset-0 rounded-full blur-[100px] scale-[1.4] pointer-events-none"
+      />
+      <div
+        style={{ backgroundColor: `${color}80` }}
+        className="absolute inset-0 rounded-full blur-[60px] scale-[1.1] pointer-events-none"
+      />
+    </>
+  );
+
+
   const defaultAnimation: MotionProps = {
     initial: { opacity: 0, scale: 0.8 },
     animate: {
@@ -44,42 +63,86 @@ export const FloatingOrb = ({
       {/* Orb Glow */}
       {type === 'glow' && (
         <>
-          <div style={{ backgroundColor: `${color}20` }} className="absolute inset-0 rounded-full blur-2xl" />
-          <div style={{ backgroundColor: `${color}40` }} className="absolute inset-0 rounded-full blur-xl scale-90" />
-          <div style={{ backgroundColor: `${color}80` }} className="absolute inset-0 rounded-full blur-lg scale-75" />
-          <div style={{ backgroundColor: color }} className="absolute inset-0 rounded-full scale-50" />
+          <div
+            style={{ backgroundColor: `${color}20` }}
+            className="absolute inset-0 rounded-full blur-[160px] scale-[1.8]"
+          />
+          <div
+            style={{ backgroundColor: `${color}40` }}
+            className="absolute inset-0 rounded-full blur-[100px] scale-[1.4]"
+          />
+          <div
+            style={{ backgroundColor: `${color}80` }}
+            className="absolute inset-0 rounded-full blur-[60px] scale-[1.1]"
+          />
+          <div
+            style={{ backgroundColor: color }}
+            className="absolute inset-0 rounded-full scale-75"
+          />
         </>
       )}
 
-      {/* Planet with Glow */}
-      {type === 'planet' && (
+      {/* Planet */}
+      {type === 'planet1' && (
         <>
-          {/* Glow layers (similar to "glow" type) */}
-          <div
-            className="absolute inset-0 rounded-full blur-[120px] opacity-25"
-            style={{ backgroundColor: `${color}40` }}
-          />
-          <div
-            className="absolute inset-0 rounded-full blur-[80px] opacity-40"
-            style={{ backgroundColor: `${color}70` }}
-          />
-          <div
-            className="absolute inset-0 rounded-full blur-[40px] opacity-60"
-            style={{ backgroundColor: `${color}A0` }}
-          />
+          <PlanetGlow color={color} />
 
-          {/* Planet Body */}
           <div
-            style={{ backgroundColor: color }}
-            className="relative w-full h-full rounded-full overflow-hidden z-10"
+            style={{
+              backgroundColor: color,
+              boxShadow: `0 0 30px ${color}AA, 0 0 80px ${color}66`,
+            }}
+            className="relative w-full h-full rounded-full overflow-hidden z-10 animate-pulse-slow"
           >
-            {/* Craters */}
             <div className="absolute w-1/4 h-1/4 bg-black/20 rounded-full top-[20%] left-[25%]" />
-            <div className="absolute w-1/6 h-1/6 bg-black/20 rounded-full top-[50%] left-[60%]" />
-            <div className="absolute w-1/5 h-1/5 bg-black/20 rounded-full top-[65%] left-[15%]" />
+            <div className="absolute w-1/6 h-1/6 bg-black/25 rounded-full top-[50%] left-[60%]" />
+            <div className="absolute w-1/5 h-1/5 bg-black/15 rounded-full top-[65%] left-[15%]" />
+            <div className="absolute w-1/6 h-1/6 bg-black/10 rounded-full top-[40%] left-[40%]" />
           </div>
         </>
       )}
+
+
+        {type === 'planet2' && (
+          <>
+            <PlanetGlow color={color} />
+
+            <div
+              style={{
+                backgroundColor: color,
+                boxShadow: `0 0 30px ${color}AA, 0 0 80px ${color}66`,
+              }}
+              className="relative w-full h-full rounded-full overflow-hidden z-10 animate-pulse-slow"
+            >
+              <div className="absolute w-1/6 h-1/6 bg-black/20 rounded-full top-[15%] left-[20%]" />
+              <div className="absolute w-1/8 h-1/8 bg-black/15 rounded-full top-[40%] left-[55%]" />
+              <div className="absolute w-1/10 h-1/10 bg-black/25 rounded-full top-[60%] left-[30%]" />
+              <div className="absolute w-1/12 h-1/12 bg-black/30 rounded-full top-[70%] left-[70%]" />
+              <div className="absolute w-1/12 h-1/12 bg-black/25 rounded-full top-[50%] left-[10%]" />
+            </div>
+          </>
+        )}
+
+
+        {type === 'planet3' && (
+          <>
+            <PlanetGlow color={color} />
+
+            <div
+              style={{
+                backgroundColor: color,
+                boxShadow: `0 0 30px ${color}AA, 0 0 80px ${color}66`,
+              }}
+              className="relative w-full h-full rounded-full overflow-hidden z-10 animate-pulse-slow"
+            >
+              <div className="absolute w-1/3 h-1/3 bg-black/25 rounded-full top-[30%] left-[30%]" />
+              <div className="absolute w-1/8 h-1/8 bg-black/20 rounded-full top-[65%] left-[20%]" />
+              <div className="absolute w-1/10 h-1/10 bg-black/15 rounded-full top-[50%] left-[70%]" />
+            </div>
+          </>
+        )}
+
+
     </motion.div>
   );
 };

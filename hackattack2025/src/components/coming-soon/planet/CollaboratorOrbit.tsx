@@ -48,7 +48,7 @@ const orbitClass = (index: number) => {
 
 export default function OrbitAccurate() {
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-transparent pointer-events-none">
+    <div className="relative w-full h-[110vh] overflow-hidden bg-transparent pointer-events-none">
       {/* Starfield background */}
       <div className="absolute inset-0">
         {[...Array(50)].map((_, i) => (
