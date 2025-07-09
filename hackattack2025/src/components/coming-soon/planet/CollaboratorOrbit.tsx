@@ -199,13 +199,13 @@ export default function OrbitAccurate() {
                 transition={{ delay: planet.delay + 1 }}
               >
                 {/* Lingkaran Inisial */}
-                <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-white/10 border border-white/30">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 lg:h-11 lg:w-11 xl:w-12 xl:h-12 rounded-full flex items-center justify-center bg-white/10 border border-white/30">
                   <Image
                     src={planet.image}
                     alt={planet.name}
                     className="object-contain w-full h-full"
-                    height={24}
-                    width={24}
+                    height={36}
+                    width={36}
                   />
                 </div>
 
