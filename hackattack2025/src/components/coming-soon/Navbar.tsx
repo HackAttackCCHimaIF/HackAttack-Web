@@ -98,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 w-[97%] bg-black/90 rounded-xl backdrop-blur-md p-4 z-50 md:hidden shadow-lg">
+        <div className="fixed top-[100px] left-1/2 -translate-x-1/2 z-[9999] w-[97%] bg-black/90 rounded-xl backdrop-blur-md p-4 md:hidden shadow-lg">
           <nav className="flex flex-col gap-3">
             {navItems.map((item) => (
               <Link

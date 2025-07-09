@@ -89,7 +89,7 @@ const Countdown = () => {
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 1 }}
         viewport={{ once: false }}
-        className="z-50"
+        className="z-30"
       >
         <TimeDisplay />
       </motion.div>
