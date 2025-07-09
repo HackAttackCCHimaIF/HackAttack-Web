@@ -56,7 +56,7 @@ const HeroSection = () => {
             </p>
 
             <motion.h1
-              className="text-[160px] font-black uppercase font-koulen leading-[130px]"
+              className="text-[64px] sm:text-[96px] md:text-[128px] lg:text-[160px] font-black uppercase font-koulen leading-[52px] sm:leading-[72px] md:leading-[92px] lg:leading-[115px]"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
@@ -160,19 +160,23 @@ const HeroSection = () => {
               </div>
 
               <motion.div
-                className="rounded-full p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
+                className="rounded-full p-[3px] sm:p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
                 initial={{ opacity: 0, y: 20, rotateX: -15 }}
                 whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 viewport={{ once: true }}
               >
                 <Button 
-                  type="submit" 
-                  className="group w-[142px] h-[44px] bg-[#01A850]/10 border-none 
-                  rounded-full text-white text-base font-semibold backdrop-blur-[18px] 
+                  type="submit"
+                  className="group w-[120px] h-[40px] sm:w-[142px] sm:h-[44px] md:w-[160px] md:h-[48px]
+                  bg-[#01A850]/10 border-none rounded-full text-white text-sm sm:text-base md:text-base
+                  font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] 
                   hover:bg-[#01A850]/40 focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  <motion.div whileHover={{ y: -2, scale: 1.03 }} transition={{ type: "spring", stiffness: 300 }}>
+                  <motion.div 
+                    whileHover={{ y: -2, scale: 1.03 }} 
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
                     Notify me!
                   </motion.div>
                 </Button>
