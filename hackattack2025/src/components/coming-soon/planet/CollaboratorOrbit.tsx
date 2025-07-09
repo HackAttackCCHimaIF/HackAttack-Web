@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 const planets = [
   {
@@ -8,7 +9,7 @@ const planets = [
     dept: "Universitas Telkom",
     color: "bg-blue-500",
     glow: "bg-blue-400",
-    initials: "UM",
+    image: "/icons/hima.svg",
     delay: 0,
     size: "w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10",
     glowSize: "w-10 h-10",
@@ -18,7 +19,7 @@ const planets = [
     dept: "Universitas Telkom",
     color: "bg-green-500",
     glow: "bg-green-400",
-    initials: "CC",
+    image: "/icons/cci.svg",
     delay: 10,
     size: "w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8",
     glowSize: "w-9 h-9",
@@ -28,7 +29,7 @@ const planets = [
     dept: "University",
     color: "bg-red-500",
     glow: "bg-red-400",
-    initials: "TU",
+    image: "/icons/telkom.svg",
     delay: 20,
     size: "w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10",
     glowSize: "w-10 h-10",
@@ -48,7 +49,7 @@ const orbitClass = (index: number) => {
 
 export default function OrbitAccurate() {
   return (
-    <div className="relative w-full h-[110vh] overflow-hidden bg-transparent pointer-events-none">
+    <div className="relative w-full h-[115vh] overflow-hidden bg-transparent pointer-events-none">
       {/* Starfield background */}
       <div className="absolute inset-0">
         {[...Array(50)].map((_, i) => (
@@ -117,7 +118,7 @@ export default function OrbitAccurate() {
       {/* Orbits and planets */}
       {planets.map((planet, index) => (
         <motion.div
-          key={planet.initials}
+          key={planet.name}
           className={`absolute top-1/2 left-1/2 xl:left-1/3 transform -translate-x-1/2 -translate-y-1/2 ${orbitClass(index)}`}
           style={{
             width: `${42 + index * 5}vw`, 
@@ -199,7 +200,13 @@ export default function OrbitAccurate() {
               >
                 {/* Lingkaran Inisial */}
                 <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center bg-white/10 border border-white/30">
-                  <span className="text-white font-bold text-[10px] sm:text-xs">{planet.initials}</span>
+                  <Image
+                    src={planet.image}
+                    alt={planet.name}
+                    className="object-contain w-full h-full"
+                    height={24}
+                    width={24}
+                  />
                 </div>
 
                 {/* Teks Nama & Departemen */}
