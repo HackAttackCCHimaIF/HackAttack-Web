@@ -20,12 +20,12 @@ export const FloatingOrb = ({
   const PlanetGlow = ({ color }: { color: string }) => (
     <>
       <div
-        style={{ backgroundColor: `${color}20` }}
-        className="absolute inset-0 rounded-full blur-[160px] scale-[1.8] pointer-events-none"
+        style={{ backgroundColor: `${color}30` }}
+        className="absolute inset-0 rounded-full blur-[160px] scale-[1.4] pointer-events-none"
       />
       <div
-        style={{ backgroundColor: `${color}40` }}
-        className="absolute inset-0 rounded-full blur-[100px] scale-[1.4] pointer-events-none"
+        style={{ backgroundColor: `${color}70` }}
+        className="absolute inset-0 rounded-full blur-[100px] scale-[1.25] pointer-events-none"
       />
       <div
         style={{ backgroundColor: `${color}80` }}

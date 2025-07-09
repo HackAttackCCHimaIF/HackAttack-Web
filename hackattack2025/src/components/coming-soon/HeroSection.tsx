@@ -161,7 +161,7 @@ const HeroSection = () => {
 
               <motion.div
                 className="rounded-full p-[3px] sm:p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
-                initial={{ opacity: 0, y: 20, rotateX: -15 }}
+                initial={{ opacity: 1, y: 20, rotateX: -15 }}
                 whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 viewport={{ once: true }}
