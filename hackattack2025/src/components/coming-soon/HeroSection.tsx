@@ -61,7 +61,7 @@ const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
             >
-              <span className="bg-gradient-to-b from-[#01A850]/80 via-[#01A850] to-white  text-transparent bg-clip-text">
+              <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text">
                 Coming
               </span>
               <br />
@@ -69,7 +69,7 @@ const HeroSection = () => {
             </motion.h1>
 
             <motion.p
-              className="text-base md:text-lg text-gray-300 max-w-xl font-medium"
+              className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}

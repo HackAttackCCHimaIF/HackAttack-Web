@@ -81,7 +81,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                         href={`#${item.id}`}
                         className={`inline-flex items-center justify-center whitespace-nowrap rounded-md px-4 py-2 text-sm font-semibold transition-colors ${
                           activeSection === item.id
-                            ? "text-emerald-400 bg-white/10"
+                            ? "text-emerald-400 bg-none"
                             : "text-white hover:text-gray-300 hover:bg-white/5"
                         }`}
                       >
@@ -107,7 +107,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
                 onClick={() => setMobileMenuOpen(false)}
                 className={`text-lg font-semibold px-4 py-2 rounded-md transition ${
                   activeSection === item.id
-                    ? "text-emerald-400 bg-white/10"
+                    ? "text-emerald-400"
                     : "text-white hover:bg-white/5"
                 }`}
               >
