@@ -1,11 +1,11 @@
 "use client";
 
-import React from 'react';
-import { Input } from "@/components/ui/input"; 
-import { Button } from "@/components/ui/button"; 
-import Image from 'next/image';
-import { FloatingOrb } from './planet/FloatingOrb'; 
-import { motion } from 'framer-motion';
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { FloatingOrb } from "./planet/FloatingOrb";
+import { motion } from "framer-motion";
 
 const HeroSection = () => {
   return (
@@ -74,11 +74,12 @@ const HeroSection = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
             >
-              An exciting collaboration between HIMA IF and CCI, bringing you one of the most anticipated hackathons of the year.
+              An exciting collaboration between HIMA IF and CCI, bringing you
+              one of the most anticipated hackathons of the year.
             </motion.p>
 
             {/* Floating Orbs */}
-            <FloatingOrb 
+            <FloatingOrb
               type="planet3"
               color="#F9A318"
               className="absolute top-[60%] left-[20%] sm:left-[70%] sm:top-[30%] md:left-1/2 md:top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 -z-10 pointer-events-none"
@@ -100,7 +101,7 @@ const HeroSection = () => {
             />
 
             <div className="absolute w-[120px] h-[120px] top-[15%] right-[5%] sm:w-[140px] sm:h-[140px] sm:top-[20%] sm:right-[70%] md:w-[160px] md:h-[160px] md:top-[16%] md:right-[10%]lg:w-[180px] lg:h-[180px] lg:top-[15%] lg:right-[12%]xl:w-[200px] xl:h-[200px] xl:top-[16%] xl:right-[25%]">
-              <FloatingOrb 
+              <FloatingOrb
                 type="planet1"
                 color="#047A3C"
                 className="w-24 h-24 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
@@ -115,15 +116,14 @@ const HeroSection = () => {
                     repeat: Infinity,
                     repeatType: "loop",
                   },
-                  initial: {}, 
+                  initial: {},
                 }}
               />
             </div>
 
-
-            <FloatingOrb 
+            <FloatingOrb
               type="planet2"
-              color="#2F67B4" 
+              color="#2F67B4"
               className="w-24 h-24 top-[60%] right-[5%] sm:top-[50%] sm:right-[10%] md:top-[45%] md:right-[12%] lg:top-[45%] lg:right-[14%] xl:top-[45%] xl:right-[15%] absolute"
               animationProps={{
                 animate: {
@@ -136,7 +136,7 @@ const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "loop",
                 },
-                initial: {}, 
+                initial: {},
               }}
             />
 
@@ -147,9 +147,9 @@ const HeroSection = () => {
               transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
             >
               <div className="rounded-full p-[4px] bg-gradient-to-r from-[#666666] to-[#FFFFFF]/15 flex-1 min-w-0">
-                <Input 
-                  type="email" 
-                  placeholder="Enter Email" 
+                <Input
+                  type="email"
+                  placeholder="Enter Email"
                   className="w-full h-12 px-6 bg-neutral-900/80 
                   text-base text-white placeholder:text-neutral-400 
                   border-none rounded-full backdrop-blur-[18px] 
@@ -166,15 +166,15 @@ const HeroSection = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 viewport={{ once: true }}
               >
-                <Button 
+                <Button
                   type="submit"
                   className="group w-[120px] h-[40px] sm:w-[142px] sm:h-[44px] md:w-[160px] md:h-[48px]
                   bg-[#01A850]/10 border-none rounded-full text-white text-sm sm:text-base md:text-base
                   font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] 
                   hover:bg-[#01A850]/40 focus-visible:ring-2 focus-visible:ring-emerald-400"
                 >
-                  <motion.div 
-                    whileHover={{ y: -2, scale: 1.03 }} 
+                  <motion.div
+                    whileHover={{ y: -2, scale: 1.03 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
                     Notify me!
@@ -182,7 +182,6 @@ const HeroSection = () => {
                 </Button>
               </motion.div>
             </motion.form>
-
           </motion.div>
         </div>
       </div>
