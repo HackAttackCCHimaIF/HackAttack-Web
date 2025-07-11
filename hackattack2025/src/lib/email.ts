@@ -25,7 +25,9 @@ export async function sendWelcomeEmail(email: string) {
   >
     <div
       style="
-        background: linear-gradient(135deg, #01a850, #047a3c);
+         background: linear-gradient(90deg, #0F75BD, #2F67B4, #01A850, #64BB48);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;;
         padding: 30px;
         border-radius: 10px;
         text-align: center;
