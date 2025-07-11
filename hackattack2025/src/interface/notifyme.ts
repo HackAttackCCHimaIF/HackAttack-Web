@@ -1,6 +1,7 @@
 export default interface NotifyMe {
-  id: number;
+  id?: string;
   email: string;
-  is_notified: boolean;
-  created_at: Date;
+  is_notified?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

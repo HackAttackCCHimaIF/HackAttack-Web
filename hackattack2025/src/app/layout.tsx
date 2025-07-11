@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins, Koulen } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+
 // import Navbar from "@/components/coming-soon/Navbar";
 // import Footer from "@/components/coming-soon/Footer";
 
@@ -13,7 +15,7 @@ const poppins = Poppins({
 const koulen = Koulen({
   subsets: ["latin"],
   variable: "--font-koulen",
-  weight: ["400"]
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -32,7 +34,8 @@ export default function RootLayout({
         className={`${poppins.variable} ${koulen.variable} font-poppins antialiased bg-[#0C0E13]`}
       >
         {/* <Navbar/> */}
-        {children}
+        <main>{children}</main>
+        <Toaster />
         {/* <Footer/> */}
       </body>
     </html>

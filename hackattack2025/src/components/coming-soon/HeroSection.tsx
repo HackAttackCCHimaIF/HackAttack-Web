@@ -1,13 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { FloatingOrb } from "./planet/FloatingOrb";
 import { motion } from "framer-motion";
+import { toast } from "sonner";
 
 const HeroSection = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!email.trim()) {
+      toast.error("Please enter your email address");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/notifyme", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(result.message);
+        setEmail("");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative w-full min-h-screen flex items-center justify-start text-white overflow-hidden">
       {/* Background */}
@@ -141,6 +180,7 @@ const HeroSection = () => {
             />
 
             <motion.form
+              onSubmit={handleSubmit}
               className="mt-6 w-full flex items-center gap-3 overflow-x-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -150,6 +190,8 @@ const HeroSection = () => {
                 <Input
                   type="email"
                   placeholder="Enter Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-12 px-6 bg-neutral-900/80 
                   text-base text-white placeholder:text-neutral-400 
                   border-none rounded-full backdrop-blur-[18px] 
@@ -168,16 +210,17 @@ const HeroSection = () => {
               >
                 <Button
                   type="submit"
+                  disabled={isLoading}
                   className="group w-[120px] h-[40px] sm:w-[142px] sm:h-[44px] md:w-[160px] md:h-[48px]
                   bg-[#01A850]/10 border-none rounded-full text-white text-sm sm:text-base md:text-base
-                  font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] 
-                  hover:bg-[#01A850]/40 focus-visible:ring-2 focus-visible:ring-emerald-400"
+                  font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] disabled:opacity-50 
+                  disabled:cursor-not-allowed"
                 >
                   <motion.div
-                    whileHover={{ y: -2, scale: 1.03 }}
+                    whileHover={isLoading ? { y: -2, scale: 1.03 } : {}}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    Notify me!
+                    {isLoading ? "Loading..." : "Notify me!"}
                   </motion.div>
                 </Button>
               </motion.div>
