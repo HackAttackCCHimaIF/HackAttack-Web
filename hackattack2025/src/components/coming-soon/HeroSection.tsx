@@ -212,6 +212,13 @@ const HeroSection = () => {
                   focus:ring-offset-2 focus:ring-offset-neutral-900"
                 />
               </div>
+              <ReCAPTCHA
+                sitekey="6LdqUn8rAAAAABWxsoXM75rs7dt65eZk4J9lTxj1"
+                ref={recaptchaRef}
+                onChange={(token) => setCaptchaToken(token)}
+                theme="dark"
+                className="scale-[0.9] sm:scale-100"
+              />
 
               <motion.div
                 className="rounded-full p-[3px] sm:p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
@@ -220,13 +227,6 @@ const HeroSection = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 viewport={{ once: true }}
               >
-                <ReCAPTCHA
-                  sitekey="6LdqUn8rAAAAABWxsoXM75rs7dt65eZk4J9lTxj1"
-                  ref={recaptchaRef}
-                  onChange={(token) => setCaptchaToken(token)}
-                  theme="dark"
-                  className="scale-[0.9] sm:scale-100"
-                />
                 <Button
                   type="submit"
                   disabled={isLoading}
