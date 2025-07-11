@@ -12,10 +12,11 @@ export async function sendWelcomeEmail(email: string) {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Welcome to HackAttack2025</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   </head>
   <body
     style="
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       line-height: 1.6;
       color: #333;
       max-width: 600px;
@@ -25,7 +26,7 @@ export async function sendWelcomeEmail(email: string) {
   >
     <div
       style="
-         background: linear-gradient(90deg, #0F75BD, #2F67B4, #01A850, #64BB48);
+        background: linear-gradient(90deg, #0F75BD, #2F67B4, #01A850, #64BB48);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;;
         padding: 30px;
@@ -78,7 +79,7 @@ export async function sendWelcomeEmail(email: string) {
     >
       <p>A collaboration between HIMA IF and CCI Summit</p>
       <p>
-        Follow us for updates:
+        Follow us on Instagram for updates:
         <a href="https://www.instagram.com/hackattack.ccihimaif?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" style="color: #01a850">@hackattack.ccihimaif</a>
       </p>
     </div>
