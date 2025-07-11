@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
@@ -12,6 +13,9 @@ const HeroSection = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -20,15 +24,21 @@ const HeroSection = () => {
       return;
     }
 
+    if (!captchaToken) {
+      toast.error("Please complete the CAPTCHA");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/notifyme", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: email.trim() }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          token: captchaToken,
+        }),
       });
 
       const result = await response.json();
@@ -36,6 +46,8 @@ const HeroSection = () => {
       if (result.success) {
         toast.success(result.message);
         setEmail("");
+        setCaptchaToken(null);
+        recaptchaRef.current?.reset();
       } else {
         toast.error(result.message);
       }
@@ -208,6 +220,13 @@ const HeroSection = () => {
                 transition={{ duration: 0.8, ease: "easeOut" }}
                 viewport={{ once: true }}
               >
+                <ReCAPTCHA
+                  sitekey="6LdqUn8rAAAAABWxsoXM75rs7dt65eZk4J9lTxj1"
+                  ref={recaptchaRef}
+                  onChange={(token) => setCaptchaToken(token)}
+                  theme="dark"
+                  className="scale-[0.9] sm:scale-100"
+                />
                 <Button
                   type="submit"
                   disabled={isLoading}
