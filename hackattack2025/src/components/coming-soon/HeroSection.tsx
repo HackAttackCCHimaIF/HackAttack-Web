@@ -107,7 +107,7 @@ const HeroSection = () => {
             </p>
 
             <motion.h1
-              className="text-[64px] sm:text-[96px] md:text-[128px] lg:text-[160px] font-black uppercase font-koulen leading-[52px] sm:leading-[72px] md:leading-[92px] lg:leading-[115px]"
+              className="text-[64px] sm:text-[96px] md:text-[128px] lg:text-[160px] font-black uppercase font-koulen leading-[52px] sm:leading-[72px] md:leading-[96px] lg:leading-[124px]"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
@@ -193,27 +193,53 @@ const HeroSection = () => {
 
             <motion.form
               onSubmit={handleSubmit}
-              className="mt-6 w-full flex flex-col sm:flex-row items-center gap-3 overflow-x-auto"
+              className="mt-6 w-full flex flex-col items-start gap-8 overflow-x-auto"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
             >
-              {/* Email Input */}
-              <div className="rounded-full p-[4px] bg-gradient-to-r from-[#666666] to-[#FFFFFF]/15 w-full sm:flex-1 min-w-0">
-                <Input
-                  type="email"
-                  placeholder="Enter Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full h-12 px-6 bg-neutral-900/80 
-      text-base text-white placeholder:text-neutral-400 
-      border-none rounded-full backdrop-blur-[18px] 
-      shadow-[0px_0px_6px_0px_rgba(91,91,91,0.25)] 
-      focus:outline-none focus:ring-2 focus:ring-emerald-500 
-      focus:ring-offset-2 focus:ring-offset-neutral-900"
-                />
-              </div>
+              <div className="flex flex-row gap-3 w-full items-center justify-center">
+                <div className="rounded-full p-[4px] bg-gradient-to-r from-[#666666] to-[#FFFFFF]/15 w-full sm:flex-1 min-w-0">
+                  <Input
+                    type="email"
+                    placeholder="Enter Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full h-12 px-6 bg-neutral-900/80 
+                    text-base text-white placeholder:text-neutral-400 
+                    border-none rounded-full backdrop-blur-[18px] 
+                    shadow-[0px_0px_6px_0px_rgba(91,91,91,0.25)] 
+                    focus:outline-none focus:ring-2 focus:ring-emerald-500 
+                    focus:ring-offset-2 focus:ring-offset-neutral-900"
+                  />
+                </div>
 
+                {/* Submit Button */}
+                <motion.div
+                  className="rounded-full p-[3px] sm:p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
+                  initial={{ opacity: 1, y: 20, rotateX: -15 }}
+                  whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  viewport={{ once: true }}
+                >
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="group w-[120px] h-[42px] sm:w-[142px] sm:h-[44px] md:w-[160px] md:h-[48px]
+                  bg-[#01A850]/10 border-none rounded-full text-white text-sm sm:text-base md:text-base
+                    font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] disabled:opacity-50 
+                    disabled:cursor-not-allowed"
+                  >
+                    <motion.div
+                      whileHover={isLoading ? { y: -2, scale: 1.03 } : {}}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      {isLoading ? "Loading..." : "Notify me!"}
+                    </motion.div>
+                  </Button>
+                </motion.div>
+              </div>
+              {/* Email Input */}
               {/* reCAPTCHA */}
               <div className="mt-2 sm:mt-0">
                 <ReCAPTCHA
@@ -224,31 +250,6 @@ const HeroSection = () => {
                   className="scale-[0.9] sm:scale-100"
                 />
               </div>
-
-              {/* Submit Button */}
-              <motion.div
-                className="rounded-full p-[3px] sm:p-[4px] bg-gradient-to-r from-[#01A850]/65 to-[#01A850]/70 shrink-0"
-                initial={{ opacity: 1, y: 20, rotateX: -15 }}
-                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                viewport={{ once: true }}
-              >
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="group w-[120px] h-[40px] sm:w-[142px] sm:h-[44px] md:w-[160px] md:h-[48px]
-      bg-[#01A850]/10 border-none rounded-full text-white text-sm sm:text-base md:text-base
-      font-semibold backdrop-blur-[14px] sm:backdrop-blur-[18px] disabled:opacity-50 
-      disabled:cursor-not-allowed"
-                >
-                  <motion.div
-                    whileHover={isLoading ? { y: -2, scale: 1.03 } : {}}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    {isLoading ? "Loading..." : "Notify me!"}
-                  </motion.div>
-                </Button>
-              </motion.div>
             </motion.form>
           </motion.div>
         </div>
