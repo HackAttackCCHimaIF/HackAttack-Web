@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { insertEmail } from "@/lib/actions/notifyme";
+import { insertEmail } from "@/lib/actions/notification";
 
 export async function POST(request: NextRequest) {
   try {

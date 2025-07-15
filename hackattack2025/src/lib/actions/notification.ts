@@ -83,19 +83,40 @@ export async function checkEmailDuplicate(email: string): Promise<boolean> {
   return false;
 }
 
-// Get all emails from notifyme table
-export async function getAllEmails(): Promise<string[]> {
+export async function checkEmailListUnnotified() {
   try {
-    const { data, error } = await supabase.from("notifyme").select("email");
+    const { data, error } = await supabase
+      .from("notifyme")
+      .select("email")
+      .eq("is_notified", false);
 
-    if (error) {
-      console.error("Error fetching emails:", error);
-      return [];
+    if (!error) {
+      return data.map((item) => item.email);
     }
-
-    return data.map((item) => item.email);
   } catch (error) {
-    console.error("Error fetching emails:", error);
-    return [];
+    console.error("Error fetching unnotified emails:", error);
   }
+
+  return [];
+}
+
+export async function updateStatusBroadcasted(email: string) {
+  const { data, error } = await supabase
+    .from("notifyme")
+    .update({ is_notified: true, updated_at: new Date() })
+    .eq("email", email);
+
+  if (error) {
+    return {
+      success: false,
+      message: "Error updating status",
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+
+  return {
+    success: true,
+    data,
+    message: "Status updated successfully",
+  };
 }
