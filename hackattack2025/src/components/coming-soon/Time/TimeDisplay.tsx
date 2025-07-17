@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 
 // Komponen kotak unit waktu (days/hours/minutes)
 const TimeUnit = ({ value, label }: { value: string; label: string }) => (
-  <div className="flex flex-col items-center gap-2">
+  <div className="flex flex-col items-center gap-2 justify-center">
     <div className="flex gap-1">
       {value.split("").map((digit, index) => (
         <div

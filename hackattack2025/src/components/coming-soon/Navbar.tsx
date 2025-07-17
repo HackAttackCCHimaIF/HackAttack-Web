@@ -26,7 +26,7 @@ const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
   const iconList = ["hima", "telkom", "cci", "hack"];
 
   return (
-    <nav className="fixed top-[60px] left-1/2 -translate-x-1/2 w-[95%] z-50">
+    <nav className="fixed top-[20px] md:top-[30px] left-1/2 -translate-x-1/2 w-[95%] z-50">
       <div className="rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 p-[1px] shadow-[0_0_40px_6px_rgba(255,255,255,0.1)]">
         <div className="flex h-16 w-full items-center justify-between rounded-full bg-black px-6 backdrop-blur-md">
           {/* Logo dan ikon */}

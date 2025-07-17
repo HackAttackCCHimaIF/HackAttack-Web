@@ -102,12 +102,17 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
+            <div className="[@media(min-height:700px)]:mt-0 mt-14"/>
             <p className="font-semibold text-lg tracking-tight text-gray-200">
               HackAttack2025
             </p>
 
             <motion.h1
-              className="text-[64px] sm:text-[96px] md:text-[128px] lg:text-[160px] font-black uppercase font-koulen leading-[52px] sm:leading-[72px] md:leading-[96px] lg:leading-[124px]"
+              className="font-black uppercase font-koulen text-[8vh] leading-[7vh]
+                sm:text-[10vh] sm:leading-[8vh]
+                md:text-[12vh] md:leading-[9vh]
+                lg:text-[14vh] lg:leading-[11vh]
+                text-start"
               initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
@@ -115,9 +120,10 @@ const HeroSection = () => {
               <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text">
                 Coming
               </span>
-              <br />
-              <span>Soon!</span>
+              <br className="hidden [@media(min-height:700px)]:block" />
+              <span> Soon!</span>
             </motion.h1>
+
 
             <motion.p
               className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
