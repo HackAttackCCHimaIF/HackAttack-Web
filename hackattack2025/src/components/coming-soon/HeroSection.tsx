@@ -102,7 +102,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            <div className="[@media(min-height:700px)]:mt-0 mt-14"/>
+            <div className="[@media(min-height:700px)]:mt-0 mt-14" />
             <p className="font-semibold text-lg tracking-tight text-gray-200">
               HackAttack2025
             </p>
@@ -123,7 +123,6 @@ const HeroSection = () => {
               <br className="hidden [@media(min-height:700px)]:block" />
               <span> Soon!</span>
             </motion.h1>
-
 
             <motion.p
               className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
@@ -197,6 +196,7 @@ const HeroSection = () => {
               }}
             />
 
+            {/* Email Input */}
             <motion.form
               onSubmit={handleSubmit}
               className="mt-6 w-full flex flex-col items-start gap-8 overflow-x-auto"
@@ -245,7 +245,7 @@ const HeroSection = () => {
                   </Button>
                 </motion.div>
               </div>
-              {/* Email Input */}
+
               {/* reCAPTCHA */}
               <div className="mt-2 sm:mt-0">
                 <ReCAPTCHA
