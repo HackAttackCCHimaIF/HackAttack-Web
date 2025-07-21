@@ -13,7 +13,7 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
   try {
     console.log("insertEmail called with:", email);
 
-    console.log("🔄 Testing Supabase connection...");
+    console.log("Testing Supabase connection...");
     const { error: testError } = await supabase
       .from("notifyme")
       .select("count", { count: "exact", head: true });
@@ -67,10 +67,9 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    const emailResult = await sendWelcomeEmail(email);
-    if (!emailResult.success) {
-      console.error("Failed to send welcome email:", emailResult.error);
-    }
+    sendWelcomeEmail(email).catch((error) => {
+      console.error("Failed to send welcome email:", error);
+    });
 
     return {
       success: true,
