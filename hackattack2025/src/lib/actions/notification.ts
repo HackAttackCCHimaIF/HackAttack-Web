@@ -38,7 +38,7 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
     if (error) {
       return {
         success: false,
-        message: "Something went wrong. Please try again.",
+        message: "Something went wrong. Please try again (Insert Email).",
         error: error instanceof Error ? error.message : "Unknown error",
       };
     }

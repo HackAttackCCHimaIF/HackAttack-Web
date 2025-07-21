@@ -6,10 +6,10 @@ export async function POST(request: NextRequest) {
     const { email, token } = await request.json();
 
     if (!email) {
-      return NextResponse.json(
-        { success: false, message: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({
+        success: false,
+        message: "Email is required",
+      });
     }
 
     if (!token) {

@@ -54,7 +54,7 @@ const HeroSection = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again (Hero).");
     } finally {
       setIsLoading(false);
     }
