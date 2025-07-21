@@ -7,6 +7,7 @@ import { InstagramLogo, LinkedinLogo } from "phosphor-react";
 import { Input } from "../ui/input";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import StarryBackground from "./planet/StarryBackground";
 
 const Footer = () => {
   const [message, setMessage] = useState("");
@@ -34,27 +35,7 @@ const Footer = () => {
         priority
       />
 
-      <div className="absolute inset-0 z-[-1]">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1.2, 0.5],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          />
-        ))}
-      </div>
+      <StarryBackground count={20}/>
 
       {/* Glow hijau bawah kiri – lebih rendah agar sambung ke atas */}
       {/* <div className="absolute top-[-80px] left-[0] w-[400px] h-[400px] bg-green-400 opacity-[0.08] rounded-full blur-[160px] z-0" /> */}

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { FloatingOrb } from "./planet/FloatingOrb";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import StarryBackground from "./planet/StarryBackground";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");
@@ -71,27 +72,7 @@ const HeroSection = () => {
       />
 
       {/* Starfield */}
-      <div className="absolute inset-0 pointer-events-none z-[-10]">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1.2, 0.5],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          />
-        ))}
-      </div>
+      <StarryBackground count={25} />
 
       {/* Central content */}
       <div className="w-[95%] mx-auto z-10">
