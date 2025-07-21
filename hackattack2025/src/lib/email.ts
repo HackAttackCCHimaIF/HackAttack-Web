@@ -9,16 +9,47 @@ import {
 } from "@/lib/actions/notification";
 
 export async function sendWelcomeEmail(email: string) {
-  const notifyMeTemplate = fs.readFileSync(
-    path.join(process.cwd(), "public", "email-template", "notifyme.html"),
+  let notifyMeTemplate = fs.readFileSync(
+    path.join(
+      process.cwd(),
+      "public",
+      "email-template",
+      "notifyme-update-white.html"
+    ),
     "utf8"
   );
+
+  notifyMeTemplate = notifyMeTemplate.replace("{{email}}", email);
 
   const message = {
     from: `HackAttack.CCIHimaIF <${process.env.EMAIL_FROM}>`,
     to: email,
-    subject: "Welcome to HackAttack 2025! 🚀",
+    subject: "🚀 You’re In! HackAttack2025 Is Now on Your Radar",
     html: notifyMeTemplate,
+    attachments: [
+      {
+        filename: "header.png",
+        path: path.join(
+          process.cwd(),
+          "public",
+          "email-template",
+          "email-asset",
+          "header.png"
+        ),
+        cid: "header",
+      },
+      {
+        filename: "banner.png",
+        path: path.join(
+          process.cwd(),
+          "public",
+          "email-template",
+          "email-asset",
+          "banner.png"
+        ),
+        cid: "banner",
+      },
+    ],
   };
 
   const transporter = nodemailer.createTransport({

@@ -9,10 +9,8 @@ export interface NotifyMeResponse {
   error?: string;
 }
 
-// Insert email to notifyme table
 export async function insertEmail(email: string): Promise<NotifyMeResponse> {
   try {
-    // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return {
@@ -31,7 +29,6 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    // Insert email into database
     const { data, error } = await supabase
       .from("notifyme")
       .insert([{ email }])
@@ -46,7 +43,6 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    // Send welcome email
     const emailResult = await sendWelcomeEmail(email);
     if (!emailResult.success) {
       console.error("Failed to send welcome email:", emailResult.error);
