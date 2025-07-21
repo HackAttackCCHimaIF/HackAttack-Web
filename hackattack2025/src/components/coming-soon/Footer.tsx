@@ -35,7 +35,7 @@ const Footer = () => {
         priority
       />
 
-      <StarryBackground count={20}/>
+      <StarryBackground count={20} />
 
       {/* Glow hijau bawah kiri – lebih rendah agar sambung ke atas */}
       {/* <div className="absolute top-[-80px] left-[0] w-[400px] h-[400px] bg-green-400 opacity-[0.08] rounded-full blur-[160px] z-0" /> */}
@@ -136,7 +136,7 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Link
-                href="#"
+                href="https://www.instagram.com/hackattack.ccihimaif/"
                 aria-label="Instagram"
                 className="text-neutral-400 hover:text-white transition"
               >
@@ -148,7 +148,7 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Link
-                href="#"
+                href="https://www.linkedin.com/company/himpunan-mahasiswa-s1-informatika-telkom-university/"
                 aria-label="LinkedIn"
                 className="text-neutral-400 hover:text-white transition"
               >

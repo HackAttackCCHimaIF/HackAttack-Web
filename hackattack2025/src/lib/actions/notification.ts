@@ -11,6 +11,24 @@ export interface NotifyMeResponse {
 
 export async function insertEmail(email: string): Promise<NotifyMeResponse> {
   try {
+    console.log("insertEmail called with:", email);
+
+    console.log("🔄 Testing Supabase connection...");
+    const { error: testError } = await supabase
+      .from("notifyme")
+      .select("count", { count: "exact", head: true });
+
+    if (testError) {
+      console.error("Supabase connection test failed:", testError);
+      return {
+        success: false,
+        message: "Database connection failed",
+        error: testError.message,
+      };
+    }
+
+    console.log("Supabase connection successful");
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return {
@@ -36,6 +54,12 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       .single();
 
     if (error) {
+      console.error("Supabase insert error:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
       return {
         success: false,
         message: "Something went wrong. Please try again (Insert Email).",
