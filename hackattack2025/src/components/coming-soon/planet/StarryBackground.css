@@ -1,0 +1,21 @@
+.starry {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: white;
+  border-radius: 9999px;
+  opacity: 0.7;
+  animation: starBlink 4s infinite ease-in-out;
+}
+
+@keyframes starBlink {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
