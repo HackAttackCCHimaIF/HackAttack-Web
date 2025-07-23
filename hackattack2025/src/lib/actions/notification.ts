@@ -67,9 +67,13 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    sendWelcomeEmail(email).catch((error) => {
-      console.error("Failed to send welcome email:", error);
-    });
+    sendWelcomeEmail(email)
+      .then((result) => {
+        console.log("Email sent successfully:", result);
+      })
+      .catch((error) => {
+        console.error("Failed to send welcome email:", error);
+      });
 
     return {
       success: true,

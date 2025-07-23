@@ -8,20 +8,63 @@ import { Input } from "../ui/input";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import StarryBackground from "./planet/StarryBackground";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const Footer = () => {
+  const [nameMessage, setNameMessage] = useState("");
+  const [emailMessage, setEmailMessage] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const recipient = "hackattack.ccihimaif25@gmail.com";
-    const subject = "Message around HackAttack";
-    const body = encodeURIComponent(message);
+    if (!nameMessage) {
+      toast.error("Please enter your name");
+      return;
+    }
 
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${recipient}&su=${encodeURIComponent(subject)}&body=${body}`;
+    if (!emailMessage.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
 
-    window.open(gmailUrl, "_blank");
+    if (!message) {
+      toast.error("Please enter your message");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/sendmessage", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: emailMessage.trim(),
+          name: nameMessage,
+          message: message,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(result.message);
+        setEmailMessage("");
+        setNameMessage("");
+        setMessage("");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Something went wrong. Please try again (Footer).");
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <footer className="relative text-white pt-12 pb-6 bg-transparent overflow-hidden z-[9999]">
@@ -103,24 +146,58 @@ const Footer = () => {
               </label>
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
-                  id="message"
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Enter your Message"
+                  id="nameMessage"
+                  value={nameMessage}
+                  onChange={(e) => setNameMessage(e.target.value)}
+                  placeholder="Your Name"
                   className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
+                  required
+                />
+                <Input
+                  id="emailMessage"
+                  value={emailMessage}
+                  onChange={(e) => setEmailMessage(e.target.value)}
+                  placeholder="Your Email"
+                  className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
+                  required
                 />
                 <motion.div
-                  whileHover={{ y: -1, scale: 1.03 }}
+                  whileHover={!isLoading ? { y: -1, scale: 1.03 } : {}}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <Button
                     type="submit"
-                    className="bg-[#0F75BD] px-6 py-3 text-white hover:bg-[#0F75BD]/90 w-full sm:w-auto rounded-none"
+                    disabled={isLoading}
+                    className={`
+                      px-6 py-3 text-white w-full sm:w-auto rounded-none
+                      transition-all duration-200 ease-in-out
+                      ${
+                        isLoading
+                          ? "bg-[#0F75BD]/70 cursor-not-allowed"
+                          : "bg-[#0F75BD] hover:bg-[#0F75BD]/90 hover:shadow-lg"
+                      }
+                    `}
                   >
-                    Send
+                    {isLoading ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Sending...</span>
+                      </div>
+                    ) : (
+                      "Send"
+                    )}
                   </Button>
                 </motion.div>
               </div>
+              <Input
+                type="text"
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Message"
+                className="bg-white text-black px-5 py-5 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
+                required
+              />
             </form>
           </div>
         </div>
