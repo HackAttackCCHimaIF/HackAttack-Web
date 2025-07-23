@@ -215,6 +215,7 @@ const Footer = () => {
               <Link
                 href="https://www.instagram.com/hackattack.ccihimaif/"
                 aria-label="Instagram"
+                target="_blank"
                 className="text-neutral-400 hover:text-white transition"
               >
                 <InstagramLogo size={20} />
@@ -227,6 +228,7 @@ const Footer = () => {
               <Link
                 href="https://www.linkedin.com/company/himpunan-mahasiswa-s1-informatika-telkom-university/"
                 aria-label="LinkedIn"
+                target="_blank"
                 className="text-neutral-400 hover:text-white transition"
               >
                 <LinkedinLogo size={20} />
