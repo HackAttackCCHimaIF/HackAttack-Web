@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Koulen } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // import Navbar from "@/components/coming-soon/Navbar";
 // import Footer from "@/components/coming-soon/Footer";
@@ -36,6 +37,7 @@ export default function RootLayout({
         {/* <Navbar/> */}
         <main>{children}</main>
         <Toaster />
+        <SpeedInsights />
         {/* <Footer/> */}
       </body>
     </html>
