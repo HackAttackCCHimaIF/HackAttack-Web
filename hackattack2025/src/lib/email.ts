@@ -9,7 +9,7 @@ import {
 } from "@/lib/actions/notification";
 
 export async function sendWelcomeEmail(email: string) {
-  let notifyMeTemplate = fs.readFileSync(
+  const notifyMeTemplate = fs.readFileSync(
     path.join(
       process.cwd(),
       "public",
@@ -19,13 +19,11 @@ export async function sendWelcomeEmail(email: string) {
     "utf8"
   );
 
-  notifyMeTemplate = notifyMeTemplate.replace("{{email}}", email);
-
   const message = {
     from: `HackAttack.CCIHimaIF <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "🚀 You’re In! HackAttack2025 Is Now on Your Radar",
-    html: notifyMeTemplate,
+    html: notifyMeTemplate.replace("{{email}}", email),
     attachments: [
       {
         filename: "header.png",
@@ -79,6 +77,10 @@ export async function sendMessage(
   name: string,
   message: string
 ) {
+  const messageTemplate = fs.readFileSync(
+    path.join(process.cwd(), "public", "email-template", "sendmessage.html"),
+    "utf8"
+  );
   const transporter = nodemailer.createTransport({
     service: "gmail",
     host: "smtp.gmail.com",
@@ -98,30 +100,10 @@ export async function sendMessage(
       to: "hackattack.ccihimaif25@gmail.com",
       replyTo: email,
       subject: "Pertanyaan Terkait HackAttack via WEB",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #0F75BD; border-bottom: 2px solid #0F75BD; padding-bottom: 10px;">
-            New Message from Website
-          </h2>
-          
-          <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>From:</strong> ${name}</p>
-            <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
-          </div>
-          
-          <div style="margin: 20px 0;">
-            <h3 style="color: #333; margin-bottom: 10px;">Message:</h3>
-            <div style="background-color: white; padding: 15px; border-left: 4px solid #0F75BD; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-              ${message.replace(/\n/g, "<br>")}
-            </div>
-          </div>
-          
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; color: #666; font-size: 12px;">
-            <p>This message was sent from the HackAttack website contact form.</p>
-            <p>You can reply directly to this email to respond to ${name}.</p>
-          </div>
-        </div>
-      `,
+      html: messageTemplate
+        .replace("{{name}}", name)
+        .replace("{{email}}", email)
+        .replace("{{message}}", message),
     };
 
     await transporter.sendMail(mailOptions);
