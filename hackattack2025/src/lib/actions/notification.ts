@@ -9,10 +9,26 @@ export interface NotifyMeResponse {
   error?: string;
 }
 
-// Insert email to notifyme table
 export async function insertEmail(email: string): Promise<NotifyMeResponse> {
   try {
-    // Basic email validation
+    console.log("insertEmail called with:", email);
+
+    console.log("Testing Supabase connection...");
+    const { error: testError } = await supabase
+      .from("notifyme")
+      .select("count", { count: "exact", head: true });
+
+    if (testError) {
+      console.error("Supabase connection test failed:", testError);
+      return {
+        success: false,
+        message: "Database connection failed",
+        error: testError.message,
+      };
+    }
+
+    console.log("Supabase connection successful");
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return {
@@ -31,7 +47,6 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    // Insert email into database
     const { data, error } = await supabase
       .from("notifyme")
       .insert([{ email }])
@@ -39,18 +54,26 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       .single();
 
     if (error) {
+      console.error("Supabase insert error:", {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
       return {
         success: false,
-        message: "Something went wrong. Please try again.",
+        message: "Something went wrong. Please try again (Insert Email).",
         error: error instanceof Error ? error.message : "Unknown error",
       };
     }
 
-    // Send welcome email
-    const emailResult = await sendWelcomeEmail(email);
-    if (!emailResult.success) {
-      console.error("Failed to send welcome email:", emailResult.error);
-    }
+    sendWelcomeEmail(email)
+      .then((result) => {
+        console.log("Email sent successfully:", result);
+      })
+      .catch((error) => {
+        console.error("Failed to send welcome email:", error);
+      });
 
     return {
       success: true,

@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import TimeDisplay from "./Time/TimeDisplay";
+import StarryBackground from "./planet/StarryBackground";
 
 const Countdown = () => {
   return (
@@ -17,27 +18,7 @@ const Countdown = () => {
       />
 
       {/* Starry background */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1.2, 0.5],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          />
-        ))}
-      </div>
+      <StarryBackground/>
 
       {/* Title - Positioned behind black circle but above timer */}
       <motion.h1

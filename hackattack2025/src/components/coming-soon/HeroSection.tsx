@@ -8,6 +8,7 @@ import Image from "next/image";
 import { FloatingOrb } from "./planet/FloatingOrb";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import StarryBackground from "./planet/StarryBackground";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");
@@ -53,7 +54,7 @@ const HeroSection = () => {
       }
     } catch (error) {
       console.error("Error:", error);
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again (Hero).");
     } finally {
       setIsLoading(false);
     }
@@ -71,27 +72,7 @@ const HeroSection = () => {
       />
 
       {/* Starfield */}
-      <div className="absolute inset-0 pointer-events-none z-[-10]">
-        {[...Array(50)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [0.5, 1.2, 0.5],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 3,
-            }}
-          />
-        ))}
-      </div>
+      <StarryBackground count={25} />
 
       {/* Central content */}
       <div className="w-[95%] mx-auto z-10">
@@ -102,7 +83,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            <div className="[@media(min-height:700px)]:mt-0 mt-14"/>
+            <div className="[@media(min-height:700px)]:mt-0 mt-14" />
             <p className="font-semibold text-lg tracking-tight text-gray-200">
               HackAttack2025
             </p>
@@ -123,7 +104,6 @@ const HeroSection = () => {
               <br className="hidden [@media(min-height:700px)]:block" />
               <span> Soon!</span>
             </motion.h1>
-
 
             <motion.p
               className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
@@ -197,6 +177,7 @@ const HeroSection = () => {
               }}
             />
 
+            {/* Email Input */}
             <motion.form
               onSubmit={handleSubmit}
               className="mt-6 w-full flex flex-col items-start gap-8 overflow-x-auto"
@@ -245,7 +226,7 @@ const HeroSection = () => {
                   </Button>
                 </motion.div>
               </div>
-              {/* Email Input */}
+
               {/* reCAPTCHA */}
               <div className="mt-2 sm:mt-0">
                 <ReCAPTCHA
