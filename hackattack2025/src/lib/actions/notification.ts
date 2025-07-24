@@ -67,19 +67,35 @@ export async function insertEmail(email: string): Promise<NotifyMeResponse> {
       };
     }
 
-    sendWelcomeEmail(email)
-      .then((result) => {
-        console.log("Email sent successfully:", result);
-      })
-      .catch((error) => {
-        console.error("Failed to send welcome email:", error);
-      });
+    try {
+      const emailResult = await sendWelcomeEmail(email);
 
-    return {
-      success: true,
-      message: "Successfully registered for notifications!",
-      data,
-    };
+      if (!emailResult.success) {
+        console.error("Email sending failed:", emailResult.error);
+        return {
+          success: false,
+          message: "Failed to send Notification.",
+          data,
+          error: "Email sending failed",
+        };
+      }
+
+      console.log("Message sent successfully:", emailResult);
+      return {
+        success: true,
+        message: "Success! Message sent and email notification delivered.",
+        data,
+      };
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      return {
+        success: false,
+        message:
+          "Message saved but email notification failed. We'll still review your message.",
+        data,
+        error: emailError instanceof Error ? emailError.message : "Email error",
+      };
+    }
   } catch (error) {
     console.error("Error inserting email:", error);
     return {
