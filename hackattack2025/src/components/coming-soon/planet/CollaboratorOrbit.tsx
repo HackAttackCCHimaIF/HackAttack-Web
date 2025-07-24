@@ -90,8 +90,8 @@ function useBreakpoint() {
 
 const getOrbitSize = (index: number) => {
   // Misalnya base orbit = 10vw + index * 2vw + 5vh
-  const vwPart = 20 + index * 8; // contoh 10vw, 12vw, 14vw, ...
-  const vhPart = 15 + index * 6; // contoh 5vh, 6.5vh, 8vh, ...
+  const vwPart = 20 + index * 10; // contoh 10vw, 12vw, 14vw, ...
+  const vhPart = 20 + index * 8; // contoh 5vh, 6.5vh, 8vh, ...
   return `calc(${vwPart}vw + ${vhPart}vh)`;
 };
 
@@ -185,7 +185,7 @@ export default function OrbitAccurate() {
     };
   
   return (
-    <div className="relative w-full min-h-[120vh] overflow-hidden bg-transparent pointer-events-none">
+    <div className="relative w-full min-h-[125vh] overflow-hidden bg-transparent pointer-events-none">
       {/* Starfield background */}
       <StarryBackground/>
 
