@@ -47,9 +47,7 @@ export default function CollaboratorPage() {
           </div>
         </motion.div>
       </div>
-
-      {/* Footer */}
-      <Footer />
+      <Footer/>
     </div>
   );
 }
