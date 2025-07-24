@@ -371,10 +371,6 @@ export default function OrbitAccurate() {
                         {planet.description}
                       </p>
                       
-                      {/* Debug info - remove in production */}
-                      <div className="text-xs text-gray-400 opacity-50">
-                        Angle: {Math.round(currentAngle)}° | Position: {popoverPos.position}
-                      </div>
                     </CardContent>
 
                     {/* Dynamic Arrow */}
