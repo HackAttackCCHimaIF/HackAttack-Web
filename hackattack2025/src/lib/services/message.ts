@@ -1,6 +1,6 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/config/supabase";
 import Message from "@/interface/message";
-import { sendMessage } from "@/lib/email";
+import { sendMessage } from "@/lib/config/email";
 
 export interface MessageResponse {
   success: boolean;
@@ -32,6 +32,7 @@ export async function createMessage(
   }
 
   try {
+    // Step 1: Save to database
     const { data, error } = await supabase
       .from("message")
       .insert([{ email, name, message }])
@@ -52,20 +53,36 @@ export async function createMessage(
       };
     }
 
-    sendMessage(email, name, message)
-      .then((result) => {
-        console.log("Message sent successfully:", result);
-      })
-      .catch((error) => {
-        console.error("Failed to send message:", error);
-      });
+    try {
+      const emailResult = await sendMessage(email, name, message);
 
-    return {
-      success: true,
-      message:
-        "Success send message, we will reply to your email as soon as possible.",
-      data,
-    };
+      if (!emailResult.success) {
+        console.error("Email sending failed:", emailResult.error);
+        return {
+          success: false,
+          message:
+            "Message saved but email notification failed. We'll still review your message.",
+          data,
+          error: "Email sending failed",
+        };
+      }
+
+      console.log("Message sent successfully:", emailResult);
+      return {
+        success: true,
+        message: "Success! Message sent and email notification delivered.",
+        data,
+      };
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      return {
+        success: false,
+        message:
+          "Message saved but email notification failed. We'll still review your message.",
+        data,
+        error: emailError instanceof Error ? emailError.message : "Email error",
+      };
+    }
   } catch (error) {
     console.error("Error sending message:", error);
     return {

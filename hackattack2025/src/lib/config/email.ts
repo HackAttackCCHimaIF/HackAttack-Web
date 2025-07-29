@@ -6,7 +6,7 @@ import path from "path";
 import {
   checkEmailListUnnotified,
   updateStatusBroadcasted,
-} from "@/lib/actions/notification";
+} from "@/lib/services/notification";
 
 export async function sendWelcomeEmail(email: string) {
   const notifyMeTemplate = fs.readFileSync(
