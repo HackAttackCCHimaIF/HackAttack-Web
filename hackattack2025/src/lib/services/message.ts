@@ -32,7 +32,6 @@ export async function createMessage(
   }
 
   try {
-    // Step 1: Save to database
     const { data, error } = await supabase
       .from("message")
       .insert([{ email, name, message }])
