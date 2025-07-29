@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendBroadcast } from "@/lib/email";
+import { sendBroadcast } from "@/lib/config/email";
 
 export async function POST(req: NextRequest) {
   // check secret cron job

@@ -1,6 +1,6 @@
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/lib/config/supabase";
 import NotifyMe from "@/interface/notifyme";
-import { sendWelcomeEmail } from "@/lib/email";
+import { sendWelcomeEmail } from "@/lib/config/email";
 
 export interface NotifyMeResponse {
   success: boolean;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createMessage } from "@/lib/actions/message";
+import { createMessage } from "@/lib/services/message";
 
 export async function POST(request: NextRequest) {
   try {
