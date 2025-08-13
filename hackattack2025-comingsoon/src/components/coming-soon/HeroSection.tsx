@@ -78,42 +78,46 @@ const HeroSection = () => {
       <div className="w-[95%] mx-auto z-10">
         <div className="container px-4 w-fit">
           <motion.div
-            className="max-w-4xl flex flex-col gap-1"
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
+            className="max-w-4xl flex flex-col gap-1 min-h-[300px] sm:min-h-[400px] md:min-h-[500px]"
+            animate={{ y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            <div className="[@media(min-height:700px)]:mt-0 mt-14" />
-            <p className="font-semibold text-lg tracking-tight text-gray-200">
-              HackAttack2025
-            </p>
+            <motion.div
+              className="mt-6 w-full flex flex-col items-start gap-8 overflow-x-auto"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.8, ease: "easeOut" }}
+            >
+              <div className="[@media(min-height:700px)]:mt-0 mt-14" />
+              <p className="font-semibold text-lg tracking-tight text-gray-200">
+                HackAttack2025
+              </p>
 
-            <motion.h1
-              className="font-black uppercase font-koulen text-[8vh] leading-[7vh]
+              <motion.h1
+                className="font-black uppercase font-koulen text-[8vh] leading-[7vh]
                 sm:text-[10vh] sm:leading-[8vh]
                 md:text-[12vh] md:leading-[9vh]
                 lg:text-[14vh] lg:leading-[11vh]
                 text-start"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
-            >
-              <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text">
-                Coming
-              </span>
-              <br className="hidden [@media(min-height:700px)]:block" />
-              <span> Soon!</span>
-            </motion.h1>
+                animate={{ y: 0 }}
+                transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
+              >
+                <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text">
+                  Coming
+                </span>
+                <br className="hidden [@media(min-height:700px)]:block" />
+                <span> Soon!</span>
+              </motion.h1>
 
-            <motion.p
-              className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
-            >
-              An exciting collaboration between HIMA IF and CCI, bringing you
-              one of the most anticipated hackathons of the year.
-            </motion.p>
+              <motion.p
+                className="text-base md:text-lg text-gray-300 max-w-xl font-medium mt-6"
+                animate={{ y: 0 }}
+                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+              >
+                An exciting collaboration between HIMA IF and CCI, bringing you
+                one of the most anticipated hackathons of the year.
+              </motion.p>
+            </motion.div>
 
             {/* Floating Orbs */}
             <FloatingOrb
@@ -137,15 +141,16 @@ const HeroSection = () => {
               }}
             />
 
-            <div className="absolute w-[120px] h-[120px] top-[15%] right-[5%] sm:w-[140px] sm:h-[140px] sm:top-[20%] sm:right-[70%] md:w-[160px] md:h-[160px] md:top-[16%] md:right-[10%]lg:w-[180px] lg:h-[180px] lg:top-[15%] lg:right-[12%]xl:w-[200px] xl:h-[200px] xl:top-[16%] xl:right-[25%]">
+            {/* Planet 1 */}
+            <div className="absolute w-[120px] h-[120px] top-[15%] right-[5%] sm:w-[140px] sm:h-[140px] sm:top-[20%] sm:right-[70%] md:w-[160px] md:h-[160px] md:top-[16%] md:right-[10%] lg:w-[180px] lg:h-[180px] lg:top-[15%] lg:right-[12%] xl:w-[200px] xl:h-[200px] xl:top-[16%] xl:right-[25%]">
               <FloatingOrb
                 type="planet1"
                 color="#047A3C"
                 className="w-24 h-24 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
                 animationProps={{
                   animate: {
-                    x: [0, 5, -5, 0],
-                    y: [0, -4, 4, 0],
+                    scale: [1, 1.05, 0.95, 1],
+                    rotate: [0, 2, -2, 0],
                   },
                   transition: {
                     duration: 10,
@@ -153,19 +158,20 @@ const HeroSection = () => {
                     repeat: Infinity,
                     repeatType: "loop",
                   },
-                  initial: {},
+                  initial: { scale: 1, rotate: 0 },
                 }}
               />
             </div>
 
+            {/* Planet 2 */}
             <FloatingOrb
               type="planet2"
               color="#2F67B4"
               className="w-24 h-24 top-[60%] right-[5%] sm:top-[50%] sm:right-[10%] md:top-[45%] md:right-[12%] lg:top-[45%] lg:right-[14%] xl:top-[45%] xl:right-[15%] absolute"
               animationProps={{
                 animate: {
-                  x: [0, -6, 6, 0],
-                  y: [0, 3, -3, 0],
+                  scale: [1, 1.05, 0.95, 1],
+                  rotate: [0, -2, 2, 0],
                 },
                 transition: {
                   duration: 12,
@@ -173,7 +179,7 @@ const HeroSection = () => {
                   repeat: Infinity,
                   repeatType: "loop",
                 },
-                initial: {},
+                initial: { scale: 1, rotate: 0 },
               }}
             />
 
