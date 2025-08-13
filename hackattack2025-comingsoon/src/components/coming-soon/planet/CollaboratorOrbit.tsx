@@ -50,7 +50,6 @@ const planets = [
   },
 ];
 
-
 const orbitClass = (index: number, breakpoint: string) => {
   const base = 20 + index * 5;
 
@@ -58,14 +57,13 @@ const orbitClass = (index: number, breakpoint: string) => {
     breakpoint === "sm"
       ? `clamp(180px, ${base + 5}vw, 380px)`
       : breakpoint === "md"
-      ? `clamp(200px, ${base + 10}vw, 460px)`
-      : breakpoint === "lg"
-      ? `clamp(240px, ${base + 12}vw, 540px)`
-      : `clamp(320px, ${base + 14}vw, 640px)`;
+        ? `clamp(200px, ${base + 10}vw, 460px)`
+        : breakpoint === "lg"
+          ? `clamp(240px, ${base + 12}vw, 540px)`
+          : `clamp(320px, ${base + 14}vw, 640px)`;
 
   return `w-[${clampSize}] h-[${clampSize}]`;
 };
-
 
 function useBreakpoint() {
   const [breakpoint, setBreakpoint] = useState("base");
@@ -96,7 +94,11 @@ const getOrbitSize = (index: number) => {
 };
 
 // Hook untuk menghitung posisi planet dalam orbit
-function usePlanetPosition(planetId: string, delay: number, initialAngle: number = 0) {
+function usePlanetPosition(
+  planetId: string,
+  delay: number,
+  initialAngle: number = 0
+) {
   const [angle, setAngle] = useState(initialAngle);
   const [startTime, setStartTime] = useState<number | null>(null);
 
@@ -106,7 +108,7 @@ function usePlanetPosition(planetId: string, delay: number, initialAngle: number
       setStartTime(Date.now());
     }, delay * 1000);
 
-    return () => clearTimeout(timeout); 
+    return () => clearTimeout(timeout);
   }, [delay]);
 
   useEffect(() => {
@@ -128,66 +130,65 @@ function usePlanetPosition(planetId: string, delay: number, initialAngle: number
   return angle;
 }
 
-
 // Function untuk menentukan posisi popover berdasarkan sudut planet
 const getPopoverPosition = (angle: number) => {
   // Normalize angle to 0-360
   const normalizedAngle = ((angle % 360) + 360) % 360;
-  
+
   // Jika planet berada di bagian bawah orbit (sudut 90-270 derajat), popover ke atas
   if (normalizedAngle >= 90 && normalizedAngle <= 270) {
     return {
       position: "top",
       classes: "bottom-full mb-10",
-      arrowClasses: "-bottom-2 left-1/2 -translate-x-1/2 rotate-45"
+      arrowClasses: "-bottom-2 left-1/2 -translate-x-1/2 rotate-45",
     };
-  } 
+  }
   // Jika planet berada di bagian atas orbit (sudut 270-90 derajat), popover ke bawah
   else {
     return {
-      position: "bottom", 
+      position: "bottom",
       classes: "top-full mt-4",
-      arrowClasses: "-top-2 left-1/2 -translate-x-1/2 rotate-45"
+      arrowClasses: "-top-2 left-1/2 -translate-x-1/2 rotate-45",
     };
   }
 };
 
 export default function OrbitAccurate() {
-    const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
-    const [clickCooldown, setClickCooldown] = useState<Record<string, boolean>>({});
-    const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-    const breakpoint = useBreakpoint();
-    
-    // Track posisi setiap planet
-    const planetPositions = {
-      hima: usePlanetPosition("hima", 0, 50),
-      cci: usePlanetPosition("cci", 8, 60), 
-      telkom: usePlanetPosition("telkom", 16, 70)
-    };
-    
-    console.log("Current Breakpoint:", breakpoint);
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handlePlanetClick = (planetId: string, e: any) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // Prevent spam clicks
-      if (clickCooldown[planetId]) return;
-      
-      // Set cooldown
-      setClickCooldown(prev => ({ ...prev, [planetId]: true }));
-      setTimeout(() => {
-        setClickCooldown(prev => ({ ...prev, [planetId]: false }));
-      }, 300);
-      
-      setExpandedPlanet(expandedPlanet === planetId ? null : planetId);
-    };
-  
+  const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
+  const [clickCooldown, setClickCooldown] = useState<Record<string, boolean>>(
+    {}
+  );
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const breakpoint = useBreakpoint();
+
+  // Track posisi setiap planet
+  const planetPositions = {
+    hima: usePlanetPosition("hima", 0, 50),
+    cci: usePlanetPosition("cci", 8, 60),
+    telkom: usePlanetPosition("telkom", 16, 70),
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handlePlanetClick = (planetId: string, e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Prevent spam clicks
+    if (clickCooldown[planetId]) return;
+
+    // Set cooldown
+    setClickCooldown((prev) => ({ ...prev, [planetId]: true }));
+    setTimeout(() => {
+      setClickCooldown((prev) => ({ ...prev, [planetId]: false }));
+    }, 300);
+
+    setExpandedPlanet(expandedPlanet === planetId ? null : planetId);
+  };
+
   return (
     <div className="relative w-full min-h-[125vh] overflow-hidden bg-transparent pointer-events-none">
       {/* Starfield background */}
-      <StarryBackground/>
+      <StarryBackground />
 
       {/* Sun in the center */}
       <div className="absolute top-1/2 left-1/2 xl:left-1/3 transform -translate-x-1/2 -translate-y-1/2">
@@ -206,7 +207,6 @@ export default function OrbitAccurate() {
 
           {/* Main sun body */}
           <div className="relative w-full h-full rounded-full bg-gradient-radial from-yellow-100 via-[#FFD94F] to-orange-600 shadow-inner shadow-yellow-400/50">
-
             {/* Inner pulsating glow layer (lebih besar & blur) */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="relative flex items-center justify-center">
@@ -225,17 +225,15 @@ export default function OrbitAccurate() {
             {/* Bayangan pinggir */}
             <div className="absolute bottom-0 right-0 w-28 h-28 bg-black/20 rounded-full blur-[40px]" />
           </div>
-
-
         </motion.div>
       </div>
 
-
       {/* Orbits and planets */}
       {planets.map((planet, index) => {
-        const currentAngle = planetPositions[planet.id as keyof typeof planetPositions];
+        const currentAngle =
+          planetPositions[planet.id as keyof typeof planetPositions];
         const popoverPos = getPopoverPosition(currentAngle);
-        
+
         return (
           <motion.div
             key={planet.name}
@@ -289,9 +287,13 @@ export default function OrbitAccurate() {
                   <div className="absolute w-[160%] h-[160%] rounded-full border-2 border-white/30 blur-sm opacity-40 pointer-events-none" />
 
                   {/* Planet Body */}
-                  <div className={`relative ${planet.size} rounded-full overflow-hidden border border-white shadow-lg`}>
+                  <div
+                    className={`relative ${planet.size} rounded-full overflow-hidden border border-white shadow-lg`}
+                  >
                     {/* Solid base color */}
-                    <div className={`w-full h-full rounded-full ${planet.color}`} />
+                    <div
+                      className={`w-full h-full rounded-full ${planet.color}`}
+                    />
 
                     {/* Shading layer */}
                     <motion.div
@@ -311,10 +313,11 @@ export default function OrbitAccurate() {
                   <div className="border p-7 md:p-10 lg:p-12 border-dashed absolute rounded-full"></div>
                 </div>
 
-
                 {/* Label */}
                 <Button
-                  ref={el => { buttonRefs.current[planet.id] = el; }}
+                  ref={(el) => {
+                    buttonRefs.current[planet.id] = el;
+                  }}
                   size={"lg"}
                   variant="secondary"
                   className="group flex items-center mt-10 px-4 py-8 lg:py-10 w-fit rounded-xl backdrop-blur-md border border-white/30 shadow-md space-x-4 cursor-pointer bg-white/10 hover:bg-white/20 transition-all duration-200 active:scale-95 pointer-events-auto"
@@ -322,12 +325,20 @@ export default function OrbitAccurate() {
                 >
                   {/* Icon area */}
                   <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-white/10 rounded-full border border-white/30 overflow-hidden">
-                    <Image src={planet.icon} alt={planet.name} width={32} height={32} className="object-contain" />
+                    <Image
+                      src={planet.icon}
+                      alt={planet.name}
+                      width={32}
+                      height={32}
+                      className="object-contain"
+                    />
                   </div>
 
                   {/* Text */}
                   <div className="flex flex-col text-left text-white">
-                    <span className="text-sm sm:text-base font-medium leading-tight">{planet.name}</span>
+                    <span className="text-sm sm:text-base font-medium leading-tight">
+                      {planet.name}
+                    </span>
                     <Badge
                       variant="outline"
                       className="w-fit mt-1 px-2 py-0.5 text-xs border-gray-400 text-gray-300 bg-transparent"
@@ -337,10 +348,11 @@ export default function OrbitAccurate() {
                   </div>
                 </Button>
 
-
                 {/* Dynamic Floating Detail Card */}
                 {expandedPlanet === planet.id && (
-                  <Card className={`absolute z-[9999] ${popoverPos.classes} w-[18rem] sm:w-[20rem] md:w-[22rem] bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ease-in-out`}>
+                  <Card
+                    className={`absolute z-[9999] ${popoverPos.classes} w-[18rem] sm:w-[20rem] md:w-[22rem] bg-white/10 backdrop-blur-xl border border-white/20 text-white shadow-2xl rounded-2xl overflow-hidden transition-all duration-300 ease-in-out`}
+                  >
                     {/* Header */}
                     <CardHeader className="flex items-start justify-between">
                       <div className="flex items-center space-x-3">
@@ -354,7 +366,9 @@ export default function OrbitAccurate() {
                           />
                         </div>
                         <div className="space-y-1">
-                          <CardTitle className="text-sm font-semibold">{planet.name}</CardTitle>
+                          <CardTitle className="text-sm font-semibold">
+                            {planet.name}
+                          </CardTitle>
                           <Badge
                             variant="outline"
                             className="text-gray-300 text-[11px] sm:text-xs border-gray-400 bg-transparent"
@@ -370,11 +384,12 @@ export default function OrbitAccurate() {
                       <p className="text-gray-100 text-sm leading-relaxed tracking-wide">
                         {planet.description}
                       </p>
-                      
                     </CardContent>
 
                     {/* Dynamic Arrow */}
-                    <div className={`absolute ${popoverPos.arrowClasses} w-4 h-4 bg-white/10 border border-white/20 z-10`} />
+                    <div
+                      className={`absolute ${popoverPos.arrowClasses} w-4 h-4 bg-white/10 border border-white/20 z-10`}
+                    />
                   </Card>
                 )}
               </div>
