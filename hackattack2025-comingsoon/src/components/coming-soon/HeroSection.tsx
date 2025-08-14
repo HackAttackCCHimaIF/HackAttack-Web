@@ -99,10 +99,11 @@ const HeroSection = () => {
                 md:text-[12vh] md:leading-[9vh]
                 lg:text-[14vh] lg:leading-[11vh]
                 text-start"
-                animate={{ y: 0 }}
-                transition={{ delay: 0.2, duration: 1, ease: "easeOut" }}
+                initial={{ y: 0, opacity: 1 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
-                <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text">
+                <span className="bg-gradient-to-br from-[#01A850] to-white text-transparent bg-clip-text will-change-transform">
                   Coming
                 </span>
                 <br className="hidden [@media(min-height:700px)]:block" />
