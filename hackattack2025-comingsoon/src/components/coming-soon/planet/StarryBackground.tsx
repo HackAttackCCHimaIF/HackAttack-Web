@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import "./StarryBackground.css";
 
 type StarryBackgroundProps = {
@@ -11,11 +11,20 @@ type StarryBackgroundProps = {
 
 const StarryBackground = ({
   count = 25, // dikurangi biar ringan
-  className = '',
-  starClassName = '',
+  className = "",
+  starClassName = "",
 }: StarryBackgroundProps) => {
-  const stars = React.useMemo(() => {
-    return Array.from({ length: count }).map((_, i) => {
+  const [stars, setStars] = useState<React.ReactNode[]>([]);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    const generatedStars = Array.from({ length: count }).map((_, i) => {
       const left = `${Math.random() * 100}%`;
       const top = `${Math.random() * 100}%`;
       const delay = `${Math.random() * 3}s`;
@@ -34,11 +43,15 @@ const StarryBackground = ({
         />
       );
     });
-  }, [count, starClassName]);
+
+    setStars(generatedStars);
+  }, [count, starClassName, isMounted]);
 
   return (
-    <div className={`absolute inset-0 pointer-events-none overflow-hidden z-[-10] ${className}`}>
-      {stars}
+    <div
+      className={`absolute inset-0 pointer-events-none overflow-hidden z-[-10] ${className}`}
+    >
+      {isMounted ? stars : null}
     </div>
   );
 };
