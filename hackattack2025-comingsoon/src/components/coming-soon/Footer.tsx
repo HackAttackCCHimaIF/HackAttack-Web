@@ -144,6 +144,7 @@ const Footer = () => {
               >
                 Send us Message
               </label>
+              {/* Row 1: Name and Email inputs */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Input
                   id="nameMessage"
@@ -161,34 +162,8 @@ const Footer = () => {
                   className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
                   required
                 />
-                <motion.div
-                  whileHover={!isLoading ? { y: -1, scale: 1.03 } : {}}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`
-                      px-6 py-3 text-white w-full sm:w-auto rounded-none
-                      transition-all duration-200 ease-in-out
-                      ${
-                        isLoading
-                          ? "bg-[#0F75BD]/70 cursor-not-allowed"
-                          : "bg-[#0F75BD] hover:bg-[#0F75BD]/90 hover:shadow-lg"
-                      }
-                    `}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Sending...</span>
-                      </div>
-                    ) : (
-                      "Send"
-                    )}
-                  </Button>
-                </motion.div>
               </div>
+              {/* Row 2: Message input */}
               <Input
                 type="text"
                 id="message"
@@ -198,6 +173,35 @@ const Footer = () => {
                 className="bg-white text-black px-5 py-5 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
                 required
               />
+              {/* Row 3: Send button */}
+              <motion.div
+                whileHover={!isLoading ? { y: -1, scale: 1.03 } : {}}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`
+                    px-6 py-3 text-white w-full rounded-none
+                    transition-all duration-200 ease-in-out
+                    ${
+                      isLoading
+                        ? "bg-[#0F75BD]/70 cursor-not-allowed"
+                        : "bg-[#0F75BD] hover:bg-[#0F75BD]/90 hover:shadow-lg"
+                    }
+                  `}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    "Send"
+                  )}
+                </Button>
+              </motion.div>
             </form>
           </div>
         </div>
