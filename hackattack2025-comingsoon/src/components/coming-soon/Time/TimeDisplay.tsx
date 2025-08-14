@@ -37,23 +37,40 @@ export default function TimeDisplay() {
       : { days: 0, hours: 0, minutes: 0 };
   };
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  // Initialize with a default value to prevent hydration mismatch
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 });
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // Set mounted flag and calculate initial time
+    setMounted(true);
+    setTimeLeft(calculateTimeLeft());
+
+    // Set up the interval
     const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
     return () => clearInterval(timer);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatTime = (t: number) => String(t).padStart(2, "0");
 
+  // Always render the same structure, but conditionally show content
   return (
     <div className="flex items-center justify-center gap-2 md:gap-4 z-30">
-      <TimeUnit value={formatTime(timeLeft.days)} label="Days" />
+      <TimeUnit
+        value={mounted ? formatTime(timeLeft.days) : "00"}
+        label="Days"
+      />
       <span className="text-4xl md:text-6xl pb-8 text-neutral-400">:</span>
-      <TimeUnit value={formatTime(timeLeft.hours)} label="Hours" />
+      <TimeUnit
+        value={mounted ? formatTime(timeLeft.hours) : "00"}
+        label="Hours"
+      />
       <span className="text-4xl md:text-6xl pb-8 text-neutral-400">:</span>
-      <TimeUnit value={formatTime(timeLeft.minutes)} label="Minutes" />
+      <TimeUnit
+        value={mounted ? formatTime(timeLeft.minutes) : "00"}
+        label="Minutes"
+      />
     </div>
   );
 }

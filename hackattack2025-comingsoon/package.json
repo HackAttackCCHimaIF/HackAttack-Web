@@ -13,6 +13,7 @@
     "@floating-ui/react-dom": "^2.1.4",
     "@floating-ui/react-dom-interactions": "^0.13.3",
     "@hookform/resolvers": "^5.1.1",
+    "@next/bundle-analyzer": "^15.4.6",
     "@phosphor-icons/react": "^2.1.10",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
