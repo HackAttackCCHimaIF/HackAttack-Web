@@ -4,6 +4,7 @@ import CountdownPage from '@/components/landing-page/CountdownPage';
 import FAQSection from '@/components/landing-page/FAQSection';
 import HeroSection from '@/components/landing-page/HeroSection';
 import SpeedDating from '@/components/landing-page/SpeedDating';
+import SponsorPage from '@/components/landing-page/SponsorPage';
 import Timeline from '@/components/landing-page/Timeline';
 
 const LandingPage = () => {
@@ -27,6 +28,9 @@ const LandingPage = () => {
         </div>
         <div className='min-h-screen'>
           <SpeedDating/>
+        </div>
+         <div className='min-h-screen'>
+          <SponsorPage/>
         </div>
         <div>
           <FAQSection/>

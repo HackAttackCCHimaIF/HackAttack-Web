@@ -82,6 +82,16 @@ export default function AboutUs() {
         />
       </div> */}
 
+      <div className="absolute top-0 right-0 w-full sm:w-2/3 h-[200px] sm:h-[414px] z-10">
+              <Image
+                src="/landing-page/cloud1bwh.svg"
+                alt="Cloud background"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+
       {/* Background garuda */}
       <Image
         alt="Garuda"
@@ -117,7 +127,7 @@ export default function AboutUs() {
 
             {/* Konten dengan padding kanan supaya teks gak tertutup gambar */}
             <CardHeader className="min-h-[100px] pt-6 relative z-20 pr-44">
-              <CardTitle className="flex flex-col items-start gap-1 max-w-[240px]">
+              <CardTitle className="flex flex-col items-start gap-1 max-w-[220px]">
                 <motion.span
                   layout
                   transition={{ duration: 0.45, ease: "easeInOut" }}

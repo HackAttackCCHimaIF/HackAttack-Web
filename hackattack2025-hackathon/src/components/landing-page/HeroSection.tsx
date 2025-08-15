@@ -7,7 +7,7 @@ const HeroSection = () => {
   return (
     <section className="relative w-full h-screen overflow-hidden mt-12">
       {/* Background Map */}
-      <div className="absolute inset-0 z-0 translate-y-10 blur-sm">
+      <div className="absolute inset-0 z-0 translate-y-10 blur-xs">
         <Image
           src="/landing-page/Map.svg"
           alt="Map background"
@@ -18,15 +18,25 @@ const HeroSection = () => {
       </div>
 
       {/* Cloud */}
-      {/* <div className="absolute bottom-0 right-0 w-full sm:w-2/3 h-[200px] sm:h-[400px] z-10">
+      <div className="absolute bottom-0 right-0 w-full sm:w-2/3 h-[200px] sm:h-[400px] z-10">
         <Image
-          src="/landing-page/CLOUD (4).svg"
+          src="/landing-page/cloud1.svg"
           alt="Cloud background"
           fill
           className="object-cover"
           priority
         />
-      </div> */}
+      </div>
+
+      <div className="absolute bottom-0 left-0 w-1/5 h-[200px] sm:h-[250px] z-10">
+        <Image
+          src="/landing-page/cloud2.svg"
+          alt="Cloud background"
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
 
       {/* Wayang Foreground */}
       <div className="absolute bottom-10 sm:bottom-20 right-4 sm:right-14 rotate-0 sm:-rotate-1 w-[240px] sm:w-[400px]">

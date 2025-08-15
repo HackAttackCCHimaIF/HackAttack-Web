@@ -1,6 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
 import React from 'react'
+import { buttonVariants } from '../ui/button'
+import Link from 'next/link'
+import { DiscordLogo } from 'phosphor-react'
 
 const SpeedDating = () => {
   return (
@@ -21,24 +24,42 @@ const SpeedDating = () => {
 
       {/* Card */}
       <div className="max-w-4xl flex items-center justify-center w-full h-full relative z-10">
-        <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl relative px-1 sm:px-4">
-          <CardHeader>
-            <CardTitle>
-              <h2 className="text-white text-xl sm:text-5xl leading-snug">
-                Flying Solo? Let’s Fix That. 🤝{" "}
-                <span className="font-bold">Team up</span> with fellow innovators{" "}
-                <span className="font-bold">on our Discord!</span>
-              </h2>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <CardDescription className="text-white/90 text-sm sm:text-base">
-              We’ll help you find the right crew. Hop onto our Discord, join a
-              speed-dating session, and match with fellow problem-solvers who
-              share your passion.
-            </CardDescription>
-          </CardContent>
-        </Card>
+        <Image src={"/landing-page/''.svg"} alt='Comma' width={10} height={10} className='size-14 absolute -top-20 left-0'/>
+        <div className='flex flex-col w-full h-full gap-y-8'>
+          <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl relative px-1 sm:px-4">
+            <CardHeader>
+              <CardTitle>
+                <h2 className="text-white text-xl sm:text-5xl leading-snug">
+                  Flying Solo? Let’s Fix That. 🤝{" "}
+                  <span className="font-bold">Team up</span> with fellow innovators{" "}
+                  <span className="font-bold">on our Discord!</span>
+                </h2>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-white/90 text-sm sm:text-base">
+                We’ll help you find the right crew. Hop onto our Discord, join a
+                speed-dating session, and match with fellow problem-solvers who
+                share your passion.
+              </CardDescription>
+            </CardContent>
+          </Card>
+          <Link
+            className={buttonVariants({
+              className:
+                "w-fit bg-transparent !rounded-full !py-4 !px-2 !pr-6 transition-colors text-white duration-300 hover:bg-white hover:text-black",
+              variant: "outline",
+            })}
+            href={"/"}
+          >
+            <div className='p-1 bg-muted/10 rounded-full'>
+              <DiscordLogo className=''/>
+            </div>
+            <span className=''>
+              Join Discord
+            </span>
+          </Link>
+        </div>
       </div>
     </div>
   )
