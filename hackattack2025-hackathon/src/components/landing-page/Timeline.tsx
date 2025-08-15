@@ -8,18 +8,18 @@ import Image from 'next/image';
 
 const getDateGradient = (index: number) => {
   const colors = [
-    "bg-gradient-to-r from-sky-400 to-white/80",  // biru
-    "bg-gradient-to-r from-green-400 to-white/80", // hijau
-    "bg-gradient-to-r from-red-400 to-white/80",   // merah
+    "bg-gradient-to-r from-sky-400 to-white/80",  
+    "bg-gradient-to-r from-green-400 to-white/80", 
+    "bg-gradient-to-r from-red-400 to-white/80",   
   ];
   return colors[index % colors.length];
 };
 
 const getDateConnector = (index: number) => {
   const configs = [
-    { gradient: "bg-gradient-to-t from-sky-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(56,189,248,0.6)]" }, // biru
-    { gradient: "bg-gradient-to-t from-green-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(74,222,128,0.6)]" }, // hijau
-    { gradient: "bg-gradient-to-t from-red-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(248,113,113,0.6)]" },   // merah
+    { gradient: "bg-gradient-to-t from-sky-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(56,189,248,0.6)]" }, 
+    { gradient: "bg-gradient-to-t from-green-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(74,222,128,0.6)]" }, 
+    { gradient: "bg-gradient-to-t from-red-400 to-white/80", shadow: "shadow-[0_0_20px_rgba(248,113,113,0.6)]" },   
   ];
   
   const { gradient, shadow } = configs[index % configs.length];
@@ -138,9 +138,7 @@ const Timeline = () => {
          <div className="relative md:hidden max-w-[614px] max-h-[614px]">
           <Image src="/landing-page/circlegatau.png" alt="circle" width={614} height={614} />
         </div>
-        <div className="relative sm:hidden max-w-[614px] max-h-[614px]">
-          <Image src="/landing-page/circlegatau.png" alt="circle" width={614} height={614} />
-        </div>
+
 
       </div>
       <div className="text-center mb-12 relative z-10">
@@ -158,10 +156,8 @@ const Timeline = () => {
 
 
       <div className="relative max-w-7xl mx-auto">
-        {/* Garis */}
-        <div className="absolute md:left-1/2 left-4 transform md:-translate-x-1/2 w-1 bg-gray-200 h-full"></div>
+        <div className="absolute md:left-1/2 left-4 transform md:-translate-x-1/2 w-1  h-full rounded-full bg-gradient-to-b from-gray-200  to-transparent"></div>
 
-        {/* Mode Desktop */}
         <div className="hidden md:block">
           {timelineData.map((item, index) => {
             const isEven = index % 2 === 0;
@@ -169,7 +165,6 @@ const Timeline = () => {
               <div key={item.id} className="relative mb-12 flex w-full items-center justify-evenly">
                 {isEven ? (
                   <>
-                    {/* Kolom Tanggal */}
                     <div className="w-5/12 pr-8 flex justify-end h-fit">
                       <Card className={cn(
                         'shadow-border px-2 flex items-center justify-center py-2 border-none text-white rounded-full',
@@ -181,14 +176,12 @@ const Timeline = () => {
                       </Card>
                     </div>
 
-                    {/* Titik */}
                     <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2">
                       <div className='p-2 border rounded-full'>
                         <div className={`w-4 h-4 rounded-full ${getDateConnector(index)} p-2.5 shadow-lg z-10`}></div>
                       </div>
                     </div>
 
-                    {/* Kolom Konten */}
                     <div className="w-5/12 pl-8">
                       <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-none bg-white/5 text-white">
                         <CardHeader className="pb-3">
@@ -207,7 +200,6 @@ const Timeline = () => {
                   </>
                 ) : (
                   <>
-                    {/* Kolom Konten */}
                     <div className="w-5/12 pr-8">
                       <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-none bg-white/5 text-white">
                         <CardHeader className="pb-3">
@@ -224,14 +216,12 @@ const Timeline = () => {
                       </Card>
                     </div>
 
-                    {/* Titik */}
                     <div className="absolute left-1/2 transform -translate-x-1/2 -translate-y-1/2 top-1/2">
                       <div className='p-2 border rounded-full'>
                         <div className={`w-4 h-4 rounded-full ${getDateConnector(index)} p-2.5 shadow-lg z-10`}></div>
                       </div>
                     </div>
 
-                    {/* Kolom Tanggal */}
                     <div className="w-5/12 pl-8 flex h-fit">
                       <Card className={cn(
                         'shadow-border px-2 flex items-center justify-center py-2 border-none text-white rounded-full',
@@ -249,18 +239,15 @@ const Timeline = () => {
           })}
         </div>
 
-        {/* Mode Mobile */}
         <div className="flex flex-col space-y-8 md:hidden">
           {timelineData.map((item, index) => (
             <div key={item.id} className="relative flex items-start">
-              {/* Titik */}
               <div className="absolute left-0 top-4">
                 <div className='p-2 border rounded-full'>
                   <div className={`w-4 h-4 rounded-full ${getDateConnector(index)} p-2.5 shadow-lg z-10`}></div>
                 </div>
               </div>
 
-              {/* Konten Card */}
               <div className="ml-12 w-full">
                 <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 border-none bg-white/5 text-white">
                   <CardHeader className="pb-2">

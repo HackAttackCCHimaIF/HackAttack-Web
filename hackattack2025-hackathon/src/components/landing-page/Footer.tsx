@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { InstagramLogo, LinkedinLogo } from "phosphor-react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -68,15 +67,6 @@ const Footer = () => {
   return (
     <footer className="relative text-white pt-12 pb-6 bg-transparent overflow-hidden z-[9999]">
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent z-[-1]" />
-      {/* Background SVG */}
-      <Image
-        src="/bg.svg"
-        alt="Background"
-        fill
-        className="absolute inset-0 object-cover -z-10 pointer-events-none select-none opacity-60"
-        priority
-      />
-
 
       {/* Glow hijau bawah kiri – lebih rendah agar sambung ke atas */}
       {/* <div className="absolute top-[-80px] left-[0] w-[400px] h-[400px] bg-green-400 opacity-[0.08] rounded-full blur-[160px] z-0" /> */}

@@ -17,18 +17,19 @@ const HeroSection = () => {
         />
       </div>
 
-      {/* Cloud */}
-      <div className="absolute bottom-0 right-0 w-full sm:w-2/3 h-[200px] sm:h-[400px] z-10">
-        <Image
-          src="/landing-page/cloud1.svg"
-          alt="Cloud background"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
+      {/* Cloud kanan */}
+      <div className="absolute -bottom-1 left-0 lg:left-1/2 w-full h-[160px] md:h-[320px] lg:h-fit z-10">
+                          <Image
+                            src={"/landing-page/awanniga3.svg"}
+                            alt="Awan"
+                            width={100}
+                            height={100}
+                            className="w-full object-cover h-full"
+                          />
+                    </div>
 
-      <div className="absolute bottom-0 left-0 w-1/5 h-[200px] sm:h-[250px] z-10">
+      {/* Cloud kiri */}
+      <div className="absolute bottom-0 hidden lg:flex left-0 w-1/3 sm:w-1/5 md:w-1/6 h-[100px] sm:h-[150px] md:h-[250px] z-10">
         <Image
           src="/landing-page/cloud2.svg"
           alt="Cloud background"
@@ -38,8 +39,9 @@ const HeroSection = () => {
         />
       </div>
 
+
       {/* Wayang Foreground */}
-      <div className="absolute bottom-10 sm:bottom-20 right-4 sm:right-14 rotate-0 sm:-rotate-1 w-[240px] sm:w-[400px]">
+      <div className="absolute bottom-5 sm:bottom-20 right-0 sm:right-14 rotate-0 sm:-rotate-1 w-[240px] sm:w-[400px]">
         <Image
           src="/landing-page/wayang.svg"
           alt="Wayang"
@@ -50,7 +52,7 @@ const HeroSection = () => {
       </div>
 
       {/* Wayang Blur (Shadow) */}
-      <div className="absolute -bottom-20 sm:-bottom-50 -right-[70%] sm:-right-60 z-0 rotate-0 sm:-rotate-1 w-[660px] sm:w-[860px]">
+      <div className="absolute -bottom-40 sm:-bottom-50 -right-[70%] sm:-right-60 z-0 rotate-0 sm:-rotate-1 w-[660px] sm:w-[860px]">
         <Image
           src="/landing-page/wayang.svg"
           alt="Wayang"
@@ -60,13 +62,12 @@ const HeroSection = () => {
         />
       </div>
 
-      {/* Main Hero Content */}
       <div className="relative z-20 flex items-start justify-center h-full flex-col px-4 sm:px-8 lg:px-16 text-white">
         <h1 className="text-[28px] sm:text-[36px] lg:text-[48px] font-bold text-start max-w-lg leading-tight sm:leading-none">
           <span className="block">
             Build Real Solutions for Indonesia —
           </span>
-          <span className="block bg-[#EF4B72A3] p-1 sm:p-2 sm:pr-8 uppercase">
+          <span className="block bg-[#EF4B72A3] max-w-[280px] md:max-w-full p-1 sm:p-2 sm:pr-8 uppercase">
             HACKATTACK 2025
           </span>
           <span className="block">

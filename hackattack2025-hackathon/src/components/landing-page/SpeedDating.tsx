@@ -8,7 +8,25 @@ import { DiscordLogo } from 'phosphor-react'
 const SpeedDating = () => {
   return (
     <div className="w-screen min-h-screen relative overflow-hidden p-6 sm:p-12 flex items-center">
-      {/* Background / Side Image */}
+      <div className="absolute -top-1 left-0 lg:left-1/2 w-full h-[240px] md:h-[300px] lg:h-fit">
+          <Image
+            src={"/landing-page/awanniga3.svg"}
+            alt="Awan"
+            width={100}
+            height={100}
+            className="w-full object-cover h-full rotate-x-180"
+          />
+        </div>
+        <div className="absolute -top-1 right-1/2 w-full lg:flex hidden">
+                <Image
+            src={"/landing-page/awanniga3.svg"}
+            alt="Awan"
+            width={100}
+            height={100}
+            className="w-full object-cover rotate-y-180 rotate-x-180"
+            />
+        </div>
+
       <div className="absolute inset-0 md:left-1/2 pointer-events-none">
         <div className="relative w-full sm:w-full h-full">
             <Image
