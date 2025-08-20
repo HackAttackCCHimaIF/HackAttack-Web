@@ -7,6 +7,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { ChevronDown } from "lucide-react";
 
 export default function FAQSection() {
   const faqs = [
@@ -26,30 +27,40 @@ export default function FAQSection() {
           Frequently Asked Questions
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {faqs.map((faq, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
+        {faqs.map((faq, index) => {
+          const isRightSide = index % 2 === 1; // item di kanan
+          const isLastSingle = index === faqs.length - 1 && faqs.length % 2 !== 0;
+
+          return (
             <Accordion
               key={index}
               type="single"
               collapsible
-              className={`w-full col-span-2 ${
-                index === faqs.length - 1 ? "md:col-start-2" : ""
-              }`}
+              className={`w-full md:col-span-3
+                ${isRightSide ? "md:col-start-5" : ""}
+                ${isLastSingle ? "md:col-start-3" : ""}`}
             >
               <AccordionItem
                 value={`item-${index}`}
-                className="bg-neutral-900 rounded-lg border border-neutral-800 px-4"
+                className="bg-neutral-900 border border-neutral-800 py-2 px-4 rounded-4xl"
               >
-                <AccordionTrigger className="flex justify-between text-left text-green-400 hover:no-underline">
+                <AccordionTrigger  className="flex justify-between font-semibold text-xl text-left text-[#98F47A] hover:no-underline">
                   {faq.question}
+                  <ChevronDown
+                    className="h-5 w-5 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180 text-[#98F47A]"
+                  />
                 </AccordionTrigger>
                 <AccordionContent className="text-neutral-300 pb-4">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-          ))}
-        </div>
+          );
+        })}
+      </div>
+
+
       </div>
     </section>
   );
