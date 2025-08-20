@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ChevronRight } from "lucide-react";
 
 const cardsData = [
   {
@@ -107,7 +107,6 @@ export default function AboutUs() {
 
   return (
     <main className="relative w-full min-h-screen flex items-center justify-center py-8 overflow-hidden">
-      {/* Clouds */}
       <div className="absolute rotate-x-180 hidden lg:flex top-0 left-0 w-1/3 sm:w-1/5 md:w-1/6 h-[100px] sm:h-[150px] md:h-[250px] z-10">
         <Image
           src="/landing-page/cloud2.svg"
@@ -128,7 +127,6 @@ export default function AboutUs() {
                 />
               </div>
 
-      {/* Garuda */}
       <Image
         alt="Garuda"
         src={"/landing-page/garuda.svg"}
@@ -136,7 +134,6 @@ export default function AboutUs() {
         className="absolute inset-0"
       />
 
-      {/* Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 w-full px-4 sm:px-8 lg:px-16 mx-auto min-h-[580px] relative z-20">
         {cardsData.map((card, index) => (
           <div
@@ -150,10 +147,8 @@ export default function AboutUs() {
                 : "col-span-1 scale-100"
             )}
           >
-            {/* Overlay */}
             <div className="absolute inset-0 bg-black/40 rounded-xl z-10"></div>
 
-            {/* Content */}
             <CardHeader className="min-h-[100px] pt-6 relative z-20 pr-44">
               <CardTitle className="flex flex-col items-start gap-1 w-full lg:max-w-[220px]">
                 <span
@@ -167,12 +162,14 @@ export default function AboutUs() {
               </CardTitle>
             </CardHeader>
 
-            <CardContent className="text-white text-base sm:text-lg relative z-20 lg:pr-44">
+            <CardContent className={cn('text-white text-base sm:text-lg relative z-20 lg:pr-44 duration-200', active === index ? "block" : "hidden")}>
               {card.content}
             </CardContent>
 
-            {/* Image */}
             {card.imageSrc}
+            <div className="absolute items-center justify-center flex bottom-4 right-4 rounded-full cursor-pointer bg-white/40 size-10 transition-all duration-500">
+                <ChevronRight className={cn('text-white size-5 transition-all duration-500', active === index ? "rotate-y-180" : "rotate-0")}/>
+            </div>
           </div>
         ))}
       </div>
