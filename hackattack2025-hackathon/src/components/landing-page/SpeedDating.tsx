@@ -47,7 +47,7 @@ const SpeedDating = () => {
           <Card className="bg-white/10 backdrop-blur-md border border-white/20 shadow-lg rounded-2xl relative px-1 sm:px-4">
             <CardHeader>
               <CardTitle>
-                <h2 className="text-white text-xl sm:text-5xl leading-snug">
+                <h2 className="text-white font-normalh text-xl sm:text-5xl leading-snug">
                   Flying Solo? Let’s Fix That. 🤝{" "}
                   <span className="font-bold">Team up</span> with fellow innovators{" "}
                   <span className="font-bold">on our Discord!</span>
@@ -65,7 +65,7 @@ const SpeedDating = () => {
           <Link
             className={buttonVariants({
               className:
-                "w-fit bg-transparent !rounded-full !py-4 !px-2 !pr-6 transition-colors text-white duration-300 hover:bg-white hover:text-black",
+                "w-fit bg-transparent !rounded-full !py-4 !px-2 !pr-8 transition-colors text-white duration-300 hover:bg-white hover:text-black",
               variant: "outline",
             })}
             href={"/"}

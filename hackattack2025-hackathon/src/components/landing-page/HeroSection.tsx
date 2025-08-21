@@ -41,7 +41,7 @@ const HeroSection = () => {
 
 
       {/* Wayang Foreground */}
-      <div className="absolute bottom-5 sm:bottom-20 right-0 sm:right-14 rotate-0 sm:-rotate-1 w-[240px] sm:w-[400px]">
+      <div className="absolute bottom-5 hidden lg:block sm:bottom-20 right-0 sm:right-14 rotate-0 sm:-rotate-1 w-[240px] sm:w-[400px]">
         <Image
           src="/landing-page/wayang.svg"
           alt="Wayang"
@@ -67,11 +67,11 @@ const HeroSection = () => {
           <span className="block">
             Build Real Solutions for Indonesia —
           </span>
-          <span className="block bg-[#EF4B72A3] max-w-[280px] md:max-w-full p-1 sm:p-2 sm:pr-8 uppercase">
+          <span className="block tracking-wide bg-[#EF4B72A3] max-w-[280px] sm:min-w-xl sm:max-w-full p-1 sm:p-2 sm:pr-8 uppercase">
             HACKATTACK 2025
           </span>
           <span className="block">
-            Is here
+            is here!
           </span>
         </h1>
         <div className="mt-3 max-w-md">

@@ -5,11 +5,26 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isHomeOpen, setIsHomeOpen] = useState(false);
+  const pathname = usePathname();
+
   const iconList = ["hima", "telkom", "cci", "hack"];
+
+  const homeSubItems = [
+    { href: "#about-us", label: "About Us" },
+    { href: "#timeline", label: "Timeline" },
+    { href: "#countdown", label: "Countdown" },
+    { href: "#speeddating", label: "Speed Dating" },
+    { href: "#sponsor", label: "Sponsor" },
+    { href: "#faq", label: "FAQ" },
+
+  ];
 
   return (
     <nav className="w-full fixed top-0 z-50 px-4 sm:px-8 lg:px-16 py-4 ">
@@ -23,7 +38,7 @@ const Navbar = () => {
             priority
             className="object-contain w-[100px] sm:w-[130px] lg:w-[156px]"
           />
-          {/* Icon list only for md+ */}
+
           <div className="hidden md:flex items-center gap-3">
             {iconList.map((icon) => (
               <motion.div
@@ -45,24 +60,58 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-6">
           <div className="flex items-center gap-6 text-white font-medium">
+            <div className="relative">
+              <button
+                onClick={() => setOpen(!open)}
+                className={`flex items-center gap-1 cursor-pointer transition-colors duration-200 pb-1 ${
+                  pathname === "/"
+                    ? "text-pink-400 border-b-2 border-pink-400"
+                    : "hover:text-pink-400"
+                }`}
+              >
+                Home
+                {open ? (
+                  <ChevronUp size={16} className="transition-transform" />
+                ) : (
+                  <ChevronDown size={16} className="transition-transform" />
+                )}
+              </button>
+
+              {open && (
+                <div className="absolute left-0 mt-6 border border-white/5 w-48 rounded-lg bg-stone-950/80 backdrop-blur-2xl shadow-lg transition-all duration-200 ease-in-out">
+                  {homeSubItems.map((sub) => (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      className="block px-4 py-2 text-sm text-white hover:bg-white/10"
+                      onClick={() => setOpen(false)} 
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <Link
-              href={"/"}
-              className="cursor-pointer hover:text-pink-400 transition-colors duration-200"
-            >
-              Home
-            </Link>
-            <Link
-              href={"/"}
-              className="cursor-pointer hover:text-pink-400 transition-colors duration-200"
+              href="/workshop"
+              className={`cursor-pointer transition-colors duration-200 pb-1 ${
+                pathname === "/workshop"
+                  ? "text-pink-400 border-b-2 border-pink-400"
+                  : "hover:text-pink-400"
+              }`}
             >
               Workshop
             </Link>
             <Link
-              href={"/"}
-              className="cursor-pointer hover:text-pink-400 transition-colors duration-200"
+              href="/merch"
+              className={`cursor-pointer transition-colors duration-200 pb-1 ${
+                pathname === "/merch"
+                  ? "text-pink-400 border-b-2 border-pink-400"
+                  : "hover:text-pink-400"
+              }`}
             >
               Merch Attack
             </Link>
@@ -71,7 +120,7 @@ const Navbar = () => {
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
-              className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white"
+              className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white"
             >
               Guide Book
             </Button>
@@ -83,7 +132,6 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Hamburger */}
         <div className="md:hidden flex items-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -94,45 +142,85 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl p-4">
-          <div className="flex flex-col gap-3 text-white font-medium">
-            <Link
-              href={"/"}
-              className="hover:text-pink-400 transition-colors duration-200"
+      <div className="md:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl p-4">
+        <div className="flex flex-col gap-3 text-white font-medium">
+
+          <div className="flex flex-col">
+            <button
+              onClick={() => setIsHomeOpen(!isHomeOpen)}
+              className={`flex items-center justify-between transition-colors duration-200 ${
+                pathname === "/"
+                  ? "text-pink-400 underline"
+                  : "hover:text-pink-400"
+              }`}
             >
-              Home
-            </Link>
-            <Link
-              href={"/"}
-              className="hover:text-pink-400 transition-colors duration-200"
-            >
-              Workshop
-            </Link>
-            <Link
-              href={"/"}
-              className="hover:text-pink-400 transition-colors duration-200"
-            >
-              Merch Attack
-            </Link>
+              <span>Home</span>
+              {isHomeOpen ? (
+                <ChevronUp size={18} className="ml-2" />
+              ) : (
+                <ChevronDown size={18} className="ml-2" />
+              )}
+            </button>
+
+            {isHomeOpen && (
+              <div className="my-3.5 ml-4 flex flex-col gap-2.5">
+                {homeSubItems.map((sub) => (
+                  <Link
+                    key={sub.href}
+                    href={sub.href}
+                    className="text-sm text-gray-300 hover:text-pink-400"
+                    onClick={() => {
+                      setIsHomeOpen(false) 
+                      setIsOpen(false)     
+                    }}
+                  >
+                    {sub.label}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="flex flex-col gap-3 mt-2">
-            <Button
-              variant="outline"
-              className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
-            >
-              Guide Book
+          <Link
+            href="/workshop"
+            className={`transition-colors duration-200 ${
+              pathname === "/workshop"
+                ? "text-pink-400 underline"
+                : "hover:text-pink-400"
+            }`}
+          >
+            Workshop
+          </Link>
+
+          <Link
+            href="/merch"
+            className={`transition-colors duration-200 ${
+              pathname === "/merch"
+                ? "text-pink-400 underline"
+                : "hover:text-pink-400"
+            }`}
+          >
+            Merch Attack
+          </Link>
+        </div>
+
+        <div className="flex flex-col gap-3 mt-2">
+          <Button
+            variant="outline"
+            className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
+          >
+            Guide Book
+          </Button>
+          <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
+            <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
+              Register Now
             </Button>
-            <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
-              <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                Register Now
-              </Button>
-            </div>
           </div>
         </div>
-      )}
+      </div>
+    )}
+
     </nav>
   );
 };
