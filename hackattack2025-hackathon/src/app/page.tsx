@@ -12,27 +12,25 @@ const LandingPage = () => {
   return (
     <>
       <div className="overflow-hidden">
-        {/* <Navbar /> */}
-        
         <div className='max-h-screen'>
           <HeroSection/>
         </div>
-        <div className='min-h-screen'>
+        <div className='min-h-screen' id='about-us'>
           <AboutUs/>
         </div>
-        <div className='min-h-screen'>
+        <div className='min-h-screen' id='timeline'>
           <Timeline/>
         </div>
-        <div className='min-h-screen md:h-fit'>
+        <div id='countdown' className='min-h-screen md:h-fit'>
           <CountdownPage/>
         </div>
-        <div className='min-h-screen'>
+        <div className='min-h-screen' id='speeddating'>
           <SpeedDating/>
         </div>
-         <div className='min-h-screen'>
+         <div className='min-h-screen' id='sponsor'>
           <SponsorPage/>
         </div>
-        <div>
+        <div className='h-full' id='faq'>
           <FAQSection/>
         </div>
       </div>
