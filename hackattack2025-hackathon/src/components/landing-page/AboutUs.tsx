@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 import { CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utility/utils";
 import { CheckCircle2, ChevronRight } from "lucide-react";
 
 const cardsData = [
@@ -33,10 +33,10 @@ const cardsData = [
       <>
         <p>
           <span className="font-bold">HackAttack 2025 </span>
-          is a national hackathon that brings together students,
-          young developers, and creative minds from across Indonesia. This year,
-          we&apos;re challenging you to design solutions that truly make a difference,
-          under the theme:
+          is a national hackathon that brings together students, young
+          developers, and creative minds from across Indonesia. This year,
+          we&apos;re challenging you to design solutions that truly make a
+          difference, under the theme:
         </p>
         <p className="mt-5 italic font-bold">
           “Tech for Nusantara: Digitalization for the Nation.”
@@ -65,8 +65,8 @@ const cardsData = [
         </p>
         <p className="mt-5">
           From equal access to education, to fair workforce opportunities — this
-          year’s theme invites you to tackle some of the most pressing
-          issues in Indonesia. Your solution could be the one that changes the game.
+          year’s theme invites you to tackle some of the most pressing issues in
+          Indonesia. Your solution could be the one that changes the game.
         </p>
       </>
     ),
@@ -118,14 +118,14 @@ export default function AboutUs() {
       </div>
 
       <div className="absolute -top-1 left-0 lg:left-1/2 w-full h-[120px] md:h-[320px] lg:h-fit z-10">
-                <Image
-                  src={"/landing-page/awanniga3.svg"}
-                  alt="Awan"
-                  width={100}
-                  height={100}
-                  className="w-full object-cover h-full rotate-x-180"
-                />
-              </div>
+        <Image
+          src={"/landing-page/awanniga3.svg"}
+          alt="Awan"
+          width={100}
+          height={100}
+          className="w-full object-cover h-full rotate-x-180"
+        />
+      </div>
 
       <Image
         alt="Garuda"
@@ -162,13 +162,23 @@ export default function AboutUs() {
               </CardTitle>
             </CardHeader>
 
-            <CardContent className={cn('text-white text-base sm:text-lg relative z-20 lg:pr-44 duration-200', active === index ? "block" : "hidden")}>
+            <CardContent
+              className={cn(
+                "text-white text-base sm:text-lg relative z-20 lg:pr-44 duration-200",
+                active === index ? "block" : "hidden"
+              )}
+            >
               {card.content}
             </CardContent>
 
             {card.imageSrc}
             <div className="absolute items-center justify-center flex bottom-4 right-4 rounded-full cursor-pointer bg-white/40 size-10 transition-all duration-500">
-                <ChevronRight className={cn('text-white size-5 transition-all duration-500', active === index ? "rotate-y-180" : "rotate-0")}/>
+              <ChevronRight
+                className={cn(
+                  "text-white size-5 transition-all duration-500",
+                  active === index ? "rotate-y-180" : "rotate-0"
+                )}
+              />
             </div>
           </div>
         ))}
