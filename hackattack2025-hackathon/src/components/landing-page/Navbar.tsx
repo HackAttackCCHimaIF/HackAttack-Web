@@ -60,7 +60,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden xl:flex items-center gap-6">
           <div className="flex items-center gap-6 text-white font-medium">
             <div className="relative">
               <button
@@ -132,7 +132,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="md:hidden flex items-center">
+        <div className="xl:hidden flex items-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-white focus:outline-none"
@@ -143,7 +143,7 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-      <div className="md:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl p-4">
+      <div className="xl:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl px-4 py-8">
         <div className="flex flex-col gap-3 text-white font-medium">
 
           <div className="flex flex-col">
