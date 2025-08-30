@@ -32,9 +32,7 @@ export default function RootLayout({
         className={`${poppins.variable} ${koulen.variable} antialiased font-poppins bg-black`}
       >
         <div>
-          <Navbar />
           {children}
-          <Footer />
         </div>
         <Toaster />
       </body>
