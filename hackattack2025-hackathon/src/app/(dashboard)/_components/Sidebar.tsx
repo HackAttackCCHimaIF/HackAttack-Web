@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { User, FileText, BookMarked, Send, LogOut, Code2, Menu, X } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utility/utils";
 
 interface SidebarProps {
   isLoggedIn: boolean;
@@ -35,7 +36,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
         </button>
       </div>
 
-      {/* Desktop Sidebar */}
       <motion.aside
         initial={{ x: -250 }}
         animate={{ x: 0 }}
@@ -52,19 +52,20 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
             </div>
           </div>
 
-          {/* Menu */}
-          <nav className="flex flex-col gap-4">
+          <nav className="flex flex-col gap-3">
             {menuItems.map((item) => (
               <a
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:text-white relative transition
+                className={`flex items-center gap-3 p-3 pb-2 pl-6 rounded-lg text-gray-300 hover:text-white relative transition
                   ${pathname === item.href ? "text-pink-500 font-semibold" : ""}`}
               >
                 {pathname === item.href && (
-                  <div className="absolute left-0 top-0 h-full w-1 bg-pink-500 rounded-r-md"></div>
+                  <div className="absolute left-1 top-0 h-full w-1 bg-pink-500 rounded-md"></div>
                 )}
-                {item.icon}
+                <div className={cn(`text-white p-2 rounded-full`, pathname === item.href ? " bg-pink-500/50" : "bg-white/10")}>
+                  {item.icon}
+                </div>
                 <span>{item.label}</span>
               </a>
             ))}
@@ -85,11 +86,9 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
         )}
       </motion.aside>
 
-      {/* Mobile Sidebar (Slide In) */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Overlay */}
             <motion.div
               className="fixed inset-0 bg-black/40 z-40"
               initial={{ opacity: 0 }}
@@ -98,7 +97,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
               onClick={() => setIsOpen(false)}
             />
 
-            {/* Sidebar */}
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
@@ -117,7 +115,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 </button>
               </div>
 
-              {/* Menu */}
               <nav className="flex flex-col gap-4 px-6">
                 {menuItems.map((item) => (
                   <a
@@ -136,7 +133,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 ))}
               </nav>
 
-              {/* Sign Out */}
               {isLoggedIn && (
                 <div className="p-6">
                   <button
