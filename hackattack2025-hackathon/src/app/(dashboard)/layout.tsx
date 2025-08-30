@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
 
         <div className="flex flex-col flex-1 ">
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 min-h-screen h-full w-screen md:w-full mt-16 md:mt-0 px-4 overflow-y-hidden">{children}</main>
         </div>
       </div>
     </div>

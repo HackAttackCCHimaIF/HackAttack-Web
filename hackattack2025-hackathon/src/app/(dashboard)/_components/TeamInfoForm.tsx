@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Edit, Pencil, LogIn, Bell, Check } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import {
   RadioGroup,
   RadioGroupItem,
@@ -26,7 +26,7 @@ import {
 import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
 import { cn } from "@/lib/utility/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { HeaderDashboard } from "./HeaderDashboard";
 
 // ======================
 // Data & Validation Schema
@@ -65,93 +65,7 @@ type TeamFormValues = z.infer<typeof teamSchema>;
 // Header Component
 // ======================
 
-const HeaderDashboard = ({
-  isEditMode,
-  setEditMode,
-  userProfile,
-}: {
-  isEditMode: boolean;
-  setEditMode: (mode: boolean) => void;
-  userProfile?: { name: string; isLoggedIn: boolean };
-}) => {
-  const topText = "Team";
-  const bottomText = "PROFILE";
 
-  return (
-    <div className="py-4 px-3 flex justify-between items-center">
-      <h1 className="text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] leading-tight sm:leading-none">
-        <span className="block text-white">{topText}</span>
-        <span className="block tracking-wide uppercase py-0.5 px-1 bg-transparent text-white">
-          {bottomText}
-        </span>
-      </h1>
-
-      <div className="flex items-center gap-4">
-        <Button
-          onClick={() => setEditMode(!isEditMode)}
-          size={"lg"}
-          className={`flex items-center gap-2 rounded-full pl-2 pr-2  !py-6 ${
-            isEditMode
-              ? "bg-pink-600/50 hover:bg-pink-700/80 text-white md:pl-6"
-              : "bg-white/10 hover:bg-white/20 text-white md:pr-6"
-          }`}
-        >
-          {/* <div className="p-2 rounded-full md:bg-white/10">
-            <Edit size={8} className={cn("text-white", isEditMode ? "hidden" : "")}/>
-          </div>
-          <div className="hidden md:flex">
-            {isEditMode ? "Save Changes" : "Edit Profile"}
-          </div> */}
-          {isEditMode ? (
-            <div className="flex items-center gap-3">
-              <p>Simpan</p>
-              <div className="p-2 rounded-full md:bg-white/10">
-                <Check size={8} className={cn("text-white")}/>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full md:bg-white/10">
-                <Edit size={8} className={cn("text-white")}/>
-              </div>
-              <p>Edit Profile</p>
-            </div>
-          )}
-        </Button>
-
-        <Button
-          size={"icon"}
-          className={`flex items-center gap-2 rounded-full !p-6 hover:bg-white/20`}
-        >
-          <div className="p-2 rounded-full ">
-            <Bell className="text-white"/>
-          </div>
-        </Button>
-
-        {userProfile?.isLoggedIn ? (
-          <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
-            <div className="flex-col text-right lg:flex hidden">
-              <p className="text-xs text-white/60">Selamat Datang,</p>
-              <p className="text-lg">{userProfile.name}</p>
-            </div>
-            <div className="text-black">
-              <Avatar className="rounded-lg size-10">
-                <AvatarFallback>
-                  RJ
-                </AvatarFallback>
-              </Avatar>
-            </div>
-          </div>
-        ) : (
-          <Button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-full px-6 py-2">
-            <LogIn size={16} />
-            Login
-          </Button>
-        )}
-      </div>
-    </div>
-  );
-};
 
 // ======================
 // Editable Input Component
@@ -225,8 +139,11 @@ export default function TeamProfilePage() {
 
 
   return (
-    <div className="min-h-screen h-full w-screen md:w-full overflow-y-auto mt-16 md:mt-0 px-4">
+    <div className="overflow-hidden">
       <HeaderDashboard
+        isEdit
+        topText="Team"
+        bottomText="Profile"
         isEditMode={isEditMode}
         setEditMode={setEditMode}
         userProfile={userProfile}
