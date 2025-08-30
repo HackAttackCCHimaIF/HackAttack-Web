@@ -19,9 +19,9 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
   const menuItems = [
     { label: "Profile", href: "/dashboard/peserta", icon: <User size={18} /> },
     { label: "Theme", href: "/dashboard/peserta/theme", icon: <Code2 size={18} /> },
-    { label: "Guide Book", href: "/dashboard/guide-book", icon: <FileText size={18} /> },
-    { label: "Rule Book", href: "/dashboard/rule-book", icon: <BookMarked size={18} /> },
-    { label: "Submission", href: "/dashboard/submission", icon: <Send size={18} /> },
+    { label: "Guide Book", href: "/dashboard/peserta/guide-book", icon: <FileText size={18} /> },
+    { label: "Rule Book", href: "/dashboard/peserta/rule-book", icon: <BookMarked size={18} /> },
+    { label: "Submission", href: "/dashboard/peserta/submission", icon: <Send size={18} /> },
   ];
 
   return (

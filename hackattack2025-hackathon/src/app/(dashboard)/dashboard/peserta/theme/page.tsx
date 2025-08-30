@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import React, { useState } from 'react'
 
 const ThemePage = () => {
-      const [userProfile] = useState({ name: "John Doe", isLoggedIn: true });
+    const [userProfile] = useState({ name: "John Doe", isLoggedIn: true });
     
   return (
     <div>
