@@ -10,7 +10,7 @@ const ThemePage = () => {
   return (
     <div className="flex flex-col min-h-full w-full">
       <HeaderDashboard userProfile={userProfile} bottomText="Theme" />
-      <div className="flex-1 flex flex-col pb-5">
+      <div className="flex-1 flex flex-col pb-5 px-4">
         <Card className="md:flex-1 bg-white/10 backdrop-blur-md border-3 border-white/10 rounded-2xl text-white h-fit">
           <CardContent className="flex-1 flex items-center justify-center">
             <div className="max-w-2xl text-justify">

@@ -27,6 +27,7 @@ import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
 import { cn } from "@/lib/utility/utils";
 import { HeaderDashboard } from "./HeaderDashboard";
+import Link from "next/link";
 
 // ======================
 // Data & Validation Schema
@@ -139,7 +140,7 @@ export default function TeamProfilePage() {
 
 
   return (
-    <div className="overflow-y-auto w-full h-full">
+    <div className="overflow-y-auto w-full min-h-full">
       <HeaderDashboard
         isEdit
         topText="Team"
@@ -150,7 +151,8 @@ export default function TeamProfilePage() {
         // onSave={handleFormSubmit}
       />
 
-      <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
+      {userProfile.isLoggedIn ? (
+        <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
         <div className="px-4 pb-8 col-span-1 md:col-span-2 w-full">
           <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
@@ -429,6 +431,32 @@ export default function TeamProfilePage() {
           </Card>
         </div>
       </div>
+      ) : (
+        <div className="flex-1 flex flex-col pb-5 px-4 h-full">
+          <Card className="flex flex-col md:flex-1 bg-white/10 backdrop-blur-md border-3 border-white/10 rounded-2xl text-white h-full md:min-h-[calc(100vh-8.5rem)]">
+            <CardContent className="flex-1 flex items-center justify-center">
+              <div className="max-w-xl text-center px-4">
+                <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium tracking-wide">
+                  Selamat Datang Peserta
+                </p>
+                <h2 className="font-bold text-4xl sm:text-5xl lg:text-6xl leading-tight">
+                  HACKATTACK
+                  <br />
+                  2025
+                </h2>
+                <p className="text-sm sm:text-base mt-4">
+                  Silahkan untuk{" "}
+                  <Link href={"/sign-in"} className="font-bold hover:text-pink-400 duration-200">
+                    login
+                  </Link>{" "}
+                  terlebih dahulu
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+      )}
     </div>
   );
 }

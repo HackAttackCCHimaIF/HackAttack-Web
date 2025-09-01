@@ -21,7 +21,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="relative z-10 flex w-full h-full">
         {/* Sidebar */}
         <div className="w-0 md:w-68">
-          <Sidebar isLoggedIn={true} onSignOut={() => {}} />
+          <Sidebar isLoggedIn={false} onSignOut={() => {}} />
         </div>
 
         {/* Main Content */}

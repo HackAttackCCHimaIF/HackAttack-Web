@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, FileText, BookMarked, Send, LogOut, Code2, Menu, X } from "lucide-react";
+import { User, FileText, BookMarked, Send, LogOut, Code2, Menu, X, LogIn, UserPlus } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utility/utils";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 interface SidebarProps {
   isLoggedIn: boolean;
@@ -26,6 +28,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile toggle button */}
       <div className="md:hidden fixed top-4 left-4 z-50 w-full">
         <button
           onClick={() => setIsOpen(true)}
@@ -35,13 +38,14 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
         </button>
       </div>
 
+      {/* Desktop Sidebar */}
       <motion.aside
         initial={{ x: -250 }}
         animate={{ x: 0 }}
         transition={{ type: "spring", stiffness: 80 }}
         className="hidden md:flex fixed top-4 left-4 h-[96vh] w-64 bg-white/10 backdrop-blur-sm shadow-xl flex-col justify-between rounded-3xl overflow-hidden"
       >
-        {/* Logo */}
+        {/* Logo & Navigation */}
         <div className="flex flex-col h-full items-start pt-12 gap-12 text-white text-xl font-bold">
           <div className="flex flex-row items-center px-6">
             <Image src="/dashboard/logo.svg" alt="Logo" className="w-9 h-9" width={36} height={36} />
@@ -62,7 +66,12 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 {pathname === item.href && (
                   <div className="absolute left-1 top-0 h-full w-1 bg-pink-500 rounded-md"></div>
                 )}
-                <div className={cn(`text-white p-2 rounded-full`, pathname === item.href ? " bg-pink-500/50" : "bg-white/10")}>
+                <div
+                  className={cn(
+                    `text-white p-2 rounded-full`,
+                    pathname === item.href ? " bg-pink-500/50" : "bg-white/10"
+                  )}
+                >
                   {item.icon}
                 </div>
                 <span>{item.label}</span>
@@ -71,8 +80,9 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
           </nav>
         </div>
 
-        {isLoggedIn && (
-          <div className="p-6">
+        {/* Bottom Section */}
+        <div className="p-6 flex flex-col gap-3">
+          {isLoggedIn ? (
             <button
               onClick={onSignOut}
               className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition"
@@ -80,10 +90,28 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
               <LogOut size={20} />
               <span>Sign Out</span>
             </button>
-          </div>
-        )}
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className={buttonVariants({className: "!bg-pink-500/50 hover:!bg-pink-600 text-white !px-4 !py-6"})}
+              >
+                <LogIn size={18} />
+                <span>Login</span>
+              </Link>
+              <Link
+                href="/sign-up"
+                className={buttonVariants({className: "bg-white/10 hover:bg-white/20 text-white !px-4 !py-6"})}
+              >
+                <UserPlus size={18} />
+                <span>Register</span>
+              </Link>
+            </>
+          )}
+        </div>
       </motion.aside>
 
+      {/* Mobile Sidebar */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -130,8 +158,8 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 ))}
               </nav>
 
-              {isLoggedIn && (
-                <div className="p-6">
+              <div className="p-6 flex flex-col gap-3">
+                {isLoggedIn ? (
                   <button
                     onClick={onSignOut}
                     className="flex items-center gap-2 text-gray-400 hover:text-red-500 transition"
@@ -139,8 +167,25 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                     <LogOut size={20} />
                     <span>Sign Out</span>
                   </button>
-                </div>
-              )}
+                ) : (
+                  <>
+                    <a
+                      href="/sign-in"
+                      className="flex items-center gap-2 bg-pink-500/60 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition"
+                    >
+                      <LogIn size={18} />
+                      <span>Login</span>
+                    </a>
+                    <a
+                      href="/sign-up"
+                      className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition"
+                    >
+                      <UserPlus size={18} />
+                      <span>Register</span>
+                    </a>
+                  </>
+                )}
+              </div>
             </motion.aside>
           </>
         )}
