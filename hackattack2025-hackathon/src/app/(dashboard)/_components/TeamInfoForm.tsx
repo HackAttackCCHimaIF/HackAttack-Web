@@ -28,6 +28,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utility/utils";
 import { HeaderDashboard } from "./HeaderDashboard";
 import Link from "next/link";
+import { SuccessDialog } from "./SuccessDialog";
 
 // ======================
 // Data & Validation Schema
@@ -108,7 +109,7 @@ const EditableInput = ({
 
 export default function TeamProfilePage() {
   const [isEditMode, setEditMode] = useState(false);
-  const [userProfile] = useState({ name: "John Doe", isLoggedIn: false });
+  const [userProfile] = useState({ name: "John Doe", isLoggedIn: true });
 
   const {
     register,
@@ -141,6 +142,7 @@ export default function TeamProfilePage() {
 
   return (
     <div className="overflow-y-auto w-full min-h-full">
+      <SuccessDialog open={false} onClose={() => null}/>
       <HeaderDashboard
         isEdit
         topText="Team"
@@ -153,7 +155,7 @@ export default function TeamProfilePage() {
 
       {userProfile.isLoggedIn ? (
         <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
-        <div className="px-4 pb-8 col-span-1 md:col-span-2 w-full">
+        <div className="pl-4 pb-8 col-span-1 md:col-span-2 w-full">
           <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
               <CardTitle className="text-2xl font-medium leading-none">
@@ -319,7 +321,7 @@ export default function TeamProfilePage() {
           </Card>
         </div>
 
-        <div className="px-4 pb-8 col-span-1">
+        <div className="pr-4 pb-8 col-span-1">
           <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
               <CardTitle className="text-2xl font-medium leading-none">

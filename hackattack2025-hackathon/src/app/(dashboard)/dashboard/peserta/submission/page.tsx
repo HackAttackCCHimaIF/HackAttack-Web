@@ -14,7 +14,7 @@ const SubmissionPage = () => {
     
   return (
     <div className="min-h-1/2 h-full flex flex-col">
-        <HeaderDashboard userProfile={userProfile} bottomText="Theme" />
+        <HeaderDashboard userProfile={userProfile} bottomText="Submission" />
 
         <div className="flex-1 w-full overflow-y-auto px-4 pb-5">
             <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl flex flex-col h-fit md:h-full">

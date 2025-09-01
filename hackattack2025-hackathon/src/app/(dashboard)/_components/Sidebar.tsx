@@ -93,14 +93,14 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
           ) : (
             <>
               <Link
-                href="/sign-in"
+                href="/login"
                 className={buttonVariants({className: "!bg-pink-500/50 hover:!bg-pink-600 text-white !px-4 !py-6"})}
               >
                 <LogIn size={18} />
                 <span>Login</span>
               </Link>
               <Link
-                href="/sign-up"
+                href="/register"
                 className={buttonVariants({className: "bg-white/10 hover:bg-white/20 text-white !px-4 !py-6"})}
               >
                 <UserPlus size={18} />

@@ -26,12 +26,17 @@ export const HeaderDashboard = ({
 
   return (
     <div className="py-4 px-4 flex justify-between items-center">
-      <h1 className="text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] pt-2 leading-tight sm:leading-none">
-        <span className="block text-white uppercase">{topText}</span>
-        <span className="block tracking-wide uppercase py-0.5 px-1 bg-pink-500/50 pr-4 text-white">
-          {bottomText}
-        </span>
-      </h1>
+      <div className="relative inline-block">
+        <div className="absolute -inset-0 bg-white/60 blur-2xl rounded-lg opacity-50"></div>
+
+        <h1 className="relative text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] pt-2 leading-tight sm:leading-none">
+          <span className="block text-white uppercase">{topText}</span>
+          <span className="block tracking-wide uppercase py-0.5 px-1 bg-pink-500/50 pr-4 text-white">
+            {bottomText}
+          </span>
+        </h1>
+      </div>
+
 
       <div className="flex items-center gap-1 md:gap-4">
         {isLoggedIn ? (
