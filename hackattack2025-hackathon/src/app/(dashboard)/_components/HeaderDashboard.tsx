@@ -1,3 +1,4 @@
+ 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Check, Edit, LogIn } from "lucide-react";
@@ -10,7 +11,8 @@ export const HeaderDashboard = ({
   userProfile,
   topText,
   bottomText,
-  isEdit
+  isEdit,
+  onSave,
 }: {
   isEditMode?: boolean;
   isEdit?: boolean; 
@@ -18,41 +20,50 @@ export const HeaderDashboard = ({
   userProfile?: { name: string; isLoggedIn: boolean };
   topText?: string;
   bottomText: string;
+  onSave?: () => void
 }) => {
 
   return (
-    <div className="py-4 px-3 flex justify-between items-center">
-      <h1 className="text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] leading-tight sm:leading-none">
-        <span className="block text-white">{topText}</span>
+    <div className="py-4 px-4 flex justify-between items-center">
+      <h1 className="text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] pt-2 leading-tight sm:leading-none">
+        <span className="block text-white uppercase">{topText}</span>
         <span className="block tracking-wide uppercase py-0.5 px-1 bg-pink-500/50 pr-4 text-white">
           {bottomText}
         </span>
       </h1>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1 md:gap-4">
         {isEdit && (
           <Button
-            onClick={() => setEditMode && setEditMode(!isEditMode)}
-            size={"lg"}
-            className={`flex items-center gap-2 rounded-full pl-2 pr-2 !py-6 ${
-              isEditMode
-                ? "bg-pink-600/50 hover:bg-pink-700/80 text-white md:pl-6"
-                : "bg-white/10 hover:bg-white/20 text-white md:pr-6"
-            }`}
-          >
+              onClick={() => {
+                if (isEditMode) {
+                  onSave?.();
+                  setEditMode?.(false);
+                } else {
+                  setEditMode?.(true);
+                }
+
+              }}
+              size={"lg"}
+              className={`flex items-center gap-2 rounded-full pl-2 pr-2 !py-6 ${
+                isEditMode
+                  ? "bg-pink-600/50 hover:bg-pink-700/80 text-white lg:pl-6"
+                  : "bg-white/10 hover:bg-white/20 text-white lg:pr-6"
+              }`}
+            >
             {isEditMode ? (
               <div className="flex items-center gap-3">
-                <p>Simpan</p>
-                <div className="p-2 rounded-full md:bg-white/10">
+                <p className="hidden lg:flex">Simpan</p>
+                <div className="p-2 rounded-full lg:bg-white/10">
                   <Check size={8} className="text-white" />
                 </div>
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full md:bg-white/10">
+                <div className="p-2 rounded-full lg:bg-white/10">
                   <Edit size={8} className="text-white" />
                 </div>
-                <p>Edit Profile</p>
+                <p className="hidden lg:flex">Edit Profile</p>
               </div>
             )}
           </Button>
@@ -75,9 +86,9 @@ export const HeaderDashboard = ({
             </div>
           </div>
         ) : (
-          <Button className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white rounded-full px-6 py-2">
+          <Button className="flex items-center gap-3 bg-white/10 hover:bg-white/20 text-white rounded-full !px-4 !py-6">
             <LogIn size={16} />
-            Login
+            <p className="hidden md:flex">Login</p>
           </Button>
         )}
       </div>

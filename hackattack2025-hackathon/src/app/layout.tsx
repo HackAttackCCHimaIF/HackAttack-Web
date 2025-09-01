@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${koulen.variable} antialiased font-poppins bg-black`}
+        className={`${poppins.variable} ${koulen.variable} antialiased font-poppins `}
       >
         <div>
           {children}

@@ -107,31 +107,31 @@ const EditableInput = ({
 
 export default function TeamProfilePage() {
   const [isEditMode, setEditMode] = useState(false);
-  const [userProfile] = useState({ name: "John Doe", isLoggedIn: true });
+  const [userProfile] = useState({ name: "John Doe", isLoggedIn: false });
 
   const {
     register,
-    handleSubmit,
+    // handleSubmit,
     control,
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
   });
 
-  const onSubmit = (data: TeamFormValues) => {
-    console.log("Form Data:", data);
-    setEditMode(false);
-  };
+  // const onSubmit = (data: TeamFormValues) => {
+  //   console.log("Form Data:", data);
+  //   setEditMode(false);
+  // };
 
   const { fields, append, remove } = useFieldArray({
         control,
         name: "members",
     });
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSubmit(onSubmit)(e);
-  };
+  // const handleFormSubmit = () => {
+  //   // e.preventDefault();
+  //   // handleSubmit(onSubmit)(e);
+  // };
 
   const inputClassName =
     "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
@@ -139,7 +139,7 @@ export default function TeamProfilePage() {
 
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-y-auto w-full h-full">
       <HeaderDashboard
         isEdit
         topText="Team"
@@ -147,9 +147,10 @@ export default function TeamProfilePage() {
         isEditMode={isEditMode}
         setEditMode={setEditMode}
         userProfile={userProfile}
+        // onSave={handleFormSubmit}
       />
 
-      <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 grid-rows-2 lg:grid-cols-3">
+      <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
         <div className="px-4 pb-8 col-span-1 md:col-span-2 w-full">
           <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
@@ -185,7 +186,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="leaderEmail"
                       type="email"
-                      placeholder="Masukan Email Anggota"
+                      placeholder="Input Email Anggota"
                       disabled={!isEditMode}
                       className={inputClassName}
                     />
@@ -204,7 +205,7 @@ export default function TeamProfilePage() {
                       <EditableInput
                         register={register}
                         name="leaderGithub"
-                        placeholder="Masukan Link Github"
+                        placeholder="Input Link Github"
                         disabled={!isEditMode}
                         className={inputClassName}
                       />
@@ -234,7 +235,7 @@ export default function TeamProfilePage() {
                       )}
                       <div className="w-full flex justify-end pt-2">
                         <p className="text-white/50 text-xs max-w-xs text-end">
-                          *Masukan Screenshot hasil Persyaratan dalam satu drive, kemudian kumpulkan.
+                          *Input Screenshot hasil Persyaratan dalam satu drive, kemudian kumpulkan.
                         </p>
                       </div>
                     </div>
@@ -271,7 +272,7 @@ export default function TeamProfilePage() {
                         <EditableInput
                             register={register}
                             name={`members.${index}.email`}
-                            placeholder="Masukan Email Anggota"
+                            placeholder="Input Email Anggota"
                             disabled={!isEditMode}
                             className={inputClassName}
                         />
@@ -281,7 +282,7 @@ export default function TeamProfilePage() {
                         <EditableInput
                             register={register}
                             name={`members.${index}.github`}
-                            placeholder="Masukan Link Github"
+                            placeholder="Input Link Github"
                             disabled={!isEditMode}
                             className={inputClassName}
                         />
@@ -316,7 +317,7 @@ export default function TeamProfilePage() {
           </Card>
         </div>
 
-        <div className="pb-8 col-span-1">
+        <div className="px-4 pb-8 col-span-1">
           <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
               <CardTitle className="text-2xl font-medium leading-none">
@@ -411,6 +412,16 @@ export default function TeamProfilePage() {
                       label="BRI ( Faiq Haqqani )"
                       text="0131 0104 8271 507"
                     />
+                    <div className="flex flex-col gap-3">
+                      <Label>Whatsapp Perwakilan</Label>
+                      <EditableInput
+                        register={register}
+                        name="leaderGithub"
+                        placeholder="Input Link Bukti Pembayaran"
+                        disabled={!isEditMode}
+                        className={inputClassName}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -421,3 +432,4 @@ export default function TeamProfilePage() {
     </div>
   );
 }
+

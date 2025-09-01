@@ -26,8 +26,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
 
   return (
     <>
-      {/* Mobile Menu Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
+      <div className="md:hidden fixed top-4 left-4 z-50 w-full">
         <button
           onClick={() => setIsOpen(true)}
           className="p-3 bg-white/10 rounded-xl backdrop-blur-sm hover:bg-white/20 transition"
@@ -72,7 +71,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
           </nav>
         </div>
 
-        {/* Sign Out */}
         {isLoggedIn && (
           <div className="p-6">
             <button
@@ -104,7 +102,6 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
               transition={{ type: "spring", stiffness: 80 }}
               className="fixed top-0 left-0 h-full w-64 bg-white/10 backdrop-blur-sm shadow-xl flex flex-col justify-between rounded-r-3xl overflow-hidden z-50 text-white"
             >
-              {/* Header with Close Button */}
               <div className="flex justify-between items-center px-6 py-4">
                 <div className="flex items-center gap-2 font-bold">
                   <Image src="/dashboard/logo.svg" alt="Logo" width={36} height={36} />
