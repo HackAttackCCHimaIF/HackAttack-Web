@@ -5,7 +5,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { data: existingUser, error: selectError } = await supabaseServer // Changed here
+    const { data: existingUser, error: selectError } = await supabaseServer
       .from("Users")
       .select("*")
       .eq("email", body.email)
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const { data, error } = await supabaseServer // Changed here
+    const { data, error } = await supabaseServer
       .from("Users")
       .insert([{ email: body.email, username: body.username }])
       .select()

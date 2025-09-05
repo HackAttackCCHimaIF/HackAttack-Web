@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/config/supabase";
-import { v4 as uuidv4 } from "uuid";
+import { supabaseServer } from "@/lib/config/supabase-server";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const id = uuidv4();
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseServer
     .from("Users")
-    .insert([{ id, email: body.email, username: body.username }])
+    .insert([{ email: body.email, username: body.username }])
     .select()
     .single();
 

@@ -109,6 +109,10 @@ export default function TeamProfilePage() {
   const [isEditMode, setEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState({
+    name: "User",
+    isLoggedIn: false,
+  });
 
   useEffect(() => {
     const getUser = async () => {
@@ -116,6 +120,43 @@ export default function TeamProfilePage() {
         data: { session },
       } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+      
+      if (session?.user?.email) {
+        // Fetch user data from Users table
+        try {
+          const { data: userData, error } = await supabase
+            .from("Users")
+            .select("username")
+            .eq("email", session.user.email)
+            .single();
+
+          if (!error && userData) {
+            setUserProfile({
+              name: userData.username || session.user.email.split("@")[0] || "User",
+              isLoggedIn: true,
+            });
+          } else {
+            // Fallback if user not found in Users table
+            setUserProfile({
+              name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+              isLoggedIn: true,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Fallback on error
+          setUserProfile({
+            name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+            isLoggedIn: true,
+          });
+        }
+      } else {
+        setUserProfile({
+          name: "User",
+          isLoggedIn: false,
+        });
+      }
+      
       setLoading(false);
     };
 
@@ -123,18 +164,56 @@ export default function TeamProfilePage() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
+      
+      if (session?.user?.email) {
+        // Fetch user data from Users table
+        try {
+          const { data: userData, error } = await supabase
+            .from("Users")
+            .select("username")
+            .eq("email", session.user.email)
+            .single();
+
+          if (!error && userData) {
+            setUserProfile({
+              name: userData.username || session.user.email.split("@")[0] || "User",
+              isLoggedIn: true,
+            });
+          } else {
+            // Fallback if user not found in Users table
+            setUserProfile({
+              name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+              isLoggedIn: true,
+            });
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          // Fallback on error
+          setUserProfile({
+            name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+            isLoggedIn: true,
+          });
+        }
+      } else {
+        setUserProfile({
+          name: "User",
+          isLoggedIn: false,
+        });
+      }
+      
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const userProfile = {
-    name: user?.user_metadata?.username || user?.email?.split("@")[0] || "User",
-    isLoggedIn: !!user,
-  };
+  // Remove the old userProfile object definition (lines 134-137)
+  // const userProfile = {
+  //   name: user?.user_metadata?.username || user?.email?.split("@")[0] || "User",
+  //   isLoggedIn: !!user,
+  // };
 
   const {
     register,
