@@ -22,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { TeamMember, TeamMemberDB, TeamLeader } from "@/types/team";
+
 import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
 import { cn } from "@/lib/utility/utils";
@@ -45,22 +47,83 @@ const universities = [
   "Universitas Airlangga",
 ];
 
+const teamMemberSchema = z.object({
+  name: z.string(),
+  email: z.string(),
+  github: z.string().optional(),
+  requirementLink: z.string(),
+}) satisfies z.ZodType<TeamMember>;
+
 const teamSchema = z.object({
-  leaderName: z.string().min(1, "Nama Anggota 1 wajib diisi"),
+  leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderEmail: z.string().email("Email tidak valid"),
   leaderGithub: z.string().optional(),
-  requirementLink: z.string().url("Masukkan link GDrive yang valid"),
-  members: z
-    .array(
-      z.object({
-        name: z.string().optional(),
-        email: z.string().optional(),
-        github: z.string().optional(),
-        requirementLink: z.string().optional(),
-      })
-    )
-    .max(3, "Maksimal 2 anggota tambahan"),
+  requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
 
+  // Team members (conditional validation)
+  members: z
+    .array(teamMemberSchema)
+    .max(3, "Maksimal 3 anggota tambahan")
+    .superRefine((members, ctx) => {
+      // Validate each member that exists
+      members.forEach((member, index) => {
+        const hasAnyField =
+          member.name ||
+          member.email ||
+          member.github ||
+          member.requirementLink;
+
+        if (hasAnyField) {
+          // Name is mandatory if member exists
+          if (!member.name || member.name.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Nama anggota wajib diisi",
+              path: [index, "name"],
+            });
+          }
+
+          // Email is mandatory if member exists
+          if (!member.email || member.email.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Email anggota wajib diisi",
+              path: [index, "email"],
+            });
+          } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(member.email)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Format email tidak valid",
+                path: [index, "email"],
+              });
+            }
+          }
+
+          // RequirementLink is mandatory if member exists
+          if (!member.requirementLink || member.requirementLink.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Link berkas persyaratan wajib diisi",
+              path: [index, "requirementLink"],
+            });
+          } else {
+            try {
+              new URL(member.requirementLink);
+            } catch {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Link berkas persyaratan harus berupa URL yang valid",
+                path: [index, "requirementLink"],
+              });
+            }
+          }
+        }
+      });
+    }),
+
+  // Team Detail fields (existing)
   teamName: z.string().min(1, "Nama team wajib diisi"),
   institution: z.string().min(1, "Asal instansi wajib dipilih"),
   whatsapp_number: z.string().min(1, "Nomor WhatsApp wajib diisi"),
@@ -120,6 +183,7 @@ export default function TeamProfilePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [teamDataLoaded, setTeamDataLoaded] = useState(false);
+  const [memberDataLoaded, setMemberDataLoaded] = useState(false);
   const [userProfile, setUserProfile] = useState({
     name: "User",
     isLoggedIn: false,
@@ -240,6 +304,11 @@ export default function TeamProfilePage() {
     resolver: zodResolver(teamSchema),
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "members",
+  });
+
   useEffect(() => {
     const loadTeamData = async () => {
       if (!user?.email || teamDataLoaded) return;
@@ -276,12 +345,96 @@ export default function TeamProfilePage() {
     loadTeamData();
   }, [user?.email, setValue, teamDataLoaded]);
 
+  useEffect(() => {
+    const loadMemberData = async () => {
+      if (!user?.email || !teamDataLoaded || memberDataLoaded) return;
+
+      try {
+        console.log("🔥 Loading existing member data...");
+
+        // First get team ID
+        const teamResponse = await fetch(
+          `/api/team?userEmail=${encodeURIComponent(user.email)}`
+        );
+        if (!teamResponse.ok) {
+          console.log("🔥 No team found, skipping member load");
+          setMemberDataLoaded(true);
+          return;
+        }
+
+        const teamResult = await teamResponse.json();
+        const teamId = teamResult.data?.id;
+
+        if (!teamId) {
+          console.log("🔥 No team ID found, skipping member load");
+          setMemberDataLoaded(true);
+          return;
+        }
+
+        // Now get members
+        const membersResponse = await fetch(
+          `/api/team-members?teamId=${teamId}`
+        );
+        if (membersResponse.ok) {
+          const membersResult = await membersResponse.json();
+          console.log("🔥 Existing member data:", membersResult.data);
+
+          if (membersResult.data && membersResult.data.length > 0) {
+            const members: TeamMemberDB[] = membersResult.data;
+            const leader = members.find((member) => member.is_leader == true);
+            const teamMembers = members.filter((member) => !member.is_leader);
+
+            // Populate leader data
+            if (leader) {
+              setValue("leaderName", leader.name || "");
+              setValue("leaderEmail", leader.email || "");
+              setValue("leaderGithub", leader.github_url || "");
+              setValue("requirementLink", leader.data_url || "");
+            }
+
+            // Populate member data
+            if (members.length > 0) {
+              const memberData = members.map((member) => ({
+                name: member.name || "",
+                email: member.email || "",
+                github: member.github_url || "",
+                requirementLink: member.data_url || "",
+              }));
+
+              setValue("members", memberData);
+
+              // Also update the form array
+              memberData.forEach((member, index) => {
+                if (index < 3) {
+                  // Max 3 members
+                  append(member);
+                }
+              });
+            }
+
+            console.log("🔥 Member form populated with existing data");
+          }
+        } else {
+          console.log("🔥 No existing member data found");
+        }
+      } catch (error) {
+        console.error("🔥 Error loading member data:", error);
+      } finally {
+        setMemberDataLoaded(true);
+      }
+    };
+
+    loadMemberData();
+  }, [user?.email, teamDataLoaded, memberDataLoaded, setValue, append]);
+
   const onSubmit = async (data: TeamFormValues) => {
     if (!user?.email) return;
 
     setSaving(true);
     try {
-      const response = await fetch("/api/team", {
+      console.log("🔥 Saving team and member data...", data);
+
+      const teamResponse = await fetch("/api/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -293,15 +446,70 @@ export default function TeamProfilePage() {
         }),
       });
 
-      if (response.ok) {
-        console.log("Team data saved successfully");
-        toast.success("Team data saved successfully");
+      if (!teamResponse.ok) {
+        const teamError = await teamResponse.json();
+        console.error("Failed to save team data:", teamError);
+        toast.error(
+          `Failed to save team: ${teamError.error || "Unknown error"}`
+        );
+        return;
+      }
+
+      const teamResult = await teamResponse.json();
+      console.log("🔥 Team saved:", teamResult);
+
+      let teamId = teamResult.data?.id;
+
+      if (!teamId) {
+        const teamFetchResponse = await fetch(
+          `/api/team?userEmail=${encodeURIComponent(user.email)}`
+        );
+        if (teamFetchResponse.ok) {
+          const teamData = await teamFetchResponse.json();
+          teamId = teamData.data?.id;
+        }
+      }
+
+      if (!teamId) {
+        toast.error("Could not get team ID");
+        return;
+      }
+
+      console.log("🔥 Using team ID:", teamId);
+
+      // Now save team members
+      const membersResponse = await fetch("/api/team-members", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamId: teamId,
+          leader: {
+            name: data.leaderName,
+            email: data.leaderEmail,
+            github_url: data.leaderGithub || null,
+            data_url: data.requirementLink,
+          },
+          members:
+            data.members?.filter(
+              (member) => member.name && member.name.trim() !== ""
+            ) || [],
+        }),
+      });
+
+      if (membersResponse.ok) {
+        const membersResult = await membersResponse.json();
+        console.log("🔥 Members saved:", membersResult);
+        toast.success("Team and member data saved successfully!");
       } else {
-        console.error("Failed to save team data");
-        toast.error("Failed to save team data");
+        const membersError = await membersResponse.json();
+        console.error("Failed to save team members:", membersError);
+        toast.error(
+          `Failed to save members: ${membersError.error || "Unknown error"}`
+        );
       }
     } catch (error) {
       console.error("Error saving team data:", error);
+      toast.error("Network error occurred");
     } finally {
       setSaving(false);
     }
@@ -323,16 +531,6 @@ export default function TeamProfilePage() {
     }
     setEditMode(newEditMode);
   };
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "members",
-  });
-
-  // const handleFormSubmit = () => {
-  //   // e.preventDefault();
-  //   // handleSubmit(onSubmit)(e);
-  // };
 
   const inputClassName =
     "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
