@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray } from "react-hook-form";
@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -28,6 +28,7 @@ import { cn } from "@/lib/utility/utils";
 import { HeaderDashboard } from "./HeaderDashboard";
 import Link from "next/link";
 import { SuccessDialog } from "./SuccessDialog";
+import { toast } from "sonner";
 
 // ======================
 // Data & Validation Schema
@@ -59,6 +60,14 @@ const teamSchema = z.object({
       })
     )
     .max(3, "Maksimal 2 anggota tambahan"),
+
+  teamName: z.string().min(1, "Nama team wajib diisi"),
+  institution: z.string().min(1, "Asal instansi wajib dipilih"),
+  whatsapp_number: z.string().min(1, "Nomor WhatsApp wajib diisi"),
+  paymentproof_url: z
+    .string()
+    .url("Link bukti pembayaran harus valid")
+    .optional(),
 });
 
 type TeamFormValues = z.infer<typeof teamSchema>;
@@ -109,6 +118,8 @@ export default function TeamProfilePage() {
   const [isEditMode, setEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [teamDataLoaded, setTeamDataLoaded] = useState(false);
   const [userProfile, setUserProfile] = useState({
     name: "User",
     isLoggedIn: false,
@@ -120,9 +131,8 @@ export default function TeamProfilePage() {
         data: { session },
       } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      
+
       if (session?.user?.email) {
-        // Fetch user data from Users table
         try {
           const { data: userData, error } = await supabase
             .from("Users")
@@ -132,21 +142,26 @@ export default function TeamProfilePage() {
 
           if (!error && userData) {
             setUserProfile({
-              name: userData.username || session.user.email.split("@")[0] || "User",
+              name:
+                userData.username || session.user.email.split("@")[0] || "User",
               isLoggedIn: true,
             });
           } else {
-            // Fallback if user not found in Users table
             setUserProfile({
-              name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+              name:
+                session.user.user_metadata?.username ||
+                session.user.email.split("@")[0] ||
+                "User",
               isLoggedIn: true,
             });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          // Fallback on error
           setUserProfile({
-            name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+            name:
+              session.user.user_metadata?.username ||
+              session.user.email.split("@")[0] ||
+              "User",
             isLoggedIn: true,
           });
         }
@@ -156,7 +171,7 @@ export default function TeamProfilePage() {
           isLoggedIn: false,
         });
       }
-      
+
       setLoading(false);
     };
 
@@ -166,9 +181,8 @@ export default function TeamProfilePage() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      
+
       if (session?.user?.email) {
-        // Fetch user data from Users table
         try {
           const { data: userData, error } = await supabase
             .from("Users")
@@ -178,21 +192,26 @@ export default function TeamProfilePage() {
 
           if (!error && userData) {
             setUserProfile({
-              name: userData.username || session.user.email.split("@")[0] || "User",
+              name:
+                userData.username || session.user.email.split("@")[0] || "User",
               isLoggedIn: true,
             });
           } else {
-            // Fallback if user not found in Users table
             setUserProfile({
-              name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+              name:
+                session.user.user_metadata?.username ||
+                session.user.email.split("@")[0] ||
+                "User",
               isLoggedIn: true,
             });
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
-          // Fallback on error
           setUserProfile({
-            name: session.user.user_metadata?.username || session.user.email.split("@")[0] || "User",
+            name:
+              session.user.user_metadata?.username ||
+              session.user.email.split("@")[0] ||
+              "User",
             isLoggedIn: true,
           });
         }
@@ -202,31 +221,108 @@ export default function TeamProfilePage() {
           isLoggedIn: false,
         });
       }
-      
+
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // Remove the old userProfile object definition (lines 134-137)
-  // const userProfile = {
-  //   name: user?.user_metadata?.username || user?.email?.split("@")[0] || "User",
-  //   isLoggedIn: !!user,
-  // };
-
   const {
     register,
     control,
+    handleSubmit,
+    getValues,
+    setValue,
+    reset,
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
   });
 
-  // const onSubmit = (data: TeamFormValues) => {
-  //   console.log("Form Data:", data);
-  //   setEditMode(false);
-  // };
+  useEffect(() => {
+    const loadTeamData = async () => {
+      if (!user?.email || teamDataLoaded) return;
+
+      try {
+        console.log("🔥 Loading existing team data...");
+        const response = await fetch(
+          `/api/team?userEmail=${encodeURIComponent(user.email)}`
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log("🔥 Existing team data:", result.data);
+
+          if (result.data) {
+            // Populate form with existing data
+            setValue("teamName", result.data.team_name || "");
+            setValue("institution", result.data.institution || "");
+            setValue("whatsapp_number", result.data.whatsapp_number || "");
+            setValue("paymentproof_url", result.data.paymentproof_url || "");
+
+            console.log("🔥 Form populated with existing data");
+          }
+        } else {
+          console.log("🔥 No existing team data found");
+        }
+      } catch (error) {
+        console.error("🔥 Error loading team data:", error);
+      } finally {
+        setTeamDataLoaded(true);
+      }
+    };
+
+    loadTeamData();
+  }, [user?.email, setValue, teamDataLoaded]);
+
+  const onSubmit = async (data: TeamFormValues) => {
+    if (!user?.email) return;
+
+    setSaving(true);
+    try {
+      const response = await fetch("/api/team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          teamName: data.teamName,
+          institution: data.institution,
+          whatsapp_number: data.whatsapp_number,
+          paymentproof_url: data.paymentproof_url,
+          userEmail: user.email,
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Team data saved successfully");
+        toast.success("Team data saved successfully");
+      } else {
+        console.error("Failed to save team data");
+        toast.error("Failed to save team data");
+      }
+    } catch (error) {
+      console.error("Error saving team data:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleEditModeChange = async (newEditMode: boolean) => {
+    console.log("🔥 Edit mode changing:", {
+      from: isEditMode,
+      to: newEditMode,
+    });
+
+    if (isEditMode && !newEditMode) {
+      console.log("🔥 Attempting to save data...");
+
+      const currentValues = getValues();
+      console.log("🔥 Current form values:", currentValues);
+
+      await onSubmit(currentValues);
+    }
+    setEditMode(newEditMode);
+  };
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -258,9 +354,8 @@ export default function TeamProfilePage() {
         topText="Team"
         bottomText="Profile"
         isEditMode={isEditMode}
-        setEditMode={setEditMode}
+        setEditMode={handleEditModeChange}
         userProfile={userProfile}
-        // onSave={handleFormSubmit}
       />
 
       {userProfile.isLoggedIn ? (
@@ -469,44 +564,76 @@ export default function TeamProfilePage() {
                       disabled={!isEditMode}
                       className={inputClassName}
                     />
+                    {errors.teamName && (
+                      <p className="text-red-400 text-sm">
+                        {errors.teamName.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-3">
                     <Label>Asal Instansi</Label>
-                    <Select disabled={!isEditMode}>
-                      <SelectTrigger className="bg-white/10 w-full text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 ">
-                        <SelectValue placeholder="Pilih Instansi" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {universities.map((uni) => (
-                          <SelectItem key={uni} value={uni}>
-                            {uni}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-
-                    <RadioGroup
-                      defaultValue=""
-                      className="flex items-center gap-3 mt-1"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value="Telkom University" id="telkom" />
-                        <Label htmlFor="telkom">Telkom University</Label>
-                      </div>
-                    </RadioGroup>
+                    <Controller
+                      name="institution"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          disabled={!isEditMode}
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <SelectTrigger className="bg-white/10 w-full text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10">
+                            <SelectValue placeholder="Pilih Instansi" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {universities.map((uni) => (
+                              <SelectItem key={uni} value={uni}>
+                                {uni}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    {errors.institution && (
+                      <p className="text-red-400 text-sm">
+                        {errors.institution.message}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex flex-col gap-3">
                     <Label>Whatsapp Perwakilan</Label>
                     <EditableInput
                       register={register}
-                      name="whatsapp"
+                      name="whatsapp_number"
                       placeholder="Input your WhatsApp number"
                       disabled={!isEditMode}
                       className={inputClassName}
                       defaultValue="62"
                     />
+                    {errors.whatsapp_number && (
+                      <p className="text-red-400 text-sm">
+                        {errors.whatsapp_number.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Payment Proof */}
+                  <div className="flex flex-col gap-3">
+                    <Label>Link Bukti Pembayaran</Label>
+                    <EditableInput
+                      register={register}
+                      name="paymentproof_url"
+                      placeholder="Input Link Bukti Pembayaran"
+                      disabled={!isEditMode}
+                      className={inputClassName}
+                    />
+                    {errors.paymentproof_url && (
+                      <p className="text-red-400 text-sm">
+                        {errors.paymentproof_url.message}
+                      </p>
+                    )}
                   </div>
 
                   <CopyableLink
@@ -543,16 +670,6 @@ export default function TeamProfilePage() {
                         label="BRI ( Faiq Haqqani )"
                         text="0131 0104 8271 507"
                       />
-                      <div className="flex flex-col gap-3">
-                        <Label>Whatsapp Perwakilan</Label>
-                        <EditableInput
-                          register={register}
-                          name="leaderGithub"
-                          placeholder="Input Link Bukti Pembayaran"
-                          disabled={!isEditMode}
-                          className={inputClassName}
-                        />
-                      </div>
                     </div>
                   </div>
                 </div>
