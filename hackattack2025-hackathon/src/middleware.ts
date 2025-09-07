@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 const ipRequestMap = new Map<string, number[]>();
 
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
-const MAX_REQ = 3; // Max  requests per window
+const MAX_REQ = 100; // Max  requests per window
 
 export function middleware(req: NextRequest) {
   const ip =

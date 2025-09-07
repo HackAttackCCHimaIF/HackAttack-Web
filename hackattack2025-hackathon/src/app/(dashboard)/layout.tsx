@@ -1,10 +1,43 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "./_components/Sidebar";
 import Image from "next/image";
+import { supabase } from "@/lib/config/supabase";
+import { User } from "@supabase/supabase-js";
+import { useRouter } from "next/navigation";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="w-full h-screen flex relative bg-black">
       {/* Background */}
@@ -21,7 +54,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <div className="relative z-10 flex w-full h-full">
         {/* Sidebar */}
         <div className="w-0 md:w-68">
-          <Sidebar isLoggedIn={false} onSignOut={() => {}} />
+          <Sidebar isLoggedIn={!!user} onSignOut={handleSignOut} />
         </div>
 
         {/* Main Content */}
