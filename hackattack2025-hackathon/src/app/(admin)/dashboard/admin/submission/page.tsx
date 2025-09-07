@@ -1,16 +1,16 @@
 import React from 'react'
-import AdminDashboard from '../../_components/AdminDashboard'
 import { AdminHeaderDashboard } from '../../_components/AdminHeaderDashboard'
-import AdminSubmissionTable from '../../_components/AdminSubmissionTable'
+import AdminSubmissionTableWrapper from '../../_components/AdminSubmissionTableWrapper'
+import AdminSubmissionDashboard from '../../_components/AdminSubmissionDashboard'
 
 
 const AdminDashboardPage = () => {
   return (
     <div>
       <AdminHeaderDashboard leftText='Submission Data' description='Comprehensive Submission Data from Participants'/>
-      <AdminDashboard>
-        <AdminSubmissionTable/>
-      </AdminDashboard>
+      <AdminSubmissionDashboard>
+        <AdminSubmissionTableWrapper/>
+      </AdminSubmissionDashboard>
     </div>
   )
 }

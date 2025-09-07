@@ -1,7 +1,7 @@
 import React from 'react'
 import AdminDashboard from '../../_components/AdminDashboard'
 import { AdminHeaderDashboard } from '../../_components/AdminHeaderDashboard'
-import RegistrationTable from '../../_components/AdminTable'
+import AdminWorkshopSuspenseWrapper from '../../_components/AdminSuspenseWrapper'
 
 
 const AdminDashboardPage = () => {
@@ -9,7 +9,7 @@ const AdminDashboardPage = () => {
     <div>
       <AdminHeaderDashboard leftText='Welcome' rightText='Admin!👋🏼' description='Your hard work keeps everything running thank you, Admin!'/>
       <AdminDashboard>
-        <RegistrationTable/>
+        <AdminWorkshopSuspenseWrapper/>
       </AdminDashboard>
     </div>
   )
