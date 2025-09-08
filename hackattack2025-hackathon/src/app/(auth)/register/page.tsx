@@ -18,6 +18,21 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const handleGoogleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) toast.error(error.message);
+  };
+
   const handleRegister = async () => {
     setLoading(true);
 
@@ -26,7 +41,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard/peserta`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/peserta`,
       },
     });
 
@@ -38,21 +53,6 @@ export default function RegisterPage() {
     }
 
     setLoading(false);
-  };
-
-  const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
-      },
-    });
-  
-    if (error) toast.error(error.message);
   };
 
   return (

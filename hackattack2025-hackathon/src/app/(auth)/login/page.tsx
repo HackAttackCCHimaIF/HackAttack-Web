@@ -18,6 +18,27 @@ export default function LoginPage() {
 
   const iconList = ["hima", "telkom", "cci", "hack"];
 
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        toast.error(error.message);
+        setLoading(false);
+      }
+    } catch {
+      toast.error("An error occurred with Google sign-in");
+      setLoading(false);
+    }
+  };
+
   const handleMagicLinkLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -32,7 +53,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard/peserta`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/peserta`,
         },
       });
 
@@ -45,27 +66,6 @@ export default function LoginPage() {
     } catch {
       toast.error("An error occurred. Please try again.");
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      });
-
-      if (error) {
-        toast.error(error.message);
-        setLoading(false);
-      }
-    } catch {
-      toast.error("An error occurred with Google sign-in");
       setLoading(false);
     }
   };

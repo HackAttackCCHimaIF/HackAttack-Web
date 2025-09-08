@@ -21,7 +21,7 @@ function CompleteRegistrationContent() {
           });
 
           const result = await response.json();
-          
+
           if (response.ok && result.success) {
             localStorage.removeItem("pending_username");
             router.push("/dashboard/peserta");
