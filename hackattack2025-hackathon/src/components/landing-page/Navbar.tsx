@@ -2,16 +2,20 @@
 
 import { motion } from "framer-motion";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { supabase } from "@/lib/config/supabase";
+import { User } from "@supabase/supabase-js";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [isHomeOpen, setIsHomeOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const pathname = usePathname();
 
   const iconList = ["hima", "telkom", "cci", "hack"];
@@ -23,8 +27,25 @@ const Navbar = () => {
     { href: "#speeddating", label: "Speed Dating" },
     { href: "#sponsor", label: "Sponsor" },
     { href: "#faq", label: "FAQ" },
-
   ];
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <nav className="w-full fixed top-0 z-50 px-4 sm:px-8 lg:px-16 py-4 ">
@@ -60,7 +81,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden xl:flex items-center gap-6">
           <div className="flex items-center gap-6 text-white font-medium">
             <div className="relative">
               <button
@@ -86,7 +107,7 @@ const Navbar = () => {
                       key={sub.href}
                       href={sub.href}
                       className="block px-4 py-2 text-sm text-white hover:bg-white/10"
-                      onClick={() => setOpen(false)} 
+                      onClick={() => setOpen(false)}
                     >
                       {sub.label}
                     </Link>
@@ -125,14 +146,29 @@ const Navbar = () => {
               Guide Book
             </Button>
             <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block">
-              <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                Register Now
-              </Button>
+              {!loading && (
+                <Link
+                  href={user ? "/dashboard/peserta" : "/register"}
+                  className="w-full"
+                >
+                  <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
+                    {user ? "Dashboard" : "Register Now"}
+                  </Button>
+                </Link>
+              )}
+              {loading && (
+                <Button
+                  className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
+                  disabled
+                >
+                  Loading...
+                </Button>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="md:hidden flex items-center">
+        <div className="xl:hidden flex items-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-white focus:outline-none"
@@ -143,84 +179,97 @@ const Navbar = () => {
       </div>
 
       {isOpen && (
-      <div className="md:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl p-4">
-        <div className="flex flex-col gap-3 text-white font-medium">
+        <div className="xl:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl px-4 py-8">
+          <div className="flex flex-col gap-3 text-white font-medium">
+            <div className="flex flex-col">
+              <button
+                onClick={() => setIsHomeOpen(!isHomeOpen)}
+                className={`flex items-center justify-between transition-colors duration-200 ${
+                  pathname === "/"
+                    ? "text-pink-400 underline"
+                    : "hover:text-pink-400"
+                }`}
+              >
+                <span>Home</span>
+                {isHomeOpen ? (
+                  <ChevronUp size={18} className="ml-2" />
+                ) : (
+                  <ChevronDown size={18} className="ml-2" />
+                )}
+              </button>
 
-          <div className="flex flex-col">
-            <button
-              onClick={() => setIsHomeOpen(!isHomeOpen)}
-              className={`flex items-center justify-between transition-colors duration-200 ${
-                pathname === "/"
+              {isHomeOpen && (
+                <div className="my-3.5 ml-4 flex flex-col gap-2.5">
+                  {homeSubItems.map((sub) => (
+                    <Link
+                      key={sub.href}
+                      href={sub.href}
+                      className="text-sm text-gray-300 hover:text-pink-400"
+                      onClick={() => {
+                        setIsHomeOpen(false);
+                        setIsOpen(false);
+                      }}
+                    >
+                      {sub.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/workshop"
+              className={`transition-colors duration-200 ${
+                pathname === "/workshop"
                   ? "text-pink-400 underline"
                   : "hover:text-pink-400"
               }`}
             >
-              <span>Home</span>
-              {isHomeOpen ? (
-                <ChevronUp size={18} className="ml-2" />
-              ) : (
-                <ChevronDown size={18} className="ml-2" />
-              )}
-            </button>
+              Workshop
+            </Link>
 
-            {isHomeOpen && (
-              <div className="my-3.5 ml-4 flex flex-col gap-2.5">
-                {homeSubItems.map((sub) => (
-                  <Link
-                    key={sub.href}
-                    href={sub.href}
-                    className="text-sm text-gray-300 hover:text-pink-400"
-                    onClick={() => {
-                      setIsHomeOpen(false) 
-                      setIsOpen(false)     
-                    }}
-                  >
-                    {sub.label}
-                  </Link>
-                ))}
-              </div>
-            )}
+            <Link
+              href="/merch"
+              className={`transition-colors duration-200 ${
+                pathname === "/merch"
+                  ? "text-pink-400 underline"
+                  : "hover:text-pink-400"
+              }`}
+            >
+              Merch Attack
+            </Link>
           </div>
 
-          <Link
-            href="/workshop"
-            className={`transition-colors duration-200 ${
-              pathname === "/workshop"
-                ? "text-pink-400 underline"
-                : "hover:text-pink-400"
-            }`}
-          >
-            Workshop
-          </Link>
-
-          <Link
-            href="/merch"
-            className={`transition-colors duration-200 ${
-              pathname === "/merch"
-                ? "text-pink-400 underline"
-                : "hover:text-pink-400"
-            }`}
-          >
-            Merch Attack
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-3 mt-2">
-          <Button
-            variant="outline"
-            className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
-          >
-            Guide Book
-          </Button>
-          <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
-            <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-              Register Now
+          <div className="flex flex-col gap-3 mt-2">
+            <Button
+              variant="outline"
+              className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
+            >
+              Guide Book
             </Button>
+            <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
+              {!loading && (
+                <Link
+                  href={user ? "/dashboard" : "/register"}
+                  className="w-full"
+                >
+                  <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
+                    {user ? "Dashboard" : "Register Now"}
+                  </Button>
+                </Link>
+              )}
+              {loading && (
+                <Button
+                  className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
+                  disabled
+                >
+                  Loading...
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    )}
-
+      )}
     </nav>
   );
 };

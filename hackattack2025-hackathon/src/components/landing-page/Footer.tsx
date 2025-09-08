@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { InstagramLogo, LinkedinLogo } from "phosphor-react";
+import { InstagramLogo, LinkedinLogo, TiktokLogo } from "phosphor-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -133,23 +133,25 @@ const Footer = () => {
                 Send us a Message
               </label>
               {/* Row 1: Name and Email inputs */}
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Input
-                  id="nameMessage"
-                  value={nameMessage}
-                  onChange={(e) => setNameMessage(e.target.value)}
-                  placeholder="Your Name"
-                  className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-1/3 rounded-none"
-                  required
-                />
-                <Input
-                  id="emailMessage"
-                  value={emailMessage}
-                  onChange={(e) => setEmailMessage(e.target.value)}
-                  placeholder="Your Email"
-                  className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-2/3 rounded-none"
-                  required
-                />
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <div className="flex flex-row gap-2 w-full">
+                  <Input
+                    id="nameMessage"
+                    value={nameMessage}
+                    onChange={(e) => setNameMessage(e.target.value)}
+                    placeholder="Your Name"
+                    className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-1/3 rounded-none"
+                    required
+                  />
+                  <Input
+                    id="emailMessage"
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    placeholder="Your Email"
+                    className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
+                    required
+                  />
+                </div>
               </div>
               {/* Row 2: Message input */}
               <Input
@@ -218,12 +220,25 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Link
-                href="https://www.linkedin.com/company/himpunan-mahasiswa-s1-informatika-telkom-university/"
+                href="https://www.linkedin.com/company/hackattack2025/"
                 aria-label="LinkedIn"
                 target="_blank"
                 className="text-neutral-400 hover:text-white transition"
               >
                 <LinkedinLogo size={20} />
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ y: -1, scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Link
+                href="https://www.tiktok.com/@hackattack2025"
+                aria-label="Tiktok"
+                target="_blank"
+                className="text-neutral-400 hover:text-white transition"
+              >
+                <TiktokLogo size={20} />
               </Link>
             </motion.div>
           </div>
