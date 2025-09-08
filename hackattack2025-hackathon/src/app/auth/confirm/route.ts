@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
 
     if (!error && data.user) {
       return NextResponse.redirect(
-        `${origin}/auth/complete-registration?email=${encodeURIComponent(
+        `$/auth/complete-registration?email=${encodeURIComponent(
           data.user.email || ""
         )}`
       );
