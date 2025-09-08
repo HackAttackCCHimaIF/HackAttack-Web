@@ -6,12 +6,14 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get("code");
   const next = searchParams.get("next") ?? "/dashboard/peserta";
 
+  const baseUrl = new URL(request.url).origin;
+
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error && data.user) {
       try {
-        await fetch(`/api/auth/registration`, {
+        await fetch(`${baseUrl}/api/auth/registration`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -25,11 +27,11 @@ export async function GET(request: NextRequest) {
         console.error("ERROR:", error);
       }
 
-      return NextResponse.redirect(`${next}`);
+      return NextResponse.redirect(`${baseUrl}${next}`);
     }
   } else {
-    return NextResponse.redirect(`/auth/callback-handler`);
+    return NextResponse.redirect(`${baseUrl}/auth/callback-handler`);
   }
 
-  return NextResponse.redirect(`/auth/auth-code-error`);
+  return NextResponse.redirect(`${baseUrl}/auth/auth-code-error`);
 }
