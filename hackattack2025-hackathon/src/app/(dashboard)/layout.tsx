@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import Sidebar from "./_components/Sidebar";
 import Image from "next/image";
 import { supabase } from "@/lib/config/supabase";
-import { User } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/lib/stores/userStore";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, setUser, loading, setLoading, reset } = useUserStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -19,6 +18,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
+    // Listen auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -27,10 +27,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [setUser, setLoading]);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    reset();
     router.push("/");
   };
 

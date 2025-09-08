@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { InstitutionDropdown } from "./InstituionDropdown"
 import { CopyableLink } from "@/components/CopyableLink"
 import { WhatsappInput } from "./WhatsappInput"
+import { Button } from "@/components/ui/button"
 
 const inputClassName =
   "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12"
@@ -133,8 +134,12 @@ const PaymentForm = () => {
             </CardContent>
           </Card>
         </div>
-        
       </div>
+        <div className="flex items-center w-full justify-center mt-12">
+            <Button className=' border !bg-white/10 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full'>
+                <p className='font-semibold text-xl sm:text-3xl'>Register</p>
+            </Button>
+        </div>
     </div>
   )
 }

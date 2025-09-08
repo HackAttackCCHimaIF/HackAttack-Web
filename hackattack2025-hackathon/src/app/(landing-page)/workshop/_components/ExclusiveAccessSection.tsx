@@ -1,8 +1,9 @@
 "use client"
 
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 
 const ExclusiveAccessSection = () => {
@@ -126,9 +127,9 @@ const ExclusiveAccessSection = () => {
 
         {/* Footer */}
         <CardFooter className='flex w-full items-center justify-center mt-12'>
-          <Button className='rounded-none border !bg-white/10 w-full sm:w-auto !py-6 sm:!py-8 !px-8 sm:!px-12'>
-            <p className='font-semibold text-xl sm:text-3xl'>Register</p>
-          </Button>
+          <Link className={buttonVariants({className: "rounded-none border !bg-white/10 w-full sm:w-auto !py-6 sm:!py-8 !px-8 sm:!px-12"})} href={"/workshop/payment"}>
+              <p className='font-semibold text-xl sm:text-3xl'>Register</p>
+          </Link>
         </CardFooter>
       </Card>
     </div>

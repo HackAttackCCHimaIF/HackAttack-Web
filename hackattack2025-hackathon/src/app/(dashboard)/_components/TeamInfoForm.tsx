@@ -529,7 +529,6 @@ export default function TeamProfilePage() {
         bottomText="Profile"
         isEditMode={isEditMode}
         setEditMode={handleEditModeChange}
-        userProfile={userProfile}
       />
 
       {userProfile.isLoggedIn ? (
