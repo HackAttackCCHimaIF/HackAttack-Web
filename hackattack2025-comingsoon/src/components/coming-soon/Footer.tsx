@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { InstagramLogo, LinkedinLogo } from "phosphor-react";
+import { InstagramLogo, LinkedinLogo, TiktokLogo } from "phosphor-react";
 import { Input } from "../ui/input";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -230,12 +230,25 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Link
-                href="https://www.linkedin.com/company/himpunan-mahasiswa-s1-informatika-telkom-university/"
+                href="https://www.linkedin.com/company/hackattack2025/"
                 aria-label="LinkedIn"
                 target="_blank"
                 className="text-neutral-400 hover:text-white transition"
               >
                 <LinkedinLogo size={20} />
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ y: -1, scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Link
+                href="https://www.tiktok.com/@hackattack2025"
+                aria-label="Tiktok"
+                target="_blank"
+                className="text-neutral-400 hover:text-white transition"
+              >
+                <TiktokLogo size={20} />
               </Link>
             </motion.div>
           </div>
