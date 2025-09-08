@@ -295,10 +295,8 @@ export default function TeamProfilePage() {
   const {
     register,
     control,
-    handleSubmit,
     getValues,
     setValue,
-    reset,
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
@@ -314,29 +312,23 @@ export default function TeamProfilePage() {
       if (!user?.email || teamDataLoaded) return;
 
       try {
-        console.log("🔥 Loading existing team data...");
         const response = await fetch(
           `/api/team?userEmail=${encodeURIComponent(user.email)}`
         );
 
         if (response.ok) {
           const result = await response.json();
-          console.log("🔥 Existing team data:", result.data);
 
           if (result.data) {
-            // Populate form with existing data
             setValue("teamName", result.data.team_name || "");
             setValue("institution", result.data.institution || "");
             setValue("whatsapp_number", result.data.whatsapp_number || "");
             setValue("paymentproof_url", result.data.paymentproof_url || "");
-
-            console.log("🔥 Form populated with existing data");
           }
         } else {
-          console.log("🔥 No existing team data found");
         }
-      } catch (error) {
-        console.error("🔥 Error loading team data:", error);
+      } catch {
+        toast.error("Error loading team data:");
       } finally {
         setTeamDataLoaded(true);
       }
@@ -350,14 +342,10 @@ export default function TeamProfilePage() {
       if (!user?.email || !teamDataLoaded || memberDataLoaded) return;
 
       try {
-        console.log("🔥 Loading existing member data...");
-
-        // First get team ID
         const teamResponse = await fetch(
           `/api/team?userEmail=${encodeURIComponent(user.email)}`
         );
         if (!teamResponse.ok) {
-          console.log("🔥 No team found, skipping member load");
           setMemberDataLoaded(true);
           return;
         }
@@ -366,25 +354,21 @@ export default function TeamProfilePage() {
         const teamId = teamResult.data?.id;
 
         if (!teamId) {
-          console.log("🔥 No team ID found, skipping member load");
           setMemberDataLoaded(true);
           return;
         }
 
-        // Now get members
         const membersResponse = await fetch(
           `/api/team-members?teamId=${teamId}`
         );
         if (membersResponse.ok) {
           const membersResult = await membersResponse.json();
-          console.log("🔥 Existing member data:", membersResult.data);
 
           if (membersResult.data && membersResult.data.length > 0) {
             const members: TeamMemberDB[] = membersResult.data;
-            const leader = members.find((member) => member.is_leader == true);
+            const leader = members.find((member) => member.is_leader);
             const teamMembers = members.filter((member) => !member.is_leader);
 
-            // Populate leader data
             if (leader) {
               setValue("leaderName", leader.name || "");
               setValue("leaderEmail", leader.email || "");
@@ -392,48 +376,52 @@ export default function TeamProfilePage() {
               setValue("requirementLink", leader.data_url || "");
             }
 
-            // Populate member data
-            if (members.length > 0) {
-              const memberData = members.map((member) => ({
-                name: member.name || "",
-                email: member.email || "",
-                github: member.github_url || "",
-                requirementLink: member.data_url || "",
-              }));
+            console.log(fields.length);
 
-              setValue("members", memberData);
-
-              // Also update the form array
-              memberData.forEach((member, index) => {
-                if (index < 3) {
-                  // Max 3 members
-                  append(member);
-                }
-              });
+            for (let i = fields.length - 1; i >= 0; i--) {
+              remove(i);
             }
 
-            console.log("🔥 Member form populated with existing data");
+            if (teamMembers.length > 0) {
+              teamMembers.forEach((member) => {
+                const memberData: TeamMember = {
+                  name: member.name || "",
+                  email: member.email || "",
+                  github: member.github_url || "",
+                  requirementLink: member.data_url || "",
+                };
+
+                console.log("🔥 Appending member:", memberData);
+                append(memberData);
+              });
+            }
           }
         } else {
-          console.log("🔥 No existing member data found");
+          toast.error("No member data available");
         }
-      } catch (error) {
-        console.error("🔥 Error loading member data:", error);
+      } catch {
+        toast.error("Error loading member data");
       } finally {
         setMemberDataLoaded(true);
       }
     };
 
     loadMemberData();
-  }, [user?.email, teamDataLoaded, memberDataLoaded, setValue, append]);
+  }, [
+    user?.email,
+    teamDataLoaded,
+    memberDataLoaded,
+    setValue,
+    append,
+    remove,
+    fields.length,
+  ]);
 
   const onSubmit = async (data: TeamFormValues) => {
     if (!user?.email) return;
 
     setSaving(true);
     try {
-      console.log("🔥 Saving team and member data...", data);
-
       const teamResponse = await fetch("/api/team", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -456,7 +444,6 @@ export default function TeamProfilePage() {
       }
 
       const teamResult = await teamResponse.json();
-      console.log("🔥 Team saved:", teamResult);
 
       let teamId = teamResult.data?.id;
 
@@ -475,9 +462,6 @@ export default function TeamProfilePage() {
         return;
       }
 
-      console.log("🔥 Using team ID:", teamId);
-
-      // Now save team members
       const membersResponse = await fetch("/api/team-members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -497,18 +481,14 @@ export default function TeamProfilePage() {
       });
 
       if (membersResponse.ok) {
-        const membersResult = await membersResponse.json();
-        console.log("🔥 Members saved:", membersResult);
         toast.success("Team and member data saved successfully!");
       } else {
         const membersError = await membersResponse.json();
-        console.error("Failed to save team members:", membersError);
         toast.error(
           `Failed to save members: ${membersError.error || "Unknown error"}`
         );
       }
-    } catch (error) {
-      console.error("Error saving team data:", error);
+    } catch {
       toast.error("Network error occurred");
     } finally {
       setSaving(false);
@@ -522,10 +502,7 @@ export default function TeamProfilePage() {
     });
 
     if (isEditMode && !newEditMode) {
-      console.log("🔥 Attempting to save data...");
-
       const currentValues = getValues();
-      console.log("🔥 Current form values:", currentValues);
 
       await onSubmit(currentValues);
     }
@@ -535,7 +512,6 @@ export default function TeamProfilePage() {
   const inputClassName =
     "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
 
-  // Show loading state while checking authentication
   if (loading) {
     return (
       <div className="overflow-y-auto w-full min-h-full flex items-center justify-center">
