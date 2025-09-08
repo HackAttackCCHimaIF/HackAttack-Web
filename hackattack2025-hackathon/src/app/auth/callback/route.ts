@@ -9,8 +9,6 @@ export async function GET(request: NextRequest) {
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-    console.log("🔥 EXCHANGE RESULT:", { data: !!data.user, error });
-
     if (!error && data.user) {
       try {
         await fetch(`/api/auth/registration`, {
@@ -33,6 +31,5 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`/auth/callback-handler`);
   }
 
-  console.log("🔥 REDIRECTING TO ERROR PAGE");
   return NextResponse.redirect(`/auth/auth-code-error`);
 }

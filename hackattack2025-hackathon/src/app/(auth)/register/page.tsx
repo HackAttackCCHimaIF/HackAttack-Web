@@ -26,7 +26,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard/peserta`,
+        emailRedirectTo: `/dashboard/peserta`,
       },
     });
 
@@ -44,14 +44,14 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `/auth/callback`,
         queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        }
+          access_type: "offline",
+          prompt: "consent",
+        },
       },
     });
-  
+
     if (error) toast.error(error.message);
   };
 
