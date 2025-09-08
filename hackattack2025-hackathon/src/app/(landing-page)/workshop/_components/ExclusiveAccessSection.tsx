@@ -45,7 +45,7 @@ const ExclusiveAccessSection = () => {
         <CardHeader>
           <CardTitle className='text-2xl sm:text-4xl font-bold mb-3'>
             <span className='bg-gradient-to-r from-[#0f75bd] to-[#64BB48] bg-clip-text text-transparent'>
-              Workshop{" "}
+              Workshop
             </span>
             :{" "}
             <br className='sm:hidden block'/>
