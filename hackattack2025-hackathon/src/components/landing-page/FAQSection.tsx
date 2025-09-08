@@ -7,7 +7,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronDown } from "lucide-react";
 
 export default function FAQSection() {
   const faqs = [
@@ -45,11 +44,9 @@ export default function FAQSection() {
                 value={`item-${index}`}
                 className="bg-neutral-900 border border-neutral-800 py-2 px-4 rounded-4xl"
               >
-                <AccordionTrigger  className="flex justify-between font-semibold text-xl text-left text-[#98F47A] hover:no-underline">
+                <AccordionTrigger className="flex w-full justify-between font-semibold text-xl text-left items-center text-[#98F47A] hover:no-underline">
                   {faq.question}
-                  <ChevronDown
-                    className="h-5 w-5 shrink-0 transition-transform duration-200 data-[state=open]:rotate-180 text-[#98F47A]"
-                  />
+                  
                 </AccordionTrigger>
                 <AccordionContent className="text-neutral-300 pb-4">
                   {faq.answer}

@@ -14,7 +14,7 @@ const CountdownTimer = () => {
           className="flex flex-col items-center gap-4"
         >
           <TimeDisplay />
-          <h2 className="text-base sm:text-lg text-white text-center">
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl sm:mt-3 md:mt-6 text-white text-center">
             Until Hackathon Start
           </h2>
         </motion.div>

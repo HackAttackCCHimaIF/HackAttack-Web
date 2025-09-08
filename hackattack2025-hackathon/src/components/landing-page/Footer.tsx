@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { InstagramLogo, LinkedinLogo } from "phosphor-react";
+import { InstagramLogo, LinkedinLogo, TiktokLogo } from "phosphor-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -106,7 +106,7 @@ const Footer = () => {
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 <Link
-                  href="https://mail.google.com/mail/?view=cm&fs=1&to=hackattack.ccihimaif25@gmail.com&su=Contact%20Us%20From%20Website"
+                  href="https://mail.google.com/mail/?view=cm&fs=1&to=hackattack.ccihimaif25@gmail.com&su=Contact%20Us%20From%20Hackattack%20Website"
                   className=" text-neutral-200"
                 >
                   Contact us
@@ -130,65 +130,68 @@ const Footer = () => {
                 htmlFor="message"
                 className="font-semibold text-neutral-200"
               >
-                Send us Message
+                Send us a Message
               </label>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Input
-                  id="nameMessage"
-                  value={nameMessage}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={(e: any) => setNameMessage(e.target.value)}
-                  placeholder="Your Name"
-                  className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
-                  required
-                />
-                <Input
-                  id="emailMessage"
-                  value={emailMessage}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={(e: any) => setEmailMessage(e.target.value)}
-                  placeholder="Your Email"
-                  className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
-                  required
-                />
-                <motion.div
-                  whileHover={!isLoading ? { y: -1, scale: 1.03 } : {}}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`
-                      px-6 py-3 text-white w-full sm:w-auto rounded-none
-                      transition-all duration-200 ease-in-out
-                      ${
-                        isLoading
-                          ? "bg-[#0F75BD]/70 cursor-not-allowed"
-                          : "bg-[#0F75BD] hover:bg-[#0F75BD]/90 hover:shadow-lg"
-                      }
-                    `}
-                  >
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Sending...</span>
-                      </div>
-                    ) : (
-                      "Send"
-                    )}
-                  </Button>
-                </motion.div>
+              {/* Row 1: Name and Email inputs */}
+              <div className="flex flex-col sm:flex-row gap-2 w-full">
+                <div className="flex flex-row gap-2 w-full">
+                  <Input
+                    id="nameMessage"
+                    value={nameMessage}
+                    onChange={(e) => setNameMessage(e.target.value)}
+                    placeholder="Your Name"
+                    className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-1/3 rounded-none"
+                    required
+                  />
+                  <Input
+                    id="emailMessage"
+                    value={emailMessage}
+                    onChange={(e) => setEmailMessage(e.target.value)}
+                    placeholder="Your Email"
+                    className="bg-white text-black px-4 py-3 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
+                    required
+                  />
+                </div>
               </div>
+              {/* Row 2: Message input */}
               <Input
                 type="text"
                 id="message"
                 value={message}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={(e: any) => setMessage(e.target.value)}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Message"
                 className="bg-white text-black px-5 py-5 placeholder:text-neutral-500 border border-neutral-300 w-full rounded-none"
                 required
               />
+              {/* Row 3: Send button */}
+              <motion.div
+                whileHover={!isLoading ? { y: -1, scale: 1.03 } : {}}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="w-full sm:w-auto"
+              >
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className={`
+                    px-6 py-3 text-white w-full rounded-none
+                    transition-all duration-200 ease-in-out
+                    ${
+                      isLoading
+                        ? "bg-[#0F75BD]/70 cursor-not-allowed"
+                        : "bg-[#0F75BD] hover:bg-[#0F75BD]/90 hover:shadow-lg"
+                    }
+                  `}
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Sending...</span>
+                    </div>
+                  ) : (
+                    "Send"
+                  )}
+                </Button>
+              </motion.div>
             </form>
           </div>
         </div>
@@ -217,12 +220,25 @@ const Footer = () => {
               transition={{ type: "spring", stiffness: 300 }}
             >
               <Link
-                href="https://www.linkedin.com/company/himpunan-mahasiswa-s1-informatika-telkom-university/"
+                href="https://www.linkedin.com/company/hackattack2025/"
                 aria-label="LinkedIn"
                 target="_blank"
                 className="text-neutral-400 hover:text-white transition"
               >
                 <LinkedinLogo size={20} />
+              </Link>
+            </motion.div>
+            <motion.div
+              whileHover={{ y: -1, scale: 1.03 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <Link
+                href="https://www.tiktok.com/@hackattack2025"
+                aria-label="Tiktok"
+                target="_blank"
+                className="text-neutral-400 hover:text-white transition"
+              >
+                <TiktokLogo size={20} />
               </Link>
             </motion.div>
           </div>
