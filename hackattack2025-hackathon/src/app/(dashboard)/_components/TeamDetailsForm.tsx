@@ -1,13 +1,24 @@
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
 import { EditableInput } from "./EditableInput";
 
 const universities = [
-  "Universitas Indonesia", "Institut Teknologi Bandung", "Universitas Gadjah Mada",
-  "Institut Teknologi Sepuluh Nopember", "Telkom University", "Universitas Brawijaya",
-  "Universitas Padjadjaran", "Universitas Airlangga"
+  "Universitas Indonesia",
+  "Institut Teknologi Bandung",
+  "Universitas Gadjah Mada",
+  "Institut Teknologi Sepuluh Nopember",
+  "Telkom University",
+  "Universitas Brawijaya",
+  "Universitas Padjadjaran",
+  "Universitas Airlangga",
 ];
 
 interface TeamDetailsFormProps {
@@ -17,7 +28,11 @@ interface TeamDetailsFormProps {
   inputClassName: string;
 }
 
-export function TeamDetailsForm({ register, isEditMode, inputClassName }: TeamDetailsFormProps) {
+export function TeamDetailsForm({
+  register,
+  isEditMode,
+  inputClassName,
+}: TeamDetailsFormProps) {
   return (
     <div className="space-y-6 flex flex-col">
       <div className="flex flex-col gap-3">
@@ -39,7 +54,9 @@ export function TeamDetailsForm({ register, isEditMode, inputClassName }: TeamDe
           </SelectTrigger>
           <SelectContent>
             {universities.map((uni) => (
-              <SelectItem key={uni} value={uni}>{uni}</SelectItem>
+              <SelectItem key={uni} value={uni}>
+                {uni}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -57,13 +74,24 @@ export function TeamDetailsForm({ register, isEditMode, inputClassName }: TeamDe
         />
       </div>
 
-      <CopyableLink label="Link GDrive (Twibbon Caption, dll)" text="https://drive.google.com/" />
+      <CopyableLink
+        label="Link GDrive (Twibbon Caption, dll)"
+        text="https://drive.google.com/"
+      />
 
       <div className="flex flex-col">
         <Label>Metode Pembayaran</Label>
         <p className="text-2xl font-bold">Rp250.000*</p>
-        <p className="text-sm text-white/50">(Harga pendaftaran tergantung instansi asal Tim)</p>
-        <Image src="/dashboard/QR.png" width={340} height={340} alt="QR" className="w-80 rounded-4xl border-10 border-white/10" />
+        <p className="text-sm text-white/50">
+          (Harga pendaftaran tergantung instansi asal Tim)
+        </p>
+        <Image
+          src="/dashboard/QR.png"
+          width={340}
+          height={340}
+          alt="QR"
+          className="w-80 rounded-4xl border-10 border-white/10"
+        />
         <CopyableLink label="BCA (Faiq Haqqani)" text="8895558571" />
         <CopyableLink label="BRI (Faiq Haqqani)" text="0131 0104 8271 507" />
       </div>

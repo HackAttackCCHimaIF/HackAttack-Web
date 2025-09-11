@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray } from "react-hook-form";
@@ -13,16 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil } from "lucide-react";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-import { TeamMember, TeamMemberDB, TeamLeader } from "@/types/team";
+import { TeamMember, TeamMemberDB } from "@/types/team";
 
 import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
@@ -35,17 +28,6 @@ import { toast } from "sonner";
 // ======================
 // Data & Validation Schema
 // ======================
-
-const universities = [
-  "Universitas Indonesia",
-  "Institut Teknologi Bandung",
-  "Universitas Gadjah Mada",
-  "Institut Teknologi Sepuluh Nopember",
-  "Telkom University",
-  "Universitas Brawijaya",
-  "Universitas Padjadjaran",
-  "Universitas Airlangga",
-];
 
 const teamMemberSchema = z.object({
   name: z.string(),
@@ -125,8 +107,22 @@ const teamSchema = z.object({
 
   // Team Detail fields (existing)
   teamName: z.string().min(1, "Nama team wajib diisi"),
-  institution: z.string().min(1, "Asal instansi wajib dipilih"),
-  whatsapp_number: z.string().min(1, "Nomor WhatsApp wajib diisi"),
+  institution: z.string().min(1, "Asal instansi wajib diisi"),
+  whatsapp_number: z
+    .string()
+    .min(1, "Nomor WhatsApp wajib diisi")
+    .regex(
+      /^62\d{8,13}$/,
+      "Nomor WhatsApp harus dimulai dengan 62 dan berisi 10-15 digit"
+    )
+    .refine(
+      (val) => val.startsWith("62"),
+      "Nomor WhatsApp harus dimulai dengan 62"
+    )
+    .refine(
+      (val) => /^\d+$/.test(val),
+      "Nomor WhatsApp hanya boleh berisi angka"
+    ),
   paymentproof_url: z
     .string()
     .url("Link bukti pembayaran harus valid")
@@ -173,6 +169,99 @@ any) => {
   );
 };
 
+const WhatsAppInput = ({
+  register,
+  name,
+  placeholder,
+  disabled,
+  className = "",
+  ...props
+}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+any) => {
+  const [value, setValue] = useState("62");
+  const { onChange, ...registerProps } = register(name);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = e.target.value;
+
+    // Always ensure it starts with 62
+    if (!inputValue.startsWith("62")) {
+      inputValue = "62" + inputValue.replace(/^62*/, "");
+    }
+
+    // Only allow numbers
+    inputValue = inputValue.replace(/\D/g, "");
+
+    // Ensure it starts with 62
+    if (!inputValue.startsWith("62")) {
+      inputValue = "62";
+    }
+
+    // Limit length (62 + max 13 digits = 15 total)
+    if (inputValue.length > 15) {
+      inputValue = inputValue.substring(0, 15);
+    }
+
+    setValue(inputValue);
+    onChange({ target: { value: inputValue } });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const input = e.target as HTMLInputElement;
+    const cursorPosition = input.selectionStart || 0;
+
+    if ((e.key === "Backspace" || e.key === "Delete") && cursorPosition <= 2) {
+      e.preventDefault();
+    }
+
+    if (
+      !/\d/.test(e.key) &&
+      ![
+        "Backspace",
+        "Delete",
+        "ArrowLeft",
+        "ArrowRight",
+        "Tab",
+        "Enter",
+      ].includes(e.key)
+    ) {
+      e.preventDefault();
+    }
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    // Set cursor after "62" when focused
+    setTimeout(() => {
+      if (e.target.value === "62") {
+        e.target.setSelectionRange(2, 2);
+      }
+    }, 0);
+  };
+
+  return (
+    <div className="relative">
+      <Input
+        {...registerProps}
+        type="tel"
+        placeholder={placeholder}
+        disabled={disabled}
+        value={value}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        onFocus={handleFocus}
+        className={`${className} ${disabled ? "opacity-60" : ""}`}
+        {...props}
+      />
+      {!disabled && (
+        <Pencil
+          size={16}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50"
+        />
+      )}
+    </div>
+  );
+};
+
 // ======================
 // Main Component
 // ======================
@@ -184,6 +273,7 @@ export default function TeamProfilePage() {
   const [saving, setSaving] = useState(false);
   const [teamDataLoaded, setTeamDataLoaded] = useState(false);
   const [memberDataLoaded, setMemberDataLoaded] = useState(false);
+  const [institution, setInstitution] = useState("");
   const [userProfile, setUserProfile] = useState({
     name: "User",
     isLoggedIn: false,
@@ -300,6 +390,9 @@ export default function TeamProfilePage() {
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
+    defaultValues: {
+      whatsapp_number: "62",
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -321,8 +414,22 @@ export default function TeamProfilePage() {
 
           if (result.data) {
             setValue("teamName", result.data.team_name || "");
-            setValue("institution", result.data.institution || "");
-            setValue("whatsapp_number", result.data.whatsapp_number || "");
+
+            const institution = result.data.institution || "";
+            setValue("institution", institution);
+
+            if (institution === "Telkom University") {
+              setInstitution("telkom");
+            } else if (institution) {
+              setInstitution("lainnya");
+            }
+
+            // Handle WhatsApp number - ensure it starts with 62
+            let whatsappNumber = result.data.whatsapp_number || "62";
+            if (!whatsappNumber.startsWith("62")) {
+              whatsappNumber = "62" + whatsappNumber;
+            }
+            setValue("whatsapp_number", whatsappNumber);
             setValue("paymentproof_url", result.data.paymentproof_url || "");
           }
         } else {
@@ -744,30 +851,79 @@ export default function TeamProfilePage() {
                     )}
                   </div>
 
+                  {/* Asal Instansi */}
                   <div className="flex flex-col gap-3">
                     <Label>Asal Instansi</Label>
-                    <Controller
-                      name="institution"
-                      control={control}
-                      render={({ field }) => (
-                        <Select
+                    <RadioGroup
+                      disabled={!isEditMode}
+                      value={institution}
+                      onValueChange={(value: string) => {
+                        setInstitution(value as "telkom" | "lainnya");
+
+                        if (value === "telkom") {
+                          setValue("institution", "Telkom University");
+                        } else {
+                          setValue("institution", "");
+                        }
+                      }}
+                      className="flex flex-col gap-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="telkom"
+                          id="telkom"
+                          className="border-white text-white"
                           disabled={!isEditMode}
-                          onValueChange={field.onChange}
-                          value={field.value}
+                        />
+                        <Label
+                          htmlFor="telkom"
+                          className={`cursor-pointer ${
+                            !isEditMode ? "opacity-60" : ""
+                          }`}
                         >
-                          <SelectTrigger className="bg-white/10 w-full text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10">
-                            <SelectValue placeholder="Pilih Instansi" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {universities.map((uni) => (
-                              <SelectItem key={uni} value={uni}>
-                                {uni}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    />
+                          Telkom University
+                        </Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem
+                          value="lainnya"
+                          id="lainnya"
+                          className="border-white text-white"
+                          disabled={!isEditMode}
+                        />
+                        <Label
+                          htmlFor="lainnya"
+                          className={`cursor-pointer ${
+                            !isEditMode ? "opacity-60" : ""
+                          }`}
+                        >
+                          Lainnya
+                        </Label>
+                      </div>
+                    </RadioGroup>
+
+                    {institution === "lainnya" && (
+                      <div className="mt-3">
+                        <EditableInput
+                          register={register}
+                          name="institution"
+                          placeholder="Masukkan nama instansi"
+                          disabled={!isEditMode}
+                          className={inputClassName}
+                        />
+                      </div>
+                    )}
+
+                    {institution === "telkom" && !isEditMode && (
+                      <div className="mt-3">
+                        <div
+                          className={`${inputClassName} opacity-60 flex items-center`}
+                        >
+                          Telkom University
+                        </div>
+                      </div>
+                    )}
+
                     {errors.institution && (
                       <p className="text-red-400 text-sm">
                         {errors.institution.message}
@@ -775,15 +931,15 @@ export default function TeamProfilePage() {
                     )}
                   </div>
 
+                  {/* Whatsapp Perwakilan */}
                   <div className="flex flex-col gap-3">
                     <Label>Whatsapp Perwakilan</Label>
-                    <EditableInput
+                    <WhatsAppInput
                       register={register}
                       name="whatsapp_number"
-                      placeholder="Input your WhatsApp number"
+                      placeholder="62812345678"
                       disabled={!isEditMode}
                       className={inputClassName}
-                      defaultValue="62"
                     />
                     {errors.whatsapp_number && (
                       <p className="text-red-400 text-sm">
@@ -809,39 +965,63 @@ export default function TeamProfilePage() {
                     )}
                   </div>
 
+                  {/* CopyableLink */}
                   <CopyableLink
                     disabled={!isEditMode}
                     label="Link GDrive (Twibbon Caption, dll)"
                     text="https://www.figma.com/design/OoZALSutXFS9ePSXclSJmy/draft-hackatton?node-id=0-1&p=f&t=0eRQB5Z4751onv0d-0"
                   />
 
+                  {/* Metode Pembayaran */}
                   <div className="relative flex flex-col">
                     <div className="relative w-full flex flex-col space-y-3 justify-center">
                       <Label>Metode Pembayaran.</Label>
                       <div className="flex flex-col space-y-1 text-center">
-                        <p className="text-2xl font-bold">Rp250.000*</p>
+                        <p className="text-2xl font-bold">
+                          {institution === "telkom"
+                            ? "Rp150.000*"
+                            : institution === "others"
+                            ? "Rp170.000*"
+                            : "Rp-*"}
+                        </p>
                         <p className="text-sm font-medium text-white/50">
-                          ( Harga pendaftaran tergantung instansi asal Tim )
+                          {institution === "telkom"
+                            ? "( Harga khusus untuk mahasiswa Telkom University )"
+                            : institution === "lainnya"
+                            ? "( Harga pendaftaran untuk instansi lainnya )"
+                            : "( Pilih instansi untuk melihat harga pendaftaran )"}
                         </p>
                       </div>
                       <div className="before:content-[''] flex items-center justify-center ">
-                        <Image
-                          src="/dashboard/QR.png"
-                          width={340}
-                          height={340}
-                          alt="QR"
-                          className="w-80 rounded-4xl border-10 border-white/10"
-                        />
+                        {institution === "telkom" ? (
+                          <Image
+                            src="/dashboard/QR.png"
+                            width={340}
+                            height={340}
+                            alt="QR Telkom"
+                            className="w-80 rounded-4xl border-10 border-white/10"
+                          />
+                        ) : institution === "lainnya" ? (
+                          <Image
+                            src="/dashboard/QR.png"
+                            width={340}
+                            height={340}
+                            alt="QR Telkom"
+                            className="w-80 rounded-4xl border-10 border-white/10"
+                          />
+                        ) : (
+                          ""
+                        )}
                       </div>
                       <CopyableLink
                         disabled={!isEditMode}
-                        label="BCA ( Faiq Haqqani )"
-                        text="8895558571"
+                        label="BCA ( GISELA SESARIA KUSTHIKA  PUTRI )"
+                        text="7285451698"
                       />
                       <CopyableLink
                         disabled={!isEditMode}
-                        label="BRI ( Faiq Haqqani )"
-                        text="0131 0104 8271 507"
+                        label="ShopeePay ( GISELA SESARIA KUSTHIKA PUTRI )"
+                        text="081808767771"
                       />
                     </div>
                   </div>
