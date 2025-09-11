@@ -53,7 +53,7 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signInWithOtp({
         email: email,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/peserta`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
         },
       });
 
