@@ -72,7 +72,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex h-screen">
-      <div className="w-full md:w-1/2 flex flex-col justify-center items-center bg-white p-6 relative">
+      <div className="w-full md:w-3/5 flex flex-col justify-center items-center bg-white p-6 relative">
         <div className="absolute top-6 left-6">
           <div className="flex pb-3 flex-row gap-3">
             <Image
@@ -207,16 +207,138 @@ export default function LoginPage() {
             )}
           </CardContent>
         </Card>
+        <Image
+                  src="/auth/wayang.png"
+                  alt="Garuda"
+                  width={382}
+                  height={180}
+                  className="absolute m-auto max-w-[242px] object-contain bottom-0 right-0 opacity-100 hidden lg:block"
+                  priority
+                />
+                <Image
+                  src="/auth/wayang1.png"
+                  alt="Garuda"
+                  width={382}
+                  height={180}
+                  className="absolute m-auto max-w-[192px] object-contain bottom-0 left-0 opacity-100 hidden lg:block"
+                  priority
+                />
       </div>
 
-      <div className="hidden md:flex w-1/2 bg-black text-white relative flex-col justify-center items-center">
-        <div className="absolute inset-0"></div>
-
-        <div className="relative z-10 flex flex-col items-center space-y-6">
-          <h1 className="text-4xl font-bold">HackAttack 2025</h1>
-          <p className="text-lg">Login</p>
-        </div>
-      </div>
+      <div className="hidden lg:flex w-2/5 text-white relative justify-center items-center overflow-hidden bg-black">
+              {/* Bayangan Garuda di tengah */}
+              <Image
+                src="/auth/garuda.png"
+                alt="Garuda"
+                width={1000}
+                height={1000}
+                className="absolute inset-0 m-auto w-[90%] max-w-xl object-contain opacity-100 z-10"
+                priority
+              />
+      
+              <Image
+                src="/auth/merah1.png"
+                alt="Garuda"
+                width={1000}
+                height={1000}
+                className="absolute bottom-1/2 max-w-3xl object-contain opacity-100 z-0"
+                priority
+              />
+      
+              <Image
+                src="/auth/merah1.png"
+                alt="Garuda"
+                width={1000}
+                height={1000}
+                className="absolute bottom-0 max-w-3xl object-contain opacity-100 z-0"
+                priority
+              />
+      
+              <Image
+                src="/auth/merah1.png"
+                alt="Garuda"
+                width={1000}
+                height={1000}
+                className="absolute top-1/2 right-0 max-w-3xl object-contain opacity-100 z-0"
+                priority
+              />
+      
+              <Image
+                src="/auth/merah1.png"
+                alt="Garuda"
+                width={1000}
+                height={1000}
+                className="absolute bottom-1/2 -right-1/2 max-w-3xl object-contain opacity-100 z-0"
+                priority
+              />
+      
+              {/* Bendera kiri atas */}
+              <Image
+                src="/auth/benderaatas.png"
+                alt="Bendera Atas"
+                width={1000}
+                height={1000}
+                className="absolute top-0 left-0 lg:w-[180px] z-20"
+              />
+      
+              <Image
+                src="/auth/angin2.png"
+                alt="Garuda"
+                width={1200}
+                height={1200}
+                className="absolute inset-0 m-auto w-[100%] max-w-3xl object-contain opacity-100 z-0"
+                priority
+              />
+      
+               <Image
+                src="/auth/merah.png"
+                alt="Garuda"
+                width={1200}
+                height={1200}
+                className="absolute top-0 left-0 lg:w-[240px] z-0"
+                priority
+              />
+      
+              {/* Bendera bawah kanan */}
+              <Image
+                src="/auth/benderabawah.png"
+                alt="Bendera Bawah"
+                width={1000}
+                height={1000}
+                className="absolute bottom-0 right-0 lg:w-[160px] z-10"
+              />
+      
+              {/* Candi di bawah (tengah) */}
+              <Image
+                src="/auth/candi.png"
+                alt="Candi"
+                width={1000}
+                height={1000}
+                className="absolute bottom-0 left-1/2 transform -translate-x-1/2 object-contain"
+              />
+      
+              {/* Kepala Garuda kanan atas */}
+              <Image
+                src="/auth/kepalagaruda.png"
+                alt="Kepala Garuda"
+                width={1000}
+                height={1000}
+                className="absolute top-0 right-0 lg:w-[240px]"
+              />
+      
+              {/* Overlay Content */}
+              <div className="relative z-10 text-center">
+                <Image
+                  src="/navbar/Icon.svg"
+                  alt="Site Logo"
+                  width={156}
+                  height={27}
+                  priority
+                  className="object-contain inset-0 top-1/2 left-1/2 lg:w-[90%]"
+                />
+                <div className="pt-6" />
+              </div>
+          </div>
     </div>
   );
 }

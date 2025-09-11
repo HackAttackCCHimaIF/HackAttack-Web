@@ -204,7 +204,7 @@ const SubmissionPage = () => {
 
   return (
     <div className="min-h-1/2 h-full flex flex-col">
-      <HeaderDashboard userProfile={userProfile} bottomText="Submission" />
+      <HeaderDashboard bottomText="Submission" />
 
       <div className="flex-1 w-full overflow-y-auto px-4 pb-5">
         <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl flex flex-col h-fit md:h-full">
@@ -260,32 +260,31 @@ const SubmissionPage = () => {
                   jika kurang sesuatu itu kesalahan gibran.
                 </p>
               </div>
-            </form>
+                <div className="flex flex-row gap-3 pt-6 items-center justify-end">
+                  <Button
+                    type="button"
+                    onClick={handleEditModeChange}
+                    disabled={saving}
+                    size={"lg"}
+                    className={`flex items-center gap-2 rounded-full pl-2 !py-6 bg-white/10 hover:bg-white/20 text-white pr-6`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-full md:bg-white/10">
+                        <Pencil size={8} className="text-white" />
+                      </div>
+                      <p>{isEditMode ? "Cancel" : "Edit"}</p>
+                    </div>
+                  </Button>
 
-            <div className="flex flex-row gap-3 justify-end pt-12">
-              <Button
-                type="button"
-                onClick={handleEditModeChange}
-                disabled={saving}
-                size={"lg"}
-                className={`flex items-center gap-2 rounded-full pl-2 !py-6 bg-white/10 hover:bg-white/20 text-white pr-6`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full md:bg-white/10">
-                    <Pencil size={8} className="text-white" />
-                  </div>
-                  <p>{isEditMode ? "Cancel" : "Edit"}</p>
+                  <Button
+                    onClick={handleSubmit(onSubmit)}
+                    disabled={!isEditMode || !proposalUrl || !isConfirmed || saving}
+                    className="bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6"
+                  >
+                    {saving ? "Submitting..." : "Submit"}
+                  </Button>
                 </div>
-              </Button>
-
-              <Button
-                onClick={handleSubmit(onSubmit)}
-                disabled={!isEditMode || !proposalUrl || !isConfirmed || saving}
-                className="bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6"
-              >
-                {saving ? "Submitting..." : "Submit"}
-              </Button>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>

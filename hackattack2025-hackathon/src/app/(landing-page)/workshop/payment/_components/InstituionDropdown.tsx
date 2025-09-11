@@ -65,7 +65,7 @@ export function InstitutionDropdown({
         align="start"
         className={cn(
           "w-[var(--radix-dropdown-menu-trigger-width)]",
-          "rounded-b-2xl rounded-t-none border-t-0 bg-white/10 text-white border-white/10"
+          "rounded-b-2xl rounded-t-none border-t-0 bg-[#3C3C3C] text-white border-white/10"
         )}
       >
         {options.map((option) => (
