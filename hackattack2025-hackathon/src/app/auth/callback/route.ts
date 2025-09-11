@@ -13,6 +13,11 @@ export async function GET(request: NextRequest) {
 
     if (!error && data.user) {
       try {
+        console.log(
+          "🔥 Google OAuth success, registering user:",
+          data.user.email
+        );
+
         await fetch(`${baseUrl}/api/auth/registration`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -24,10 +29,12 @@ export async function GET(request: NextRequest) {
           }),
         });
       } catch (error) {
-        console.error("ERROR:", error);
+        console.error("🔥 Registration API error:", error);
       }
 
       return NextResponse.redirect(`${baseUrl}${next}`);
+    } else {
+      console.error("🔥 OAuth exchange error:", error);
     }
   } else {
     return NextResponse.redirect(`${baseUrl}/auth/callback-handler`);

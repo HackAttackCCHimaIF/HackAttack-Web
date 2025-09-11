@@ -41,7 +41,7 @@ export default function RegisterPage() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/peserta`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
       },
     });
 
@@ -183,7 +183,7 @@ export default function RegisterPage() {
         />
       </div>
 
-      <div className="hidden lg:flex w-2/5 text-white relative justify-center items-center overflow-hidden bg-red-900">
+      <div className="hidden lg:flex w-2/5 text-white relative justify-center items-center overflow-hidden bg-black">
         {/* Bayangan Garuda di tengah */}
         <Image
           src="/auth/garuda.png"
@@ -194,13 +194,67 @@ export default function RegisterPage() {
           priority
         />
 
+        <Image
+          src="/auth/merah1.png"
+          alt="Garuda"
+          width={1000}
+          height={1000}
+          className="absolute bottom-1/2 max-w-3xl object-contain opacity-100 z-0"
+          priority
+        />
+
+        <Image
+          src="/auth/merah1.png"
+          alt="Garuda"
+          width={1000}
+          height={1000}
+          className="absolute bottom-0 max-w-3xl object-contain opacity-100 z-0"
+          priority
+        />
+
+        <Image
+          src="/auth/merah1.png"
+          alt="Garuda"
+          width={1000}
+          height={1000}
+          className="absolute top-1/2 right-0 max-w-3xl object-contain opacity-100 z-0"
+          priority
+        />
+
+        <Image
+          src="/auth/merah1.png"
+          alt="Garuda"
+          width={1000}
+          height={1000}
+          className="absolute bottom-1/2 -right-1/2 max-w-3xl object-contain opacity-100 z-0"
+          priority
+        />
+
         {/* Bendera kiri atas */}
         <Image
           src="/auth/benderaatas.png"
           alt="Bendera Atas"
           width={1000}
           height={1000}
-          className="absolute top-0 left-0 lg:w-[180px] z-10"
+          className="absolute top-0 left-0 lg:w-[180px] z-20"
+        />
+
+        <Image
+          src="/auth/angin2.png"
+          alt="Garuda"
+          width={1200}
+          height={1200}
+          className="absolute inset-0 m-auto w-[100%] max-w-3xl object-contain opacity-100 z-0"
+          priority
+        />
+
+         <Image
+          src="/auth/merah.png"
+          alt="Garuda"
+          width={1200}
+          height={1200}
+          className="absolute top-0 left-0 lg:w-[240px] z-0"
+          priority
         />
 
         {/* Bendera bawah kanan */}

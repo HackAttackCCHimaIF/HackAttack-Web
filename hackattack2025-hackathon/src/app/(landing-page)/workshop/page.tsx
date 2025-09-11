@@ -11,21 +11,7 @@ const WorkshopPage = () => {
         <div className='min-h-screen' id='ExclusiveAccessSection'>
           <ExclusiveAccessSection/>
         </div>
-        {/* <div className='min-h-screen' id='timeline'>
-          <Timeline/>
-        </div>
-        <div id='countdown' className='min-h-screen md:h-fit'>
-          <CountdownPage/>
-        </div>
-        <div className='min-h-screen' id='speeddating'>
-          <SpeedDating/>
-        </div>
-         <div className='min-h-screen' id='sponsor'>
-          <SponsorPage/>
-        </div>
-        <div className='h-full' id='faq'>
-          <FAQSection/>
-        </div> */}
+
       </div>
   )
 }
