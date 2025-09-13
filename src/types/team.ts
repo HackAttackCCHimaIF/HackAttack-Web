@@ -4,6 +4,7 @@ export interface TeamMember {
   email: string;
   github?: string;
   requirementLink: string;
+  member_role?: "Hustler" | "Hipster" | "Hacker";
 }
 
 export interface TeamMemberDB {
@@ -15,6 +16,7 @@ export interface TeamMemberDB {
   data_url: string | null;
   is_leader: boolean;
   created_at?: string;
+  member_role: "Hustler" | "Hipster" | "Hacker";
 }
 
 export interface TeamLeader {

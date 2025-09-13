@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray } from "react-hook-form";
@@ -14,6 +14,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { TeamMember, TeamMemberDB } from "@/types/team";
 
@@ -34,20 +41,20 @@ const teamMemberSchema = z.object({
   email: z.string(),
   github: z.string().optional(),
   requirementLink: z.string(),
+  member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
 }) satisfies z.ZodType<TeamMember>;
 
 const teamSchema = z.object({
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderEmail: z.string().email("Email tidak valid"),
   leaderGithub: z.string().optional(),
+  leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
 
-  // Team members (conditional validation)
   members: z
     .array(teamMemberSchema)
     .max(3, "Maksimal 3 anggota tambahan")
     .superRefine((members, ctx) => {
-      // Validate each member that exists
       members.forEach((member, index) => {
         const hasAnyField =
           member.name ||
@@ -56,7 +63,6 @@ const teamSchema = z.object({
           member.requirementLink;
 
         if (hasAnyField) {
-          // Name is mandatory if member exists
           if (!member.name || member.name.trim() === "") {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -65,7 +71,6 @@ const teamSchema = z.object({
             });
           }
 
-          // Email is mandatory if member exists
           if (!member.email || member.email.trim() === "") {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -83,7 +88,6 @@ const teamSchema = z.object({
             }
           }
 
-          // RequirementLink is mandatory if member exists
           if (!member.requirementLink || member.requirementLink.trim() === "") {
             ctx.addIssue({
               code: z.ZodIssueCode.custom,
@@ -105,7 +109,6 @@ const teamSchema = z.object({
       });
     }),
 
-  // Team Detail fields (existing)
   teamName: z.string().min(1, "Nama team wajib diisi"),
   institution: z.string().min(1, "Asal instansi wajib diisi"),
   whatsapp_number: z
@@ -263,6 +266,38 @@ any) => {
 };
 
 // ======================
+// Helper Functions
+// ======================
+
+// Add separate validation functions around line 275
+const isTeamDetailsComplete = (values: TeamFormValues) => {
+  return (
+    values.teamName &&
+    values.teamName.trim() !== "" &&
+    values.institution &&
+    values.institution.trim() !== "" &&
+    values.whatsapp_number &&
+    values.whatsapp_number.trim() !== "" &&
+    values.whatsapp_number !== "62"
+  );
+};
+
+const isLeaderInfoComplete = (values: TeamFormValues) => {
+  return (
+    values.leaderName &&
+    values.leaderName.trim() !== "" &&
+    values.leaderEmail &&
+    values.leaderEmail.trim() !== "" &&
+    values.requirementLink &&
+    values.requirementLink.trim() !== ""
+  );
+};
+
+const isAllInfoComplete = (values: TeamFormValues) => {
+  return isTeamDetailsComplete(values) && isLeaderInfoComplete(values);
+};
+
+// ======================
 // Main Component
 // ======================
 
@@ -387,6 +422,7 @@ export default function TeamProfilePage() {
     control,
     getValues,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
@@ -399,6 +435,18 @@ export default function TeamProfilePage() {
     control,
     name: "members",
   });
+
+  const watchedValues = watch([
+    "teamName",
+    "institution",
+    "whatsapp_number",
+    "leaderName",
+    "leaderEmail",
+    "requirementLink",
+  ]);
+  const teamDetailsCompleted = isTeamDetailsComplete(getValues());
+  const leaderInfoCompleted = isLeaderInfoComplete(getValues());
+  const allInfoCompleted = isAllInfoComplete(getValues());
 
   useEffect(() => {
     const loadTeamData = async () => {
@@ -480,6 +528,11 @@ export default function TeamProfilePage() {
               setValue("leaderName", leader.name || "");
               setValue("leaderEmail", leader.email || "");
               setValue("leaderGithub", leader.github_url || "");
+              setValue(
+                "leaderRole",
+                (leader.member_role as "Hustler" | "Hipster" | "Hacker") ||
+                  "Hacker"
+              );
               setValue("requirementLink", leader.data_url || "");
             }
 
@@ -495,6 +548,9 @@ export default function TeamProfilePage() {
                   name: member.name || "",
                   email: member.email || "",
                   github: member.github_url || "",
+                  member_role:
+                    (member.member_role as "Hustler" | "Hipster" | "Hacker") ||
+                    undefined,
                   requirementLink: member.data_url || "",
                 };
 
@@ -578,6 +634,7 @@ export default function TeamProfilePage() {
             name: data.leaderName,
             email: data.leaderEmail,
             github_url: data.leaderGithub || null,
+            role: data.leaderRole,
             data_url: data.requirementLink,
           },
           members:
@@ -651,15 +708,64 @@ export default function TeamProfilePage() {
 
               <CardContent className="max-h-[67vh] overflow-y-auto">
                 <div className="space-y-12 pt-6 tracking-wide">
+                  {isEditMode && !teamDetailsCompleted && (
+                    <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
+                      <div className="flex items-center gap-2">
+                        <span className="text-yellow-200 text-lg">⚠️</span>
+                        <div>
+                          <p className="text-yellow-200 font-medium">
+                            Isi Data Team Terlebih Dahulu
+                          </p>
+                          <p className="text-yellow-200/80 text-sm mt-1">
+                            Lengkapi Nama Team, Asal Instansi, dan WhatsApp
+                            untuk melanjutkan
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isEditMode &&
+                    teamDetailsCompleted &&
+                    !leaderInfoCompleted && (
+                      <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                        <div className="flex items-center gap-2">
+                          <span className="text-blue-200 text-lg">👤</span>
+                          <div>
+                            <p className="text-blue-200 font-medium">
+                              Lengkapi Data Ketua
+                            </p>
+                            <p className="text-blue-200/80 text-sm mt-1">
+                              Isi semua data ketua untuk dapat menambah anggota
+                              tim
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                   <div className="space-y-6 flex flex-col">
                     <div className="flex flex-col gap-3">
-                      <h3 className="font-semibold text-white mb-3">Leader</h3>
+                      <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
+                        Leader
+                        {isEditMode && !teamDetailsCompleted && (
+                          <span className="text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded">
+                            Isi data team dulu
+                          </span>
+                        )}
+                      </h3>
+
+                      {/* Leader Name */}
                       <Label>Nama Ketua</Label>
                       <EditableInput
                         register={register}
                         name="leaderName"
-                        placeholder="Input your leader team name"
-                        disabled={!isEditMode}
+                        placeholder={
+                          teamDetailsCompleted
+                            ? "Input your leader team name"
+                            : "Isi data team terlebih dahulu"
+                        }
+                        disabled={!isEditMode || !teamDetailsCompleted}
                         className={inputClassName}
                       />
                       {errors.leaderName && (
@@ -669,14 +775,19 @@ export default function TeamProfilePage() {
                       )}
                     </div>
 
+                    {/* Leader Email */}
                     <div className="flex flex-col gap-3">
-                      <Label>Email Anggota</Label>
+                      <Label>Email Ketua</Label>
                       <EditableInput
                         register={register}
                         name="leaderEmail"
                         type="email"
-                        placeholder="Input Email Anggota"
-                        disabled={!isEditMode}
+                        placeholder={
+                          teamDetailsCompleted
+                            ? "Input Email Ketua"
+                            : "Isi data team terlebih dahulu"
+                        }
+                        disabled={!isEditMode || !teamDetailsCompleted}
                         className={inputClassName}
                       />
                       {errors.leaderEmail && (
@@ -686,6 +797,49 @@ export default function TeamProfilePage() {
                       )}
                     </div>
 
+                    {/* Leader Role */}
+                    <div className="flex flex-col gap-3">
+                      <Label>Role Ketua</Label>
+                      <Controller
+                        name="leaderRole"
+                        control={control}
+                        render={({ field }) => (
+                          <Select
+                            disabled={!isEditMode || !teamDetailsCompleted}
+                            value={field.value || ""}
+                            onValueChange={field.onChange}
+                          >
+                            <SelectTrigger className={inputClassName}>
+                              <SelectValue
+                                placeholder={
+                                  teamDetailsCompleted
+                                    ? "Pilih Role"
+                                    : "Isi data team dulu"
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Hustler">
+                                Hustler (Business)
+                              </SelectItem>
+                              <SelectItem value="Hipster">
+                                Hipster (Design)
+                              </SelectItem>
+                              <SelectItem value="Hacker">
+                                Hacker (Tech)
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
+                      {errors.leaderRole && (
+                        <p className="text-red-400 text-sm">
+                          {errors.leaderRole.message}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Leader GitHub */}
                     <div className="flex flex-col gap-3 w-full">
                       <Label>
                         Link <span className="font-bold">Github*</span>
@@ -694,8 +848,12 @@ export default function TeamProfilePage() {
                         <EditableInput
                           register={register}
                           name="leaderGithub"
-                          placeholder="Input Link Github"
-                          disabled={!isEditMode}
+                          placeholder={
+                            teamDetailsCompleted
+                              ? "Input Link Github"
+                              : "Isi data team terlebih dahulu"
+                          }
+                          disabled={!isEditMode || !teamDetailsCompleted}
                           className={inputClassName}
                         />
                         <div className="w-full flex justify-end pt-2">
@@ -706,6 +864,7 @@ export default function TeamProfilePage() {
                       </div>
                     </div>
 
+                    {/* Leader Requirements */}
                     <div className="flex flex-col gap-2">
                       <Label>
                         Berkas Persyaratan* (Twibbon, Follow IG, Pap muka)
@@ -715,8 +874,12 @@ export default function TeamProfilePage() {
                           register={register}
                           name="requirementLink"
                           type="url"
-                          placeholder="Link Gdrive"
-                          disabled={!isEditMode}
+                          placeholder={
+                            teamDetailsCompleted
+                              ? "Link Gdrive"
+                              : "Isi data team terlebih dahulu"
+                          }
+                          disabled={!isEditMode || !teamDetailsCompleted}
                           className={inputClassName}
                         />
                         {errors.requirementLink && (
@@ -737,13 +900,26 @@ export default function TeamProfilePage() {
                   {fields.map((member, index) => (
                     <div
                       key={member.id}
-                      className="space-y-6 flex flex-col border-t border-white/20 pt-6"
+                      className={`space-y-6 flex flex-col border-t border-white/20 pt-6 ${
+                        isEditMode && !allInfoCompleted ? "opacity-60" : ""
+                      }`}
                     >
+                      {index === 0 && isEditMode && !allInfoCompleted && (
+                        <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
+                          <p className="text-red-200 text-sm font-medium flex items-center gap-2">
+                            <span>🚫</span>
+                            {!teamDetailsCompleted
+                              ? "Isi data team terlebih dahulu"
+                              : "Lengkapi data ketua untuk menambah anggota"}
+                          </p>
+                        </div>
+                      )}
+
                       <div className="flex justify-between items-center">
                         <h3 className="font-semibold text-white">
                           Member {index + 1}
                         </h3>
-                        {isEditMode && (
+                        {isEditMode && allInfoCompleted && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -754,13 +930,19 @@ export default function TeamProfilePage() {
                           </Button>
                         )}
                       </div>
+
+                      {/* All member inputs disabled if not all info complete */}
                       <div className="flex flex-col gap-3">
                         <Label>Nama Anggota</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.name`}
-                          placeholder="Input member name"
-                          disabled={!isEditMode}
+                          placeholder={
+                            allInfoCompleted
+                              ? "Input member name"
+                              : "Lengkapi data team dan ketua dulu"
+                          }
+                          disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -769,18 +951,66 @@ export default function TeamProfilePage() {
                         <EditableInput
                           register={register}
                           name={`members.${index}.email`}
-                          placeholder="Input Email Anggota"
-                          disabled={!isEditMode}
+                          placeholder={
+                            allInfoCompleted
+                              ? "Input Email Anggota"
+                              : "Lengkapi data team dan ketua dulu"
+                          }
+                          disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
+                      </div>
+                      <div className="flex flex-col gap-3">
+                        <Label>Role</Label>
+                        <Controller
+                          name={`members.${index}.member_role`}
+                          control={control}
+                          render={({ field }) => (
+                            <Select
+                              disabled={!isEditMode || !allInfoCompleted}
+                              value={field.value || ""}
+                              onValueChange={field.onChange}
+                            >
+                              <SelectTrigger className={inputClassName}>
+                                <SelectValue
+                                  placeholder={
+                                    allInfoCompleted
+                                      ? "Pilih Role"
+                                      : "Lengkapi data team dan ketua dulu"
+                                  }
+                                />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Hustler">
+                                  Hustler (Business)
+                                </SelectItem>
+                                <SelectItem value="Hipster">
+                                  Hipster (Design)
+                                </SelectItem>
+                                <SelectItem value="Hacker">
+                                  Hacker (Tech)
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                        {errors.members?.[index]?.member_role && (
+                          <p className="text-red-400 text-sm">
+                            {errors.members[index]?.member_role?.message}
+                          </p>
+                        )}
                       </div>
                       <div className="flex flex-col gap-3">
                         <Label>Github*</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.github`}
-                          placeholder="Input Link Github"
-                          disabled={!isEditMode}
+                          placeholder={
+                            allInfoCompleted
+                              ? "Input Link Github"
+                              : "Lengkapi data team dan ketua dulu"
+                          }
+                          disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -789,8 +1019,12 @@ export default function TeamProfilePage() {
                         <EditableInput
                           register={register}
                           name={`members.${index}.requirementLink`}
-                          placeholder="Link GDrive"
-                          disabled={!isEditMode}
+                          placeholder={
+                            allInfoCompleted
+                              ? "Link GDrive"
+                              : "Lengkapi data team dan ketua dulu"
+                          }
+                          disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -798,24 +1032,35 @@ export default function TeamProfilePage() {
                   ))}
 
                   {isEditMode && (
-                    <div className="w-full flex items-center justify-center">
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          append({
-                            name: "",
-                            email: "",
-                            github: "",
-                            requirementLink: "",
-                          })
-                        }
-                        className={cn(
-                          `bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6`,
-                          fields.length === 3 ? "hidden" : ""
-                        )}
-                      >
-                        <Plus className="mr-2" /> Add Team Member
-                      </Button>
+                    <div className="w-full flex items-center justify-center pt-6">
+                      {allInfoCompleted ? (
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            append({
+                              name: "",
+                              email: "",
+                              github: "",
+                              requirementLink: "",
+                              member_role: undefined,
+                            })
+                          }
+                          className={cn(
+                            `bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6`,
+                            fields.length === 3 ? "hidden" : ""
+                          )}
+                        >
+                          <Plus className="mr-2" /> Add Team Member
+                        </Button>
+                      ) : (
+                        <div className="bg-white/5 border border-white/20 rounded-full px-6 py-3 text-white/50 text-sm flex items-center gap-2">
+                          <span className="text-yellow-400">⚠️</span>
+                          {!teamDetailsCompleted 
+                            ? "Isi data team terlebih dahulu" 
+                            : "Lengkapi data ketua untuk menambah anggota"
+                          }
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
