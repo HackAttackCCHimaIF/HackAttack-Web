@@ -14,7 +14,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Delete existing team members for this team
     const { error: deleteError } = await supabaseServer
       .from("TeamMember")
       .delete()
@@ -25,10 +24,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: deleteError.message }, { status: 400 });
     }
 
-    // Prepare all members (leader + additional members)
     const allMembers = [];
 
-    // Add leader
     if (leader) {
       allMembers.push({
         id: uuidv4(),
@@ -38,10 +35,10 @@ export async function POST(req: Request) {
         github_url: leader.github_url || null,
         data_url: leader.data_url,
         is_leader: true,
+        member_role: leader.member_role,
       });
     }
 
-    // Add additional members
     if (members && Array.isArray(members)) {
       members.forEach((member) => {
         if (member.name && member.name.trim() !== "") {
@@ -53,6 +50,7 @@ export async function POST(req: Request) {
             github_url: member.github || null,
             data_url: member.requirementLink || null,
             is_leader: false,
+            member_role: member.member_role,
           });
         }
       });
@@ -65,7 +63,6 @@ export async function POST(req: Request) {
       );
     }
 
-    // Insert all members
     const { data, error } = await supabaseServer
       .from("TeamMember")
       .insert(allMembers)
@@ -90,7 +87,6 @@ export async function POST(req: Request) {
   }
 }
 
-// GET method to fetch existing team members
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -107,7 +103,7 @@ export async function GET(req: Request) {
       .from("TeamMember")
       .select("*")
       .eq("team_id", teamId)
-      .order("is_leader", { ascending: false }); // Leader first
+      .order("is_leader", { ascending: false });
 
     if (error) {
       console.error("Database error:", error);
