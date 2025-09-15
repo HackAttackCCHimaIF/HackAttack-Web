@@ -121,8 +121,8 @@ const PaymentForm = () => {
                     />
                   </div>
 
-                  <CopyableLink label="BCA ( Faiq Haqqani )" text="8895558571" />
-                  <CopyableLink label="BRI ( Faiq Haqqani )" text="0131 0104 8271 507" />
+                  <CopyableLink label="BCA ( a.n. GISELA SESARIA KUSTHIKA  PUTRI )" text="7285451698" />
+                  <CopyableLink label="ShopeePay ( a.n. GISELA SESARIA KUSTHIKA PUTRI )" text="081808767771" />
                 </div>
 
                 {/* Payment Proof */}
