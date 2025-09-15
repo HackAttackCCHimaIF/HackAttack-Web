@@ -187,20 +187,16 @@ any) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let inputValue = e.target.value;
 
-    // Always ensure it starts with 62
     if (!inputValue.startsWith("62")) {
       inputValue = "62" + inputValue.replace(/^62*/, "");
     }
 
-    // Only allow numbers
     inputValue = inputValue.replace(/\D/g, "");
 
-    // Ensure it starts with 62
     if (!inputValue.startsWith("62")) {
       inputValue = "62";
     }
 
-    // Limit length (62 + max 13 digits = 15 total)
     if (inputValue.length > 15) {
       inputValue = inputValue.substring(0, 15);
     }
@@ -233,7 +229,6 @@ any) => {
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Set cursor after "62" when focused
     setTimeout(() => {
       if (e.target.value === "62") {
         e.target.setSelectionRange(2, 2);
@@ -273,24 +268,14 @@ any) => {
 const isTeamDetailsComplete = (values: TeamFormValues) => {
   return (
     values.teamName &&
-    values.teamName.trim() !== "" &&
     values.institution &&
-    values.institution.trim() !== "" &&
     values.whatsapp_number &&
-    values.whatsapp_number.trim() !== "" &&
     values.whatsapp_number !== "62"
   );
 };
 
 const isLeaderInfoComplete = (values: TeamFormValues) => {
-  return (
-    values.leaderName &&
-    values.leaderName.trim() !== "" &&
-    values.leaderEmail &&
-    values.leaderEmail.trim() !== "" &&
-    values.requirementLink &&
-    values.requirementLink.trim() !== ""
-  );
+  return values.leaderName && values.leaderEmail && values.requirementLink;
 };
 
 const isAllInfoComplete = (values: TeamFormValues) => {
@@ -462,28 +447,19 @@ export default function TeamProfilePage() {
 
           if (result.data) {
             setValue("teamName", result.data.team_name || "");
+            setValue("institution", result.data.institution || "");
+            setValue("whatsapp_number", result.data.whatsapp_number || "62");
+            setValue("paymentproof_url", result.data.paymentproof_url || "");
 
-            const institution = result.data.institution || "";
-            setValue("institution", institution);
-
-            if (institution === "Telkom University") {
+            if (result.data.institution === "Telkom University") {
               setInstitution("telkom");
-            } else if (institution) {
+            } else if (result.data.institution) {
               setInstitution("lainnya");
             }
-
-            // Handle WhatsApp number - ensure it starts with 62
-            let whatsappNumber = result.data.whatsapp_number || "62";
-            if (!whatsappNumber.startsWith("62")) {
-              whatsappNumber = "62" + whatsappNumber;
-            }
-            setValue("whatsapp_number", whatsappNumber);
-            setValue("paymentproof_url", result.data.paymentproof_url || "");
           }
-        } else {
         }
-      } catch {
-        toast.error("Error loading team data:");
+      } catch (error) {
+        console.error("Error loading team data:", error);
       } finally {
         setTeamDataLoaded(true);
       }
@@ -500,6 +476,7 @@ export default function TeamProfilePage() {
         const teamResponse = await fetch(
           `/api/team?userEmail=${encodeURIComponent(user.email)}`
         );
+
         if (!teamResponse.ok) {
           setMemberDataLoaded(true);
           return;
@@ -516,54 +493,44 @@ export default function TeamProfilePage() {
         const membersResponse = await fetch(
           `/api/team-members?teamId=${teamId}`
         );
+
         if (membersResponse.ok) {
           const membersResult = await membersResponse.json();
 
           if (membersResult.data && membersResult.data.length > 0) {
-            const members: TeamMemberDB[] = membersResult.data;
-            const leader = members.find((member) => member.is_leader);
-            const teamMembers = members.filter((member) => !member.is_leader);
+            const members = membersResult.data;
+            const leader = members.find(
+              (member: TeamMemberDB) => member.is_leader
+            );
+            const teamMembers = members.filter(
+              (member: TeamMemberDB) => !member.is_leader
+            );
 
             if (leader) {
               setValue("leaderName", leader.name || "");
               setValue("leaderEmail", leader.email || "");
               setValue("leaderGithub", leader.github_url || "");
-              setValue(
-                "leaderRole",
-                (leader.member_role as "Hustler" | "Hipster" | "Hacker") ||
-                  "Hacker"
-              );
               setValue("requirementLink", leader.data_url || "");
+              setValue("leaderRole", leader.member_role || "");
             }
-
-            console.log(fields.length);
 
             for (let i = fields.length - 1; i >= 0; i--) {
               remove(i);
             }
 
-            if (teamMembers.length > 0) {
-              teamMembers.forEach((member) => {
-                const memberData: TeamMember = {
-                  name: member.name || "",
-                  email: member.email || "",
-                  github: member.github_url || "",
-                  member_role:
-                    (member.member_role as "Hustler" | "Hipster" | "Hacker") ||
-                    undefined,
-                  requirementLink: member.data_url || "",
-                };
-
-                console.log("🔥 Appending member:", memberData);
-                append(memberData);
+            teamMembers.forEach((member: TeamMember) => {
+              append({
+                name: member.name || "",
+                email: member.email || "",
+                github: member.github || "",
+                requirementLink: member.requirementLink || "",
+                member_role: member.member_role || undefined,
               });
-            }
+            });
           }
-        } else {
-          toast.error("No member data available");
         }
-      } catch {
-        toast.error("Error loading member data");
+      } catch (error) {
+        console.error("Error loading member data:", error);
       } finally {
         setMemberDataLoaded(true);
       }
@@ -710,39 +677,15 @@ export default function TeamProfilePage() {
                 <div className="space-y-12 pt-6 tracking-wide">
                   {isEditMode && !teamDetailsCompleted && (
                     <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
-                      <div className="flex items-center gap-2">
-                        <span className="text-yellow-200 text-lg">⚠️</span>
-                        <div>
-                          <p className="text-yellow-200 font-medium">
-                            Isi Data Team Terlebih Dahulu
-                          </p>
-                          <p className="text-yellow-200/80 text-sm mt-1">
-                            Lengkapi Nama Team, Asal Instansi, dan WhatsApp
-                            untuk melanjutkan
-                          </p>
-                        </div>
-                      </div>
+                      <p className="text-yellow-200 font-medium">
+                        ⚠️ Isi Data Team Terlebih Dahulu
+                      </p>
+                      <p className="text-yellow-200/80 text-sm mt-1">
+                        Lengkapi Nama Team, Asal Instansi, dan WhatsApp untuk
+                        melanjutkan
+                      </p>
                     </div>
                   )}
-
-                  {isEditMode &&
-                    teamDetailsCompleted &&
-                    !leaderInfoCompleted && (
-                      <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-6">
-                        <div className="flex items-center gap-2">
-                          <span className="text-blue-200 text-lg">👤</span>
-                          <div>
-                            <p className="text-blue-200 font-medium">
-                              Lengkapi Data Ketua
-                            </p>
-                            <p className="text-blue-200/80 text-sm mt-1">
-                              Isi semua data ketua untuk dapat menambah anggota
-                              tim
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
 
                   <div className="space-y-6 flex flex-col">
                     <div className="flex flex-col gap-3">
@@ -904,17 +847,6 @@ export default function TeamProfilePage() {
                         isEditMode && !allInfoCompleted ? "opacity-60" : ""
                       }`}
                     >
-                      {index === 0 && isEditMode && !allInfoCompleted && (
-                        <div className="bg-red-500/20 border border-red-500/30 rounded-lg p-3 mb-4">
-                          <p className="text-red-200 text-sm font-medium flex items-center gap-2">
-                            <span>🚫</span>
-                            {!teamDetailsCompleted
-                              ? "Isi data team terlebih dahulu"
-                              : "Lengkapi data ketua untuk menambah anggota"}
-                          </p>
-                        </div>
-                      )}
-
                       <div className="flex justify-between items-center">
                         <h3 className="font-semibold text-white">
                           Member {index + 1}
@@ -1053,12 +985,8 @@ export default function TeamProfilePage() {
                           <Plus className="mr-2" /> Add Team Member
                         </Button>
                       ) : (
-                        <div className="bg-white/5 border border-white/20 rounded-full px-6 py-3 text-white/50 text-sm flex items-center gap-2">
-                          <span className="text-yellow-400">⚠️</span>
-                          {!teamDetailsCompleted 
-                            ? "Isi data team terlebih dahulu" 
-                            : "Lengkapi data ketua untuk menambah anggota"
-                          }
+                        <div className="bg-white/5 border border-white/20 rounded-full px-6 py-3 text-white/50 text-sm">
+                          Lengkapi data team dan ketua untuk menambah anggota
                         </div>
                       )}
                     </div>
@@ -1179,12 +1107,24 @@ export default function TeamProfilePage() {
                   {/* Whatsapp Perwakilan */}
                   <div className="flex flex-col gap-3">
                     <Label>Whatsapp Perwakilan</Label>
-                    <WhatsAppInput
+                    <EditableInput
                       register={register}
                       name="whatsapp_number"
                       placeholder="62812345678"
                       disabled={!isEditMode}
                       className={inputClassName}
+                      type="tel"
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      onInput={(e: any) => {
+                        let value = e.target.value.replace(/\D/g, "");
+                        if (!value.startsWith("62")) {
+                          value = "62" + value.replace(/^62*/, "");
+                        }
+                        if (value.length > 15) {
+                          value = value.substring(0, 15);
+                        }
+                        e.target.value = value;
+                      }}
                     />
                     {errors.whatsapp_number && (
                       <p className="text-red-400 text-sm">
