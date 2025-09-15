@@ -601,7 +601,7 @@ export default function TeamProfilePage() {
             name: data.leaderName,
             email: data.leaderEmail,
             github_url: data.leaderGithub || null,
-            role: data.leaderRole,
+            member_role: data.leaderRole || null,
             data_url: data.requirementLink,
           },
           members:
