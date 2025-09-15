@@ -2,8 +2,8 @@
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Check, Edit, LogIn, UserPlus } from "lucide-react";
-import { NotificationDrawer } from "./NotificationDrawer";
+import { Check, Edit } from "lucide-react";
+import { NotificationDialog } from "./NotificationDialog";
 import { useUserStore } from "@/lib/stores/userStore";
 
 export const HeaderDashboard = ({
@@ -79,7 +79,7 @@ export const HeaderDashboard = ({
               </Button>
             )}
 
-            <NotificationDrawer />
+            <NotificationDialog />
 
             <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
               <div className="flex-col text-right lg:flex hidden">
@@ -97,14 +97,14 @@ export const HeaderDashboard = ({
           </>
         ) : (
           <div className="flex gap-3">
-            <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full !px-4 !py-6">
+            {/* <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full !px-4 !py-6">
               <LogIn />
               <p className="hidden md:block">Login</p>
             </Button>
             <Button className="bg-pink-500/60 hover:bg-pink-600 text-white rounded-full !px-4 !py-6">
               <UserPlus />
               <p className="hidden md:block">Register</p>
-            </Button>
+            </Button> */}
           </div>
         )}
       </div>
