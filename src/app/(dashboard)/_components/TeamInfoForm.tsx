@@ -663,8 +663,8 @@ export default function TeamProfilePage() {
       />
 
       {userProfile.isLoggedIn ? (
-        <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
-          <div className="pl-4 pb-8 col-span-1 md:col-span-2 w-full">
+        <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
+          <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
             <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
                 <CardTitle className="text-2xl font-medium leading-none">
@@ -996,7 +996,7 @@ export default function TeamProfilePage() {
             </Card>
           </div>
 
-          <div className="pr-4 pb-8 col-span-1">
+          <div className="px-4 lg:pl-0 lg:pr-4 pb-8 lg:col-span-1 w-full">
             <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
                 <CardTitle className="text-2xl font-medium leading-none">

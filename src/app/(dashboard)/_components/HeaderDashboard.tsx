@@ -3,8 +3,8 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Check, Edit, LogIn, UserPlus } from "lucide-react";
-import { NotificationDrawer } from "./NotificationDrawer";
 import { useUserStore } from "@/lib/stores/userStore";
+import { NotificationDialog } from "./NotificationDialog";
 
 export const HeaderDashboard = ({
   isEditMode,
@@ -79,7 +79,7 @@ export const HeaderDashboard = ({
               </Button>
             )}
 
-            <NotificationDrawer />
+            <NotificationDialog />
 
             <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
               <div className="flex-col text-right lg:flex hidden">
