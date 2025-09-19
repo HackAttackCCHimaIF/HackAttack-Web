@@ -698,7 +698,9 @@ export default function TeamProfilePage() {
                       </h3>
 
                       {/* Leader Name */}
+
                       <Label>Leader Name*</Label>
+
                       <EditableInput
                         register={register}
                         name="leaderName"
@@ -883,6 +885,7 @@ export default function TeamProfilePage() {
                           name={`members.${index}.email`}
                           placeholder={
                             allInfoCompleted
+
                               ? "Enter the Member's Email"
                               : "Complete the team and leader data first"
                           }
