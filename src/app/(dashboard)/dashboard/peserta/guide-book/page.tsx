@@ -10,12 +10,12 @@ const GuideBookPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <HeaderDashboard bottomText="Book" topText="Guide"/>
+      <HeaderDashboard bottomText="Book" topText="Guide" />
 
-      <div className="flex-1 flex flex-col pb-5">
+      <div className="flex-1 flex flex-col pb-5 px-4">
         <Card className="flex-1 bg-white/10 backdrop-blur-md border-3 border-white/10 rounded-2xl text-white">
           <CardContent className="h-full w-full overflow-y-auto p-4 max-h-[80vh]">
-            <div className="w-full flex flex-col">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
               {guidebookImages.map((src, index) => (
                 <Image
                   key={index}
