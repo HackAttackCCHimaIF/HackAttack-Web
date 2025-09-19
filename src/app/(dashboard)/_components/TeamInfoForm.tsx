@@ -663,8 +663,8 @@ export default function TeamProfilePage() {
       />
 
       {userProfile.isLoggedIn ? (
-        <div className="w-full h-full overflow-y-auto gap-4 grid grid-cols-1 lg:grid-cols-3">
-          <div className="pl-4 pb-8 col-span-1 md:col-span-2 w-full">
+        <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
+          <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
             <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
                 <CardTitle className="text-2xl font-medium leading-none">
@@ -678,11 +678,10 @@ export default function TeamProfilePage() {
                   {isEditMode && !teamDetailsCompleted && (
                     <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
                       <p className="text-yellow-200 font-medium">
-                        ⚠️ Isi Data Team Terlebih Dahulu
+                        Fill in Team Data First
                       </p>
                       <p className="text-yellow-200/80 text-sm mt-1">
-                        Lengkapi Nama Team, Asal Instansi, dan WhatsApp untuk
-                        melanjutkan
+                        Complete your Team Name, Institution of Origin, and WhatsApp to continue.
                       </p>
                     </div>
                   )}
@@ -690,23 +689,25 @@ export default function TeamProfilePage() {
                   <div className="space-y-6 flex flex-col">
                     <div className="flex flex-col gap-3">
                       <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-                        Leader
+                        Team Lead
                         {isEditMode && !teamDetailsCompleted && (
                           <span className="text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded">
-                            Isi data team dulu
+                            Fill in the team data first
                           </span>
                         )}
                       </h3>
 
                       {/* Leader Name */}
-                      <Label>Nama Ketua</Label>
+
+                      <Label>Leader Name*</Label>
+
                       <EditableInput
                         register={register}
                         name="leaderName"
                         placeholder={
                           teamDetailsCompleted
                             ? "Input your leader team name"
-                            : "Isi data team terlebih dahulu"
+                            : "Fill in the team data first"
                         }
                         disabled={!isEditMode || !teamDetailsCompleted}
                         className={inputClassName}
@@ -720,15 +721,15 @@ export default function TeamProfilePage() {
 
                     {/* Leader Email */}
                     <div className="flex flex-col gap-3">
-                      <Label>Email Ketua</Label>
+                      <Label>Leader Email*</Label>
                       <EditableInput
                         register={register}
                         name="leaderEmail"
                         type="email"
                         placeholder={
                           teamDetailsCompleted
-                            ? "Input Email Ketua"
-                            : "Isi data team terlebih dahulu"
+                            ? "Enter the Leader's Email"
+                            : "Fill in the team data first"
                         }
                         disabled={!isEditMode || !teamDetailsCompleted}
                         className={inputClassName}
@@ -742,7 +743,7 @@ export default function TeamProfilePage() {
 
                     {/* Leader Role */}
                     <div className="flex flex-col gap-3">
-                      <Label>Role Ketua</Label>
+                      <Label>Leader Role*</Label>
                       <Controller
                         name="leaderRole"
                         control={control}
@@ -756,8 +757,8 @@ export default function TeamProfilePage() {
                               <SelectValue
                                 placeholder={
                                   teamDetailsCompleted
-                                    ? "Pilih Role"
-                                    : "Isi data team dulu"
+                                    ? "Select Role"
+                                    : "Fill in the team data first"
                                 }
                               />
                             </SelectTrigger>
@@ -785,7 +786,7 @@ export default function TeamProfilePage() {
                     {/* Leader GitHub */}
                     <div className="flex flex-col gap-3 w-full">
                       <Label>
-                        Link <span className="font-bold">Github*</span>
+                        Leader <span className="font-bold">Portfolio*</span>
                       </Label>
                       <div>
                         <EditableInput
@@ -794,7 +795,7 @@ export default function TeamProfilePage() {
                           placeholder={
                             teamDetailsCompleted
                               ? "Input Link Github"
-                              : "Isi data team terlebih dahulu"
+                              : "Fill in the team data first"
                           }
                           disabled={!isEditMode || !teamDetailsCompleted}
                           className={inputClassName}
@@ -810,7 +811,7 @@ export default function TeamProfilePage() {
                     {/* Leader Requirements */}
                     <div className="flex flex-col gap-2">
                       <Label>
-                        Berkas Persyaratan* (Twibbon, Follow IG, Pap muka)
+                        Required Documents*
                       </Label>
                       <div>
                         <EditableInput
@@ -819,8 +820,8 @@ export default function TeamProfilePage() {
                           type="url"
                           placeholder={
                             teamDetailsCompleted
-                              ? "Link Gdrive"
-                              : "Isi data team terlebih dahulu"
+                              ? "(Please upload your requirement documents in link format)"
+                              : "Fill in the team data first"
                           }
                           disabled={!isEditMode || !teamDetailsCompleted}
                           className={inputClassName}
@@ -832,8 +833,7 @@ export default function TeamProfilePage() {
                         )}
                         <div className="w-full flex justify-end pt-2">
                           <p className="text-white/50 text-xs max-w-xs text-end">
-                            *Input Screenshot hasil Persyaratan dalam satu
-                            drive, kemudian kumpulkan.
+                            Upload screenshots of all required documents into one Google Drive folder, then submit the link here.
                           </p>
                         </div>
                       </div>
@@ -865,28 +865,29 @@ export default function TeamProfilePage() {
 
                       {/* All member inputs disabled if not all info complete */}
                       <div className="flex flex-col gap-3">
-                        <Label>Nama Anggota</Label>
+                        <Label>Member&apos;s name</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.name`}
                           placeholder={
                             allInfoCompleted
-                              ? "Input member name"
-                              : "Lengkapi data team dan ketua dulu"
+                              ? "Enter the Member's Name"
+                              : "Complete the team and leader data first"
                           }
                           disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
                       <div className="flex flex-col gap-3">
-                        <Label>Email Anggota</Label>
+                        <Label>Member&apos;s Email</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.email`}
                           placeholder={
                             allInfoCompleted
-                              ? "Input Email Anggota"
-                              : "Lengkapi data team dan ketua dulu"
+
+                              ? "Enter the Member's Email"
+                              : "Complete the team and leader data first"
                           }
                           disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
@@ -907,8 +908,8 @@ export default function TeamProfilePage() {
                                 <SelectValue
                                   placeholder={
                                     allInfoCompleted
-                                      ? "Pilih Role"
-                                      : "Lengkapi data team dan ketua dulu"
+                                      ? "Select Role"
+                                      : "Complete the team and leader data first"
                                   }
                                 />
                               </SelectTrigger>
@@ -933,28 +934,28 @@ export default function TeamProfilePage() {
                         )}
                       </div>
                       <div className="flex flex-col gap-3">
-                        <Label>Github*</Label>
+                        <Label>Member Portfolio*</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.github`}
                           placeholder={
                             allInfoCompleted
-                              ? "Input Link Github"
-                              : "Lengkapi data team dan ketua dulu"
+                              ? "(Please provide your portfolio link  optional / can be NULL)"
+                              : "Complete the team and leader data first"
                           }
                           disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
                       <div className="flex flex-col gap-2">
-                        <Label>Berkas Persyaratan*</Label>
+                        <Label>Required Documents*</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.requirementLink`}
                           placeholder={
                             allInfoCompleted
-                              ? "Link GDrive"
-                              : "Lengkapi data team dan ketua dulu"
+                              ? "(Please upload your requirement documents in link format)"
+                              : "Complete the team and leader data first"
                           }
                           disabled={!isEditMode || !allInfoCompleted}
                           className={inputClassName}
@@ -986,7 +987,7 @@ export default function TeamProfilePage() {
                         </Button>
                       ) : (
                         <div className="bg-white/5 border border-white/20 rounded-full px-6 py-3 text-white/50 text-sm">
-                          Lengkapi data team dan ketua untuk menambah anggota
+                          Complete the team and leader data to add members.
                         </div>
                       )}
                     </div>
@@ -996,7 +997,7 @@ export default function TeamProfilePage() {
             </Card>
           </div>
 
-          <div className="pr-4 pb-8 col-span-1">
+          <div className="px-4 lg:pl-0 lg:pr-4 pb-8 lg:col-span-1 w-full">
             <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
                 <CardTitle className="text-2xl font-medium leading-none">
@@ -1009,7 +1010,7 @@ export default function TeamProfilePage() {
                 <div className="space-y-6 flex flex-col">
                   {/* Nama Team */}
                   <div className="flex flex-col gap-3">
-                    <Label>Nama Team</Label>
+                    <Label>Team Name*</Label>
                     <EditableInput
                       register={register}
                       name="teamName"
@@ -1026,7 +1027,7 @@ export default function TeamProfilePage() {
 
                   {/* Asal Instansi */}
                   <div className="flex flex-col gap-3">
-                    <Label>Asal Instansi</Label>
+                    <Label>Institution*</Label>
                     <RadioGroup
                       disabled={!isEditMode}
                       value={institution}
@@ -1070,7 +1071,7 @@ export default function TeamProfilePage() {
                             !isEditMode ? "opacity-60" : ""
                           }`}
                         >
-                          Lainnya
+                          Etc
                         </Label>
                       </div>
                     </RadioGroup>
@@ -1106,7 +1107,7 @@ export default function TeamProfilePage() {
 
                   {/* Whatsapp Perwakilan */}
                   <div className="flex flex-col gap-3">
-                    <Label>Whatsapp Perwakilan</Label>
+                    <Label>Leader&apos;s WhatsApp</Label>
                     <EditableInput
                       register={register}
                       name="whatsapp_number"
@@ -1135,11 +1136,11 @@ export default function TeamProfilePage() {
 
                   {/* Payment Proof */}
                   <div className="flex flex-col gap-3">
-                    <Label>Link Bukti Pembayaran</Label>
+                    <Label>Payment Proof Link*</Label>
                     <EditableInput
                       register={register}
                       name="paymentproof_url"
-                      placeholder="Input Link Bukti Pembayaran"
+                      placeholder="e.g., https://drive.google.com/abc123"
                       disabled={!isEditMode}
                       className={inputClassName}
                     />
@@ -1153,14 +1154,14 @@ export default function TeamProfilePage() {
                   {/* CopyableLink */}
                   <CopyableLink
                     disabled={!isEditMode}
-                    label="Link GDrive (Twibbon Caption, dll)"
-                    text="https://www.figma.com/design/OoZALSutXFS9ePSXclSJmy/draft-hackatton?node-id=0-1&p=f&t=0eRQB5Z4751onv0d-0"
+                    label="Publication Materials "
+                    text="(Twibbon, Caption, Poster, etc. will be provided by committee. All materials can be accessed here.)"
                   />
 
                   {/* Metode Pembayaran */}
                   <div className="relative flex flex-col">
                     <div className="relative w-full flex flex-col space-y-3 justify-center">
-                      <Label>Metode Pembayaran.</Label>
+                      <Label>Payment Method</Label>
                       <div className="flex flex-col space-y-1 text-center">
                         <p className="text-2xl font-bold">
                           {institution === "telkom"
@@ -1221,7 +1222,7 @@ export default function TeamProfilePage() {
             <CardContent className="flex-1 flex items-center justify-center">
               <div className="max-w-xl text-center px-4">
                 <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium tracking-wide">
-                  Selamat Datang Peserta
+                  Welcome Participants
                 </p>
                 <h2 className="font-bold text-4xl sm:text-5xl lg:text-6xl leading-tight">
                   HACKATTACK
@@ -1229,14 +1230,14 @@ export default function TeamProfilePage() {
                   2025
                 </h2>
                 <p className="text-sm sm:text-base mt-4">
-                  Silahkan untuk{" "}
+                  Feel Free to{" "}
                   <Link
                     href={"/sign-in"}
                     className="font-bold hover:text-pink-400 duration-200"
                   >
-                    login
+                    Login
                   </Link>{" "}
-                  terlebih dahulu
+                  First
                 </p>
               </div>
             </CardContent>

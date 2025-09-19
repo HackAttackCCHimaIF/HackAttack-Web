@@ -267,7 +267,7 @@ export default function RegistrationTable() {
                                         <div className="flex items-start justify-between w-full">
                                             <div>
                                                 <h3 className="font-semibold text-lg">{member.name}</h3>
-                                                <p className="text-sm text-gray-300">{member.email}</p>
+                                                <p className="text-sm text-white">{member.email}</p>
                                             </div>
                                             <div className="flex items-start gap-6 mt-3">
                                                 <div className="flex gap-1">
