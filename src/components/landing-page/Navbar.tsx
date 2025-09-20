@@ -21,13 +21,14 @@ const Navbar = () => {
   const iconList = ["hima", "telkom", "cci", "hack"];
 
   const homeSubItems = [
-    { href: "#about-us", label: "About Us" },
-    { href: "#timeline", label: "Timeline" },
-    { href: "#countdown", label: "Countdown" },
-    { href: "#speeddating", label: "Speed Dating" },
-    { href: "#sponsor", label: "Sponsor" },
-    { href: "#faq", label: "FAQ" },
+    { href: "/#about-us", label: "About Us" },
+    { href: "/#timeline", label: "Timeline" },
+    { href: "/#countdown", label: "Countdown" },
+    { href: "/#speeddating", label: "Speed Dating" },
+    { href: "/#sponsor", label: "Sponsor" },
+    { href: "/#faq", label: "FAQ" },
   ];
+
 
   useEffect(() => {
     // Get initial session
