@@ -130,7 +130,7 @@ const PaymentForm = () => {
                     placeholder="Select Your Institution"
                     options={[
                       { label: "Telkom University", value: "telkom" },
-                      { label: "Other Institution", value: "other" },
+                      { label: "Non Telkom University", value: "other" },
                     ]}
                     selected={formData.institution ? [formData.institution] : []}
                     onChange={(val) =>
