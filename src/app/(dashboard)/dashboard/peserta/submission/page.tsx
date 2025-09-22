@@ -203,7 +203,7 @@ const SubmissionPage = () => {
   }
 
   return (
-    <div className="min-h-1/2 h-full flex flex-col">
+    <div className="min-h-1/2 h-full flex flex-col pt-16 md:pt-0">
       <HeaderDashboard bottomText="Submission" />
 
       <div className="flex-1 w-full overflow-y-auto px-4 pb-5">

@@ -5,7 +5,7 @@ import React from "react";
 
 const ThemePage = () => {
   return (
-    <div className="flex flex-col min-h-full w-full">
+    <div className="flex flex-col min-h-full w-full pt-16 md:pt-0">
       <HeaderDashboard bottomText="Theme" />
 
       <div className="flex-1 flex flex-col pb-5 px-4">

@@ -652,7 +652,7 @@ export default function TeamProfilePage() {
   }
 
   return (
-    <div className="overflow-y-auto w-full min-h-full">
+    <div className="overflow-y-auto w-full min-h-full pt-16 md:pt-0">
       <SuccessDialog open={false} onClose={() => null} />
       <HeaderDashboard
         isEdit
