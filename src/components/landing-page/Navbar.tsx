@@ -1,5 +1,4 @@
 "use client";
-
 import { motion } from "framer-motion";
 import Image from "next/image";
 import React, { useState, useEffect } from "react";
@@ -29,15 +28,12 @@ const Navbar = () => {
     { href: "/#faq", label: "FAQ" },
   ];
 
-
   useEffect(() => {
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -51,6 +47,7 @@ const Navbar = () => {
   return (
     <nav className="w-full fixed top-0 z-50 px-4 sm:px-8 lg:px-16 py-4 ">
       <div className="flex items-center justify-between bg-stone-950/80 backdrop-blur-2xl px-8 rounded-full py-4">
+        {/* LEFT SIDE */}
         <div className="flex items-center gap-4 sm:gap-6">
           <Image
             src="/navbar/Icon.svg"
@@ -82,8 +79,10 @@ const Navbar = () => {
           </div>
         </div>
 
+        {/* DESKTOP NAV */}
         <div className="hidden xl:flex items-center gap-6">
           <div className="flex items-center gap-6 text-white font-medium">
+            {/* Home with dropdown */}
             <div className="relative">
               <button
                 onClick={() => setOpen(!open)}
@@ -127,6 +126,7 @@ const Navbar = () => {
             >
               Workshop
             </Link>
+
             <Link
               href="/merch"
               className={`cursor-pointer transition-colors duration-200 pb-1 ${
@@ -139,36 +139,50 @@ const Navbar = () => {
             </Link>
           </div>
 
+          {/* BUTTONS SECTION */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="outline"
-              className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white"
-            >
-              Guide Book
-            </Button>
-            <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block">
-              {!loading && (
-                <Link
-                  href={user ? "/dashboard/peserta" : "/register"}
-                  className="w-full"
-                >
-                  <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                    {user ? "Dashboard" : "Register Now"}
+            {pathname === "/merch" ? (
+              <Link href="/shop">
+                <Button className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white">
+                  Shop Now
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href={"/guide-book"} >
+                  <Button
+                    variant="outline"
+                    className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white"
+                  >
+                    Guide Book
                   </Button>
                 </Link>
-              )}
-              {loading && (
-                <Button
-                  className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
-                  disabled
-                >
-                  Loading...
-                </Button>
-              )}
-            </div>
+                <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block">
+                  {!loading && (
+                    <Link
+                      href={user ? "/dashboard/peserta" : "/register"}
+                      className="w-full"
+                    >
+                      <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
+                        {user ? "Dashboard" : "Register Now"}
+                      </Button>
+                    </Link>
+                  )}
+                  {loading && (
+                    <Button
+                      className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
+                      disabled
+                    >
+                      Loading...
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
 
+        {/* MOBILE NAV TOGGLE */}
         <div className="xl:hidden flex items-center">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -179,9 +193,11 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* MOBILE NAV */}
       {isOpen && (
         <div className="xl:hidden mt-4 flex flex-col gap-4 bg-stone-950/90 backdrop-blur-2xl rounded-xl px-4 py-8">
           <div className="flex flex-col gap-3 text-white font-medium">
+            {/* Home */}
             <div className="flex flex-col">
               <button
                 onClick={() => setIsHomeOpen(!isHomeOpen)}
@@ -241,33 +257,46 @@ const Navbar = () => {
             </Link>
           </div>
 
+          {/* MOBILE BUTTONS */}
           <div className="flex flex-col gap-3 mt-2">
-            <Button
-              variant="outline"
-              className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
-            >
-              Guide Book
-            </Button>
-            <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
-              {!loading && (
-                <Link
-                  href={user ? "/dashboard" : "/register"}
-                  className="w-full"
-                >
-                  <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                    {user ? "Dashboard" : "Register Now"}
+            {pathname === "/merch" ? (
+              <Link href="/shop" className="w-full">
+                <Button className="text-white w-full border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white">
+                  Shop Now
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link href={"/guide-book"}>
+                  <Button
+                    variant="outline"
+                    className="text-white border-none bg-[#84D26B]/25 hover:bg-[#84D26B]/40 rounded-full hover:text-white w-full"
+                  >
+                    Guide Book
                   </Button>
                 </Link>
-              )}
-              {loading && (
-                <Button
-                  className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
-                  disabled
-                >
-                  Loading...
-                </Button>
-              )}
-            </div>
+                <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
+                  {!loading && (
+                    <Link
+                      href={user ? "/dashboard/peserta" : "/register"}
+                      className="w-full"
+                    >
+                      <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
+                        {user ? "Dashboard" : "Register Now"}
+                      </Button>
+                    </Link>
+                  )}
+                  {loading && (
+                    <Button
+                      className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
+                      disabled
+                    >
+                      Loading...
+                    </Button>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

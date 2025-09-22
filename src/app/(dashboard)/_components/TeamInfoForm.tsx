@@ -454,7 +454,7 @@ export default function TeamProfilePage() {
             if (result.data.institution === "Telkom University") {
               setInstitution("telkom");
             } else if (result.data.institution) {
-              setInstitution("lainnya");
+              setInstitution("nontelkom");
             }
           }
         }
@@ -1032,7 +1032,7 @@ export default function TeamProfilePage() {
                       disabled={!isEditMode}
                       value={institution}
                       onValueChange={(value: string) => {
-                        setInstitution(value as "telkom" | "lainnya");
+                        setInstitution(value as "telkom" | "nontelkom");
 
                         if (value === "telkom") {
                           setValue("institution", "Telkom University");
@@ -1060,7 +1060,7 @@ export default function TeamProfilePage() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <RadioGroupItem
-                          value="lainnya"
+                          value="nontelkom"
                           id="lainnya"
                           className="border-white text-white"
                           disabled={!isEditMode}
@@ -1071,12 +1071,12 @@ export default function TeamProfilePage() {
                             !isEditMode ? "opacity-60" : ""
                           }`}
                         >
-                          Etc
+                          Non Telkom
                         </Label>
                       </div>
                     </RadioGroup>
 
-                    {institution === "lainnya" && (
+                    {institution === "nontelkom" && (
                       <div className="mt-3">
                         <EditableInput
                           register={register}
@@ -1166,14 +1166,14 @@ export default function TeamProfilePage() {
                         <p className="text-2xl font-bold">
                           {institution === "telkom"
                             ? "Rp150.000*"
-                            : institution === "others"
+                            : institution === "nontelkom"
                             ? "Rp170.000*"
                             : "Rp-*"}
                         </p>
                         <p className="text-sm font-medium text-white/50">
                           {institution === "telkom"
                             ? "( Harga khusus untuk mahasiswa Telkom University )"
-                            : institution === "lainnya"
+                            : institution === "nontelkom"
                             ? "( Harga pendaftaran untuk instansi lainnya )"
                             : "( Pilih instansi untuk melihat harga pendaftaran )"}
                         </p>
@@ -1181,19 +1181,19 @@ export default function TeamProfilePage() {
                       <div className="before:content-[''] flex items-center justify-center ">
                         {institution === "telkom" ? (
                           <Image
-                            src="/dashboard/QR.png"
+                            src="/dashboard/QRISGacor.png"
                             width={340}
                             height={340}
                             alt="QR Telkom"
-                            className="w-80 rounded-4xl border-10 border-white/10"
+                            className="w-80 p-4 rounded-4xl border-10 border-white/10"
                           />
-                        ) : institution === "lainnya" ? (
+                        ) : institution === "nontelkom" ? (
                           <Image
-                            src="/dashboard/QR.png"
+                            src="/dashboard/QRISGacor.png"
                             width={340}
                             height={340}
                             alt="QR Telkom"
-                            className="w-80 rounded-4xl border-10 border-white/10"
+                            className="w-80 p-4 rounded-4xl border-10 border-white/10"
                           />
                         ) : (
                           ""

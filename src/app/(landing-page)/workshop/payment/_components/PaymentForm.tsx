@@ -87,7 +87,7 @@ const PaymentForm = () => {
       <HeaderPayment />
 
       {/* grid layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-20 mt-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-6 lg:px-20 mt-3 gap-4">
         {/* LEFT CARD */}
         <Card className="col-span-1 lg:col-span-2 bg-white/10 backdrop-blur-md border-3 border-white/10 w-full h-full text-white rounded-2xl pt-0">
           <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
@@ -166,7 +166,7 @@ const PaymentForm = () => {
         </Card>
 
         {/* RIGHT CARD */}
-        <div className="pr-4 col-span-1">
+        <div className="pr-0 lg:pr-4 col-span-1">
           <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
               <CardTitle className="text-2xl font-medium leading-none">
@@ -195,21 +195,21 @@ const PaymentForm = () => {
 
                 {/* Payment Section */}
                 <div className="relative flex flex-col space-y-3">
-                  <Label>Metode Pembayaran.</Label>
+                  <Label>Paymenyt Method*</Label>
                   <div className="flex flex-col space-y-1 text-center">
                     <p className="text-2xl font-bold">Rp250.000*</p>
                     <p className="text-sm font-medium text-white/50">
-                      ( Harga pendaftaran tergantung instansi asal Tim )
+                      ( Belum tau )
                     </p>
                   </div>
 
                   <div className="flex items-center justify-center">
                     <Image
-                      src="/dashboard/QR.png"
+                      src="/dashboard/QRISGacor.png"
                       width={340}
                       height={340}
                       alt="QR"
-                      className="w-80 rounded-4xl border-10 border-white/10"
+                      className="w-80 p-3 rounded-4xl border-10 border-white/10"
                     />
                   </div>
 
@@ -225,7 +225,7 @@ const PaymentForm = () => {
 
                 {/* Payment Proof */}
                 <div className="flex flex-col gap-3">
-                  <Label>Link Bukti Pembayaran</Label>
+                  <Label>Payment Proof Link*</Label>
                   <Input
                     name="payment_proof"
                     value={formData.payment_proof}
@@ -247,7 +247,7 @@ const PaymentForm = () => {
           disabled={!formData.payment_proof}
           className="border !bg-white/10 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <p className="font-semibold text-xl sm:text-3xl">Register</p>
+          <p className="font-semibold text-xl md:text-2xl lg:text-3xl">Submit</p>
         </Button>
       </div>
     </div>
