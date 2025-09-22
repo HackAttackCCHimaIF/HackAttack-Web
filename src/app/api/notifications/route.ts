@@ -23,12 +23,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Fetch ALL notifications (both read and unread)
     const { data: notifications, error: notificationError } =
       await supabaseServer
         .from("Notification")
         .select("*")
         .eq("user_id", userData.id)
-        .eq("is_read", false)
         .order("created_at", { ascending: false });
 
     if (notificationError) {
