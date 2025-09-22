@@ -3,10 +3,10 @@ import { supabaseServer } from "@/lib/config/supabase-server";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const { userEmail } = body;
 
@@ -17,7 +17,6 @@ export async function PUT(
       );
     }
 
-    // Get user ID from email
     const { data: userData, error: userError } = await supabaseServer
       .from("Users")
       .select("id")
@@ -28,7 +27,6 @@ export async function PUT(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Mark specific notification as read (only if it belongs to the user)
     const { data, error } = await supabaseServer
       .from("Notification")
       .update({
