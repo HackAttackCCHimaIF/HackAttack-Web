@@ -163,7 +163,7 @@ const ExclusiveAccessSection = () => {
             href="/workshop/payment"
             className={buttonVariants({
               className:
-                "rounded-none border !bg-white/10 w-full sm:w-auto !py-6 sm:!py-8 !px-8 sm:!px-12",
+                "!rounded-full border !bg-white/10  w-auto !py-6 sm:!py-8 !px-8 sm:!px-12",
             })}
           >
             <p className="font-semibold text-xl sm:text-3xl">Register</p>

@@ -10,7 +10,7 @@ const RuleBookPage = () => {
   );
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full pt-16 md:pt-0">
       <HeaderDashboard bottomText="Book" topText="Rule" />
 
       <div className="flex-1 flex flex-col pb-5 px-4">

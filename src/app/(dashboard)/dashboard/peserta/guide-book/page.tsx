@@ -9,7 +9,7 @@ const GuideBookPage = () => {
   const guidebookImages = Array.from({ length: 13 }, (_, i) => `/dashboard/guide${i + 1}.png`);
 
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-screen w-full pt-16 md:pt-0">
       <HeaderDashboard bottomText="Book" topText="Guide" />
 
       <div className="flex-1 flex flex-col pb-5 px-4">
