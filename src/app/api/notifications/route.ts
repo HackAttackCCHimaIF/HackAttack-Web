@@ -23,7 +23,6 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Fetch ALL notifications (both read and unread)
     const { data: notifications, error: notificationError } =
       await supabaseServer
         .from("Notification")
@@ -39,10 +38,16 @@ export async function GET(req: Request) {
       );
     }
 
+    const mappedNotifications =
+      notifications?.map((notification) => ({
+        ...notification,
+        read: notification.is_read,
+      })) || [];
+
     return NextResponse.json({
       success: true,
-      data: notifications || [],
-      count: notifications?.length || 0,
+      data: mappedNotifications,
+      count: mappedNotifications.length,
     });
   } catch (error) {
     console.error("API error:", error);

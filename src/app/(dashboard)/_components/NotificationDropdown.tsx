@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,42 +12,21 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { CheckCheck, Loader2 } from "lucide-react";
 import { NotificationBell } from "./NotificationBell";
 import { NotificationItem } from "./NotificationItem";
-import { useNotificationStore } from "@/lib/stores/notificationStore";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export function NotificationDropdown() {
   const [isOpen, setIsOpen] = useState(false);
-  const {
-    notifications,
-    unreadCount,
-    isLoading,
-    error,
-    fetchNotifications,
-    markNotificationAsRead,
-    markAllNotificationsAsRead,
-  } = useNotificationStore();
-
-  // Fetch notifications on mount and when dropdown opens
-  useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
-
-  // Set up polling for real-time updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000); // Poll every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
+  const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =
+    useNotifications();
 
   const handleNotificationClick = async (id: string, read: boolean) => {
     if (!read) {
-      await markNotificationAsRead(id);
+      await markAsRead(id);
     }
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllNotificationsAsRead();
+    await markAllAsRead();
   };
 
   const unreadNotifications = notifications.filter((n) => !n.read);
@@ -92,18 +71,6 @@ export function NotificationDropdown() {
               <span className="ml-2 text-gray-600">
                 Loading notifications...
               </span>
-            </div>
-          ) : error ? (
-            <div className="p-4 text-center text-red-600">
-              <p className="text-sm">Failed to load notifications</p>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={fetchNotifications}
-                className="mt-2 text-xs"
-              >
-                Try again
-              </Button>
             </div>
           ) : notifications.length === 0 ? (
             <div className="p-8 text-center text-gray-500">

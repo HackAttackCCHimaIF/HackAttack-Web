@@ -1,14 +1,5 @@
 import { create } from "zustand";
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  type: "info" | "success" | "warning" | "error";
-  read: boolean;
-  created_at: string;
-  user_id: string;
-}
+import { Notification } from "@/lib/types/notification";
 
 interface NotificationStore {
   notifications: Notification[];
@@ -16,16 +7,15 @@ interface NotificationStore {
   isLoading: boolean;
   error: string | null;
 
-  // Actions
   setNotifications: (notifications: Notification[]) => void;
   addNotification: (notification: Notification) => void;
+  updateNotification: (id: string, updates: Partial<Notification>) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   removeNotification: (id: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
 
-  // API calls
   fetchNotifications: () => Promise<void>;
   markNotificationAsRead: (id: string) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
@@ -44,9 +34,22 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   addNotification: (notification) => {
     const { notifications } = get();
+    // Check if notification already exists to avoid duplicates
+    const exists = notifications.some((n) => n.id === notification.id);
+    if (exists) return;
+
     const newNotifications = [notification, ...notifications];
     const unreadCount = newNotifications.filter((n) => !n.read).length;
     set({ notifications: newNotifications, unreadCount });
+  },
+
+  updateNotification: (id, updates) => {
+    const { notifications } = get();
+    const updatedNotifications = notifications.map((n) =>
+      n.id === id ? { ...n, ...updates } : n
+    );
+    const unreadCount = updatedNotifications.filter((n) => !n.read).length;
+    set({ notifications: updatedNotifications, unreadCount });
   },
 
   markAsRead: (id) => {
@@ -60,7 +63,10 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
 
   markAllAsRead: () => {
     const { notifications } = get();
-    const updatedNotifications = notifications.map((n) => ({ ...n, read: true }));
+    const updatedNotifications = notifications.map((n) => ({
+      ...n,
+      read: true,
+    }));
     set({ notifications: updatedNotifications, unreadCount: 0 });
   },
 
@@ -74,8 +80,9 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error }),
 
-  // Placeholder API methods (these will be handled by the hook)
   fetchNotifications: async () => {},
   markNotificationAsRead: async () => {},
   markAllNotificationsAsRead: async () => {},
 }));
+
+export type { Notification };

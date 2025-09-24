@@ -172,94 +172,6 @@ any) => {
   );
 };
 
-const WhatsAppInput = ({
-  register,
-  name,
-  placeholder,
-  disabled,
-  className = "",
-  ...props
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-any) => {
-  const [value, setValue] = useState("62");
-  const { onChange, ...registerProps } = register(name);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let inputValue = e.target.value;
-
-    if (!inputValue.startsWith("62")) {
-      inputValue = "62" + inputValue.replace(/^62*/, "");
-    }
-
-    inputValue = inputValue.replace(/\D/g, "");
-
-    if (!inputValue.startsWith("62")) {
-      inputValue = "62";
-    }
-
-    if (inputValue.length > 15) {
-      inputValue = inputValue.substring(0, 15);
-    }
-
-    setValue(inputValue);
-    onChange({ target: { value: inputValue } });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    const input = e.target as HTMLInputElement;
-    const cursorPosition = input.selectionStart || 0;
-
-    if ((e.key === "Backspace" || e.key === "Delete") && cursorPosition <= 2) {
-      e.preventDefault();
-    }
-
-    if (
-      !/\d/.test(e.key) &&
-      ![
-        "Backspace",
-        "Delete",
-        "ArrowLeft",
-        "ArrowRight",
-        "Tab",
-        "Enter",
-      ].includes(e.key)
-    ) {
-      e.preventDefault();
-    }
-  };
-
-  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    setTimeout(() => {
-      if (e.target.value === "62") {
-        e.target.setSelectionRange(2, 2);
-      }
-    }, 0);
-  };
-
-  return (
-    <div className="relative">
-      <Input
-        {...registerProps}
-        type="tel"
-        placeholder={placeholder}
-        disabled={disabled}
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
-        className={`${className} ${disabled ? "opacity-60" : ""}`}
-        {...props}
-      />
-      {!disabled && (
-        <Pencil
-          size={16}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50"
-        />
-      )}
-    </div>
-  );
-};
-
 // ======================
 // Helper Functions
 // ======================
@@ -407,7 +319,6 @@ export default function TeamProfilePage() {
     control,
     getValues,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
@@ -421,16 +332,7 @@ export default function TeamProfilePage() {
     name: "members",
   });
 
-  const watchedValues = watch([
-    "teamName",
-    "institution",
-    "whatsapp_number",
-    "leaderName",
-    "leaderEmail",
-    "requirementLink",
-  ]);
   const teamDetailsCompleted = isTeamDetailsComplete(getValues());
-  const leaderInfoCompleted = isLeaderInfoComplete(getValues());
   const allInfoCompleted = isAllInfoComplete(getValues());
 
   useEffect(() => {
@@ -681,7 +583,8 @@ export default function TeamProfilePage() {
                         Fill in Team Data First
                       </p>
                       <p className="text-yellow-200/80 text-sm mt-1">
-                        Complete your Team Name, Institution of Origin, and WhatsApp to continue.
+                        Complete your Team Name, Institution of Origin, and
+                        WhatsApp to continue.
                       </p>
                     </div>
                   )}
@@ -810,9 +713,7 @@ export default function TeamProfilePage() {
 
                     {/* Leader Requirements */}
                     <div className="flex flex-col gap-2">
-                      <Label>
-                        Required Documents*
-                      </Label>
+                      <Label>Required Documents*</Label>
                       <div>
                         <EditableInput
                           register={register}
@@ -833,7 +734,8 @@ export default function TeamProfilePage() {
                         )}
                         <div className="w-full flex justify-end pt-2">
                           <p className="text-white/50 text-xs max-w-xs text-end">
-                            Upload screenshots of all required documents into one Google Drive folder, then submit the link here.
+                            Upload screenshots of all required documents into
+                            one Google Drive folder, then submit the link here.
                           </p>
                         </div>
                       </div>
@@ -885,7 +787,6 @@ export default function TeamProfilePage() {
                           name={`members.${index}.email`}
                           placeholder={
                             allInfoCompleted
-
                               ? "Enter the Member's Email"
                               : "Complete the team and leader data first"
                           }
