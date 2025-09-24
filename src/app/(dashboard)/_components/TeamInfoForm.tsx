@@ -1181,7 +1181,7 @@ export default function TeamProfilePage() {
                       <div className="before:content-[''] flex items-center justify-center ">
                         {institution === "telkom" ? (
                           <Image
-                            src="/dashboard/QRISGacor.png"
+                            src="/qris.jpg"
                             width={340}
                             height={340}
                             alt="QR Telkom"
@@ -1189,7 +1189,7 @@ export default function TeamProfilePage() {
                           />
                         ) : institution === "nontelkom" ? (
                           <Image
-                            src="/dashboard/QRISGacor.png"
+                            src="/qris.jpg"
                             width={340}
                             height={340}
                             alt="QR Telkom"
