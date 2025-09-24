@@ -1,8 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { useNotificationStore } from "@/lib/stores/notificationStore";
 import { useUserStore } from "@/lib/stores/userStore";
-import { supabase } from "@/lib/config/supabase";
-import type { RealtimeChannel } from "@supabase/supabase-js";
 import {
   DatabaseNotification,
   mapDatabaseNotification,
@@ -16,6 +14,8 @@ export const useNotifications = () => {
     isLoading,
     setNotifications,
     addNotification,
+    updateNotification,
+    removeNotification,
     markAsRead,
     markAllAsRead,
     setLoading,
@@ -124,71 +124,100 @@ export const useNotifications = () => {
   useEffect(() => {
     if (!user?.email) return;
 
-    let subscription: RealtimeChannel | null = null;
+    let eventSource: EventSource | null = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
+    const reconnectDelay = 3000; // 3 seconds
 
-    const setupRealtimeSubscription = async () => {
+    const connectSSE = () => {
       try {
-        const { data: userData, error: userError } = await supabase
-          .from("Users")
-          .select("id")
-          .eq("email", user.email)
-          .single();
+        const sseUrl = `/api/notifications/stream?userEmail=${encodeURIComponent(
+          user.email || ""
+        )}`;
+        eventSource = new EventSource(sseUrl);
 
-        if (userError || !userData) {
-          console.error(
-            "Failed to get user ID for real-time subscription:",
-            userError
-          );
-          return;
-        }
+        eventSource.onopen = () => {
+          console.log("SSE connection opened");
+          reconnectAttempts = 0;
+        };
 
-        subscription = supabase
-          .channel("notifications")
-          .on(
-            "postgres_changes",
-            {
-              event: "*",
-              schema: "public",
-              table: "Notification",
-              filter: `user_id=eq.${userData.id}`,
-            },
-            (payload) => {
-              console.log("Real-time notification event:", payload);
+        eventSource.onmessage = (event) => {
+          try {
+            const eventData = JSON.parse(event.data);
+            console.log("SSE event received:", eventData);
 
-              if (payload.eventType === "INSERT") {
-                const dbNotification = payload.new as DatabaseNotification;
-                const newNotification = mapDatabaseNotification(dbNotification);
-                addNotification(newNotification);
-              } else if (payload.eventType === "UPDATE") {
-                const dbNotification = payload.new as DatabaseNotification;
-                const updatedNotification =
-                  mapDatabaseNotification(dbNotification);
+            switch (eventData.type) {
+              case "connected":
+                console.log("SSE connected successfully");
+                break;
 
-                const currentNotifications =
-                  useNotificationStore.getState().notifications;
-                const updatedNotifications = currentNotifications.map((n) =>
-                  n.id === updatedNotification.id ? updatedNotification : n
+              case "subscribed":
+                console.log("SSE subscribed to notifications");
+                break;
+
+              case "notification_created":
+                const newNotification = mapDatabaseNotification(
+                  eventData.data as DatabaseNotification
                 );
-                setNotifications(updatedNotifications);
-              }
+                addNotification(newNotification);
+                break;
+
+              case "notification_updated":
+                const updatedNotification = mapDatabaseNotification(
+                  eventData.data as DatabaseNotification
+                );
+                updateNotification(updatedNotification.id, updatedNotification);
+                break;
+
+              case "notification_deleted":
+                removeNotification(eventData.data.id);
+                break;
+
+              default:
+                console.log("Unknown SSE event type:", eventData.type);
             }
-          )
-          .subscribe((status) => {
-            console.log("Real-time subscription status:", status);
-          });
+          } catch (error) {
+            console.error("Error parsing SSE event:", error);
+          }
+        };
+
+        eventSource.onerror = (error) => {
+          console.error("SSE connection error:", error);
+          eventSource?.close();
+
+          // Implement reconnection logic
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            console.log(
+              `Attempting to reconnect SSE (${reconnectAttempts}/${maxReconnectAttempts})...`
+            );
+
+            reconnectTimeout = setTimeout(() => {
+              connectSSE();
+            }, reconnectDelay * reconnectAttempts); // Exponential backoff
+          } else {
+            console.error("Max SSE reconnection attempts reached");
+          }
+        };
       } catch (error) {
-        console.error("Error setting up real-time subscription:", error);
+        console.error("Error creating SSE connection:", error);
       }
     };
 
-    setupRealtimeSubscription();
+    connectSSE();
 
+    // Cleanup function
     return () => {
-      if (subscription) {
-        supabase.removeChannel(subscription);
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
+      if (eventSource) {
+        console.log("Closing SSE connection");
+        eventSource.close();
       }
     };
-  }, [user?.email, addNotification, setNotifications]);
+  }, [user?.email, addNotification, updateNotification, removeNotification]);
 
   return {
     notifications,
