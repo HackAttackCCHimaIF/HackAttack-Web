@@ -205,7 +205,7 @@ const PaymentForm = () => {
 
                   <div className="flex items-center justify-center">
                     <Image
-                      src="/dashboard/QRISGacor.png"
+                      src="/qris.jpg"
                       width={340}
                       height={340}
                       alt="QR"

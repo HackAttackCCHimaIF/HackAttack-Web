@@ -28,7 +28,6 @@ export async function GET(req: Request) {
         .from("Notification")
         .select("*")
         .eq("user_id", userData.id)
-        .eq("is_read", false)
         .order("created_at", { ascending: false });
 
     if (notificationError) {
@@ -39,10 +38,16 @@ export async function GET(req: Request) {
       );
     }
 
+    const mappedNotifications =
+      notifications?.map((notification) => ({
+        ...notification,
+        read: notification.is_read,
+      })) || [];
+
     return NextResponse.json({
       success: true,
-      data: notifications || [],
-      count: notifications?.length || 0,
+      data: mappedNotifications,
+      count: mappedNotifications.length,
     });
   } catch (error) {
     console.error("API error:", error);
