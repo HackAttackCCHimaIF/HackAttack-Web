@@ -23,6 +23,19 @@ export async function POST(req: Request) {
       );
     }
 
+    const { data: duplicateData } = await supabase
+      .from("Workshop")
+      .select("*")
+      .eq("whatsapp_number", whatsapp)
+      .single();
+
+    if (duplicateData) {
+      return NextResponse.json(
+        { error: "Nomor WhatsApp sudah terdaftar." },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from("Workshop")
       // Penyesuaian utama ada di sini:
@@ -39,19 +52,6 @@ export async function POST(req: Request) {
       ])
       .select("*")
       .single();
-
-    const { data: duplicateData } = await supabase
-      .from("Workshop")
-      .select("*")
-      .eq("whatsapp_number", whatsapp)
-      .single();
-
-    if (duplicateData) {
-      return NextResponse.json(
-        { error: "Nomor WhatsApp sudah terdaftar." },
-        { status: 400 }
-      );
-    }
 
     // Jika ada error dari Supabase (misal: email duplikat, link tidak valid)
     if (error) throw error;

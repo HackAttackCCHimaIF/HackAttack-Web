@@ -202,6 +202,7 @@ export default function TeamProfilePage() {
   const [isEditMode, setEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [saving, setSaving] = useState(false);
   const [teamDataLoaded, setTeamDataLoaded] = useState(false);
   const [memberDataLoaded, setMemberDataLoaded] = useState(false);
@@ -420,12 +421,12 @@ export default function TeamProfilePage() {
               remove(i);
             }
 
-            teamMembers.forEach((member: TeamMember) => {
+            teamMembers.forEach((member: TeamMemberDB) => {
               append({
                 name: member.name || "",
                 email: member.email || "",
-                github: member.github || "",
-                requirementLink: member.requirementLink || "",
+                github: member.github_url || "",
+                requirementLink: member.data_url || "",
                 member_role: member.member_role || undefined,
               });
             });

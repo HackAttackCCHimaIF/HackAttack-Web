@@ -16,6 +16,24 @@ import { toast } from "sonner";
 const inputClassName =
   "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
 
+const workshopOptions = [
+  {
+    label: "Workshop 1 & 2 (Sunday, 2 & 16 November 2025)",
+    value: "workshop1&2",
+    price: 250000,
+  },
+  {
+    label: "Workshop 1 (Sunday, 2 November 2025)",
+    value: "workshop1",
+    price: 200000,
+  },
+  {
+    label: "Workshop 2 (Sunday, 16 November 2025)",
+    value: "workshop2",
+    price: 200000,
+  },
+];
+
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -40,6 +58,22 @@ const PaymentForm = () => {
     whatsapp: "",
     payment_proof: "",
   });
+
+  const getSelectedWorkshopPrice = () => {
+    const selectedWorkshop = workshopOptions.find(
+      (option) => option.value === formData.workshop
+    );
+    return selectedWorkshop ? selectedWorkshop.price : 0;
+  };
+
+  const formatPrice = (price: number) => {
+    const formattedPrice = new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+    return formattedPrice + "(masih dummy )";
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -146,16 +180,7 @@ const PaymentForm = () => {
                   <Label>Pick Your Workshop</Label>
                   <InstitutionDropdown
                     placeholder="Select Your Workshop"
-                    options={[
-                      {
-                        label: "Workshop 1 (Sunday, 2 November 2025)",
-                        value: "workshop1",
-                      },
-                      {
-                        label: "Workshop 2 (Sunday, 16 November 2025)",
-                        value: "workshop2",
-                      },
-                    ]}
+                    options={workshopOptions}
                     selected={formData.workshop ? [formData.workshop] : []}
                     onChange={(val) =>
                       setFormData({ ...formData, workshop: val[0] })
@@ -197,11 +222,12 @@ const PaymentForm = () => {
 
                 {/* Payment Section */}
                 <div className="relative flex flex-col space-y-3">
-                  <Label>Paymenyt Method*</Label>
+                  <Label>Payment Method*</Label>
                   <div className="flex flex-col space-y-1 text-center">
-                    <p className="text-2xl font-bold">Rp250.000*</p>
-                    <p className="text-sm font-medium text-white/50">
-                      ( Belum tau )
+                    <p className="text-2xl font-bold">
+                      {formData.workshop
+                        ? formatPrice(getSelectedWorkshopPrice())
+                        : "Rp.-*"}
                     </p>
                   </div>
 
