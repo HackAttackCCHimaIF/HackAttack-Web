@@ -5,10 +5,18 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     // Variabel ini datang dari frontend (form)
-    const { name, email, institution, workshop, whatsapp, payment_proof } = body;
+    const { name, email, institution, workshop, whatsapp, payment_proof } =
+      body;
 
     // Validasi input disesuaikan, payment_proof sekarang wajib
-    if (!name || !email || !institution || !workshop || !whatsapp || !payment_proof) {
+    if (
+      !name ||
+      !email ||
+      !institution ||
+      !workshop ||
+      !whatsapp ||
+      !payment_proof
+    ) {
       return NextResponse.json(
         { error: "Semua field wajib diisi, termasuk bukti pembayaran." },
         { status: 400 }
@@ -16,7 +24,7 @@ export async function POST(req: Request) {
     }
 
     const { data, error } = await supabase
-      .from("registrations")
+      .from("Workshop")
       // Penyesuaian utama ada di sini:
       .insert([
         {
@@ -32,11 +40,24 @@ export async function POST(req: Request) {
       .select("*")
       .single();
 
+    const { data: duplicateData } = await supabase
+      .from("Workshop")
+      .select("*")
+      .eq("whatsapp_number", whatsapp)
+      .single();
+
+    if (duplicateData) {
+      return NextResponse.json(
+        { error: "Nomor WhatsApp sudah terdaftar." },
+        { status: 400 }
+      );
+    }
+
     // Jika ada error dari Supabase (misal: email duplikat, link tidak valid)
     if (error) throw error;
 
     return NextResponse.json({ success: true, data });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // Memberikan pesan error yang lebih spesifik jika ada
     console.error("API Error:", error);

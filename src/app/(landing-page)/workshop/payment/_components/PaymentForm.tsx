@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import React, { useState } from "react"
-import Image from "next/image"
-import { HeaderPayment } from "./HeaderPayment"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { InstitutionDropdown } from "./InstituionDropdown"
-import { CopyableLink } from "@/components/CopyableLink"
-import { WhatsappInput } from "./WhatsappInput"
-import { Button } from "@/components/ui/button"
-import { z } from "zod"
-import { toast } from "sonner" // ✅ import toast
+import React, { useState } from "react";
+import Image from "next/image";
+import { HeaderPayment } from "./HeaderPayment";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { InstitutionDropdown } from "./InstituionDropdown";
+import { CopyableLink } from "@/components/CopyableLink";
+import { WhatsappInput } from "./WhatsappInput";
+import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { toast } from "sonner";
 
 const inputClassName =
-  "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12"
+  "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -29,7 +29,7 @@ const formSchema = z.object({
       (val) => val.includes("drive.google.com"),
       "Bukti pembayaran harus berupa link Google Drive"
     ),
-})
+});
 
 const PaymentForm = () => {
   const [formData, setFormData] = useState({
@@ -39,20 +39,20 @@ const PaymentForm = () => {
     workshop: "",
     whatsapp: "",
     payment_proof: "",
-  })
+  });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async () => {
-    const parseResult = formSchema.safeParse(formData)
+    const parseResult = formSchema.safeParse(formData);
 
     if (!parseResult.success) {
       parseResult.error.issues.forEach((err) => {
-        toast.error(err.message) // ✅ tampilkan tiap error di toast
-      })
-      return
+        toast.error(err.message);
+      });
+      return;
     }
 
     try {
@@ -60,11 +60,11 @@ const PaymentForm = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
       if (res.ok) {
-        toast.success("Registration success!") // ✅ success toast
+        toast.success("Registration success!");
         setFormData({
           name: "",
           email: "",
@@ -72,15 +72,15 @@ const PaymentForm = () => {
           workshop: "",
           whatsapp: "",
           payment_proof: "",
-        })
+        });
       } else {
-        toast.error("Error: " + data.error) // ✅ error toast
+        toast.error("Error: " + data.error);
       }
     } catch (err) {
-      console.error(err)
-      toast.error("Something went wrong.") // ✅ fallback toast
+      console.error(err);
+      toast.error("Something went wrong.");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen">
@@ -132,7 +132,9 @@ const PaymentForm = () => {
                       { label: "Telkom University", value: "telkom" },
                       { label: "Non Telkom University", value: "other" },
                     ]}
-                    selected={formData.institution ? [formData.institution] : []}
+                    selected={
+                      formData.institution ? [formData.institution] : []
+                    }
                     onChange={(val) =>
                       setFormData({ ...formData, institution: val[0] })
                     }
@@ -247,11 +249,13 @@ const PaymentForm = () => {
           disabled={!formData.payment_proof}
           className="border !bg-white/10 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <p className="font-semibold text-xl md:text-2xl lg:text-3xl">Submit</p>
+          <p className="font-semibold text-xl md:text-2xl lg:text-3xl">
+            Submit
+          </p>
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default PaymentForm
+export default PaymentForm;
