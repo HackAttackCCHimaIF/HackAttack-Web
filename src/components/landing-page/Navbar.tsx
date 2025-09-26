@@ -149,7 +149,7 @@ const Navbar = () => {
               </Link>
             ) : (
               <>
-                <Link href={"/guidebook.pdf"} >
+                <Link href={"/guidebook.pdf"} target="_blank">
                   <Button
                     variant="outline"
                     className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white"

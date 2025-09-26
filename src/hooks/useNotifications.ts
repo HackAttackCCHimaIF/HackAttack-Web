@@ -186,7 +186,6 @@ export const useNotifications = () => {
           console.error("SSE connection error:", error);
           eventSource?.close();
 
-          // Implement reconnection logic
           if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
             console.log(
@@ -195,7 +194,7 @@ export const useNotifications = () => {
 
             reconnectTimeout = setTimeout(() => {
               connectSSE();
-            }, reconnectDelay * reconnectAttempts); // Exponential backoff
+            }, reconnectDelay * reconnectAttempts);
           } else {
             console.error("Max SSE reconnection attempts reached");
           }
@@ -207,7 +206,6 @@ export const useNotifications = () => {
 
     connectSSE();
 
-    // Cleanup function
     return () => {
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
