@@ -42,7 +42,7 @@ const Timeline = () => {
       title: "Open Register Batch 1",
       description:
         "Start your journey here! The first wave of registration is open for early applicants who are ready to take on the challenge.",
-      date: "27 Oktober - 1 November",
+      date: "27 Oktober - 8 November",
       category: "Setup",
       icon: <Calendar className="w-5 h-5" />,
       status: "upcoming",
@@ -52,7 +52,7 @@ const Timeline = () => {
       title: "Registration Batch 2",
       description:
         "Missed the first batch? Don’t worry — secure your spot in the second registration window before it closes!",
-      date: "3 November - 8 November",
+      date: "10 November - 17 November",
       category: "Process",
       icon: <Users className="w-5 h-5" />,
       status: "upcoming",
@@ -62,7 +62,7 @@ const Timeline = () => {
       title: "Technical Meeting",
       description:
         "Join us for a mandatory technical meeting where we’ll walk you through the competition rules, submission guidelines, and judging criteria. Ask questions, meet other participants, and get fully prepared.",
-      date: "8 November",
+      date: "15 November",
       category: "Analytics",
       icon: <TrendingUp className="w-5 h-5" />,
       status: "upcoming",
@@ -72,7 +72,7 @@ const Timeline = () => {
       title: "Proposal Submission Deadline",
       description:
         "Submit your team’s project proposal and showcase your initial ideas. Make it count — this is your first step to reaching the final!",
-      date: "11 November",
+      date: "18 November",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
@@ -82,7 +82,7 @@ const Timeline = () => {
       title: "Finalist Announcement",
       description:
         "We’ll reveal the selected teams who made it to the finals! Check your inbox and prepare for the next stage.",
-      date: "21 November",
+      date: "28 November",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
@@ -92,7 +92,7 @@ const Timeline = () => {
       title: "Technical Meeting for Finalists",
       description:
         "Finalist teams will join an exclusive session to discuss final-stage details, judging formats, and presentation flow.",
-      date: "29 November",
+      date: "6 December",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
@@ -102,7 +102,7 @@ const Timeline = () => {
       title: "Final Hackathon Day",
       description:
         "It’s time to bring your ideas to life! Develop, test, and polish your final project during this intensive day of innovation.",
-      date: "6 December",
+      date: "13 December",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
@@ -112,7 +112,7 @@ const Timeline = () => {
       title: "Final Presentation Day",
       description:
         "Present your solution to the panel of judges. Highlight your creativity, teamwork, and impact in front of experts and fellow participants.",
-      date: "7 December",
+      date: "14 December",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
@@ -122,7 +122,7 @@ const Timeline = () => {
       title: "Winner Announcement",
       description:
         "The moment you've been waiting for — celebrate your hard work and see which teams will take home the grand prize!",
-      date: "7 December",
+      date: "14 December",
       category: "Growth",
       icon: <MapPin className="w-5 h-5" />,
       status: "upcoming",
