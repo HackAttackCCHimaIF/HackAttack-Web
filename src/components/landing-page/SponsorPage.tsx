@@ -90,7 +90,7 @@ const SponsorPage = () => {
                     <TooltipContent
                       side="top"
                       align="center"
-                      className="bg-white/80 text-black text-sm md:text-base font-medium px-3 py-2 rounded-xl shadow-lg border border-gray-200"
+                      className="bg-white backdrop-blur-2xl border-1 text-black text-sm md:text-base font-medium px-3 py-2 rounded-xl shadow-lg border-white/40"
                       sideOffset={4}
                       collisionPadding={8}
                       avoidCollisions

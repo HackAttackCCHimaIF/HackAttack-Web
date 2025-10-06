@@ -49,16 +49,26 @@ const Timeline = () => {
     },
     {
       id: 2,
+      title: "Workshop 1",
+      description:
+        "Level up your skills and discover new strategies to accelerate your personal and professional growth in this interactive workshop.",
+      date: "9 November",
+      category: "Growth",
+      icon: <Calendar className="w-5 h-5" />,
+      status: "upcoming",
+    },
+    {
+      id: 3,
       title: "Registration Batch 2",
       description:
         "Missed the first batch? Don’t worry — secure your spot in the second registration window before it closes!",
-      date: "10 November - 17 November",
+      date: "10 November - 15 November",
       category: "Process",
       icon: <Users className="w-5 h-5" />,
       status: "upcoming",
     },
     {
-      id: 3,
+      id: 4,
       title: "Technical Meeting",
       description:
         "Join us for a mandatory technical meeting where we’ll walk you through the competition rules, submission guidelines, and judging criteria. Ask questions, meet other participants, and get fully prepared.",
@@ -68,7 +78,7 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 4,
+      id: 5,
       title: "Proposal Submission Deadline",
       description:
         "Submit your team’s project proposal and showcase your initial ideas. Make it count — this is your first step to reaching the final!",
@@ -78,7 +88,17 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 5,
+      id: 6,
+      title: "Workshop 2",
+      description:
+        "Start your journey here! The first wave of registration is open for early applicants who are ready to take on the challenge.",
+      date: "23 November",
+      category: "Setup",
+      icon: <Calendar className="w-5 h-5" />,
+      status: "upcoming",
+    },
+    {
+      id: 7,
       title: "Finalist Announcement",
       description:
         "We’ll reveal the selected teams who made it to the finals! Check your inbox and prepare for the next stage.",
@@ -88,7 +108,7 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 6,
+      id: 8,
       title: "Technical Meeting for Finalists",
       description:
         "Finalist teams will join an exclusive session to discuss final-stage details, judging formats, and presentation flow.",
@@ -98,7 +118,7 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 7,
+      id: 9,
       title: "Final Hackathon Day",
       description:
         "It’s time to bring your ideas to life! Develop, test, and polish your final project during this intensive day of innovation.",
@@ -108,7 +128,7 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 8,
+      id: 10,
       title: "Final Presentation Day",
       description:
         "Present your solution to the panel of judges. Highlight your creativity, teamwork, and impact in front of experts and fellow participants.",
@@ -118,7 +138,7 @@ const Timeline = () => {
       status: "upcoming",
     },
     {
-      id: 9,
+      id: 11,
       title: "Winner Announcement",
       description:
         "The moment you've been waiting for — celebrate your hard work and see which teams will take home the grand prize!",
