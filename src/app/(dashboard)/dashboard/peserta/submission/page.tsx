@@ -232,7 +232,7 @@ const SubmissionPage = () => {
                   className={`bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12 ${
                     !isEditMode ? "opacity-60" : ""
                   }`}
-                  placeholder="Dalam bentuk link ya dek"
+                  placeholder="e.g., https://drive.google.com/file/d/abc123"
                 />
                 {isEditMode && (
                   <Pencil
@@ -256,8 +256,7 @@ const SubmissionPage = () => {
                   disabled={!isEditMode || saving}
                 />
                 <p className="text-sm text-white/50">
-                  Proposal yang kami submit telah benar dan tidak ada revisi,
-                  jika kurang sesuatu itu kesalahan gibran.
+                  By submitting this proposal, we confirm that the document is final and requires no further revision. Any missing information is the responsibility of the submitter.
                 </p>
               </div>
                 <div className="flex flex-row gap-3 pt-6 items-center justify-end">

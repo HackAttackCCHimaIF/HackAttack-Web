@@ -49,14 +49,16 @@ const Navbar = () => {
       <div className="flex items-center justify-between bg-stone-950/80 backdrop-blur-2xl px-8 rounded-full py-4">
         {/* LEFT SIDE */}
         <div className="flex items-center gap-4 sm:gap-6">
-          <Image
-            src="/navbar/Icon.svg"
-            alt="Site Logo"
-            width={156}
-            height={27}
-            priority
-            className="object-contain w-[100px] sm:w-[130px] lg:w-[156px]"
-          />
+          <Link href={"/"}>
+            <Image
+              src="/navbar/Icon.svg"
+              alt="Site Logo"
+              width={156}
+              height={27}
+              priority
+              className="object-contain w-[100px] sm:w-[130px] lg:w-[156px]"
+            />
+          </Link>
 
           <div className="hidden md:flex items-center gap-3">
             {iconList.map((icon) => (
@@ -142,7 +144,7 @@ const Navbar = () => {
           {/* BUTTONS SECTION */}
           <div className="flex items-center gap-4">
             {pathname === "/merch" ? (
-              <Link href="/shop">
+              <Link href="https://forms.gle/Xoz6CrK4ns8xg2So9">
                 <Button className="text-white border-none bg-[#84D26B]/25 border border-[#84D26B] hover:bg-[#84D26B]/40 rounded-full hover:text-white">
                   Shop Now
                 </Button>
