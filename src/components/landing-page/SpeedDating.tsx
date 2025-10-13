@@ -79,7 +79,7 @@ const SpeedDating = () => {
                 "w-fit bg-transparent !rounded-full !py-4 !px-2 !pr-8 transition-colors text-white duration-300 hover:bg-white hover:text-black",
               variant: "outline",
             })}
-            href={"https://discord.gg/hXddJ4tq"}
+            href={"https://discord.gg/NvYv3JcdAU"}
             target="_blank"
           >
             <div className="p-1 bg-muted/10 rounded-full">

@@ -20,17 +20,17 @@ const workshopOptions = [
   {
     label: "Workshop 1 & 2 (Sunday, 2 & 16 November 2025)",
     value: "workshop1&2",
-    price: 250000,
+    price: 50000,
   },
   {
     label: "Workshop 1 (Sunday, 2 November 2025)",
     value: "workshop1",
-    price: 200000,
+    price: 30000,
   },
   {
     label: "Workshop 2 (Sunday, 16 November 2025)",
     value: "workshop2",
-    price: 200000,
+    price: 30000,
   },
 ];
 
@@ -72,7 +72,7 @@ const PaymentForm = () => {
       currency: "IDR",
       minimumFractionDigits: 0,
     }).format(price);
-    return formattedPrice + "(masih dummy )";
+    return formattedPrice + "";
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -80,41 +80,56 @@ const PaymentForm = () => {
   };
 
   const handleSubmit = async () => {
-    const parseResult = formSchema.safeParse(formData);
+  const parseResult = formSchema.safeParse(formData);
 
-    if (!parseResult.success) {
-      parseResult.error.issues.forEach((err) => {
-        toast.error(err.message);
+  // ✅ Validasi form
+  if (!parseResult.success) {
+    parseResult.error.issues.forEach((err) => {
+      toast.error(err.message);
+    });
+    return;
+  }
+
+  // ✅ Tampilkan loading toast
+  const loadingToast = toast.loading("Submitting your registration...");
+
+  try {
+    const res = await fetch("/api/workshop", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      toast.success("🎉 Registration successful! We'll contact you soon.", {
+        description: "Check your email or WhatsApp for confirmation.",
       });
-      return;
-    }
 
-    try {
-      const res = await fetch("/api/workshop", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      // Reset form setelah sukses
+      setFormData({
+        name: "",
+        email: "",
+        institution: "",
+        workshop: "",
+        whatsapp: "",
+        payment_proof: "",
       });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Registration success!");
-        setFormData({
-          name: "",
-          email: "",
-          institution: "",
-          workshop: "",
-          whatsapp: "",
-          payment_proof: "",
-        });
-      } else {
-        toast.error("Error: " + data.error);
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong.");
+    } else {
+      toast.error("Failed to register.", {
+        description: data.error || "Please try again later.",
+      });
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong.", {
+      description: "Please check your connection or try again.",
+    });
+  } finally {
+    toast.dismiss(loadingToast); // ✅ Tutup loading toast setelah selesai
+  }
+};
 
   return (
     <div className="min-h-screen">
@@ -160,18 +175,12 @@ const PaymentForm = () => {
                 {/* Institution */}
                 <div className="flex flex-col space-y-3">
                   <Label>Your Institution</Label>
-                  <InstitutionDropdown
-                    placeholder="Select Your Institution"
-                    options={[
-                      { label: "Telkom University", value: "telkom" },
-                      { label: "Non Telkom University", value: "other" },
-                    ]}
-                    selected={
-                      formData.institution ? [formData.institution] : []
-                    }
-                    onChange={(val) =>
-                      setFormData({ ...formData, institution: val[0] })
-                    }
+                  <Input
+                    name="institution"
+                    value={formData.institution}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Input your Institution"
                   />
                 </div>
 
@@ -273,7 +282,7 @@ const PaymentForm = () => {
         <Button
           onClick={handleSubmit}
           disabled={!formData.payment_proof}
-          className="border !bg-white/10 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border !bg-white/10 cursor-pointer hover:!bg-white/20 hover:scale-105 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <p className="font-semibold text-xl md:text-2xl lg:text-3xl">
             Submit
