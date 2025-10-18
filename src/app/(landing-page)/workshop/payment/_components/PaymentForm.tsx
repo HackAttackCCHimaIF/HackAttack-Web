@@ -80,56 +80,56 @@ const PaymentForm = () => {
   };
 
   const handleSubmit = async () => {
-  const parseResult = formSchema.safeParse(formData);
+    const parseResult = formSchema.safeParse(formData);
 
-  // ✅ Validasi form
-  if (!parseResult.success) {
-    parseResult.error.issues.forEach((err) => {
-      toast.error(err.message);
-    });
-    return;
-  }
-
-  // ✅ Tampilkan loading toast
-  const loadingToast = toast.loading("Submitting your registration...");
-
-  try {
-    const res = await fetch("/api/workshop", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (res.ok) {
-      toast.success("🎉 Registration successful! We'll contact you soon.", {
-        description: "Check your email or WhatsApp for confirmation.",
+    // ✅ Validasi form
+    if (!parseResult.success) {
+      parseResult.error.issues.forEach((err) => {
+        toast.error(err.message);
       });
-
-      // Reset form setelah sukses
-      setFormData({
-        name: "",
-        email: "",
-        institution: "",
-        workshop: "",
-        whatsapp: "",
-        payment_proof: "",
-      });
-    } else {
-      toast.error("Failed to register.", {
-        description: data.error || "Please try again later.",
-      });
+      return;
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong.", {
-      description: "Please check your connection or try again.",
-    });
-  } finally {
-    toast.dismiss(loadingToast); // ✅ Tutup loading toast setelah selesai
-  }
-};
+
+    // ✅ Tampilkan loading toast
+    const loadingToast = toast.loading("Submitting your registration...");
+
+    try {
+      const res = await fetch("/api/workshop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("🎉 Registration successful! We'll contact you soon.", {
+          description: "Check your email or WhatsApp for confirmation.",
+        });
+
+        // Reset form setelah sukses
+        setFormData({
+          name: "",
+          email: "",
+          institution: "",
+          workshop: "",
+          whatsapp: "",
+          payment_proof: "",
+        });
+      } else {
+        toast.error("Failed to register.", {
+          description: data.error || "Please try again later.",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong.", {
+        description: "Please check your connection or try again.",
+      });
+    } finally {
+      toast.dismiss(loadingToast); // ✅ Tutup loading toast setelah selesai
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -284,7 +284,7 @@ const PaymentForm = () => {
           disabled={!formData.payment_proof}
           className="border !bg-white/10 cursor-pointer hover:!bg-white/20 hover:scale-105 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <p className="font-semibold text-xl md:text-2xl lg:text-3xl">
+          <p className="font-semibold text-xl md:text-2xl lg:text-3xl hover:text-white/80 transition-colors duration-300">
             Submit
           </p>
         </Button>
