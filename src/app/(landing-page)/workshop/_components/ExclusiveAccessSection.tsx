@@ -166,7 +166,9 @@ const ExclusiveAccessSection = () => {
                 "!rounded-full border !bg-white/10 w-auto !py-6 sm:!py-8 !px-8 sm:!px-12 hover:scale-105 hover:!bg-white/10 hover:border-white/40 transition-colors duration-300",
             })}
           >
-            <p className="font-semibold text-xl sm:text-3xl text-white">Register</p>
+            <p className="font-semibold text-xl sm:text-3xl text-white hover:text-white/80 transition-colors duration-300">
+              Register
+            </p>
           </Link>
         </CardFooter>
       </Card>

@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil } from "lucide-react";
+import { Plus, Pencil, Check, Edit } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -44,93 +44,140 @@ const teamMemberSchema = z.object({
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
 }) satisfies z.ZodType<TeamMember>;
 
-const teamSchema = z.object({
-  leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
-  leaderEmail: z.string().email("Email tidak valid"),
-  leaderGithub: z.string().optional(),
-  leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-  requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
+const teamSchema = z
+  .object({
+    leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
+    leaderEmail: z.string().email("Email tidak valid"),
+    leaderGithub: z.string().optional(),
+    leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
+    requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
 
-  members: z
-    .array(teamMemberSchema)
-    .max(3, "Maksimal 3 anggota tambahan")
-    .superRefine((members, ctx) => {
-      members.forEach((member, index) => {
-        const hasAnyField =
-          member.name ||
-          member.email ||
-          member.github ||
-          member.requirementLink;
+    members: z
+      .array(teamMemberSchema)
+      .max(5, "Maksimal 5 anggota tambahan")
+      .superRefine((members, ctx) => {
+        members.forEach((member, index) => {
+          const hasAnyField =
+            member.name ||
+            member.email ||
+            member.github ||
+            member.requirementLink;
 
-        if (hasAnyField) {
-          if (!member.name || member.name.trim() === "") {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Nama anggota wajib diisi",
-              path: [index, "name"],
-            });
-          }
-
-          if (!member.email || member.email.trim() === "") {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Email anggota wajib diisi",
-              path: [index, "email"],
-            });
-          } else {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(member.email)) {
+          if (hasAnyField) {
+            if (!member.name || member.name.trim() === "") {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "Format email tidak valid",
+                message: "Nama anggota wajib diisi",
+                path: [index, "name"],
+              });
+            }
+
+            if (!member.email || member.email.trim() === "") {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Email anggota wajib diisi",
                 path: [index, "email"],
               });
+            } else {
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+              if (!emailRegex.test(member.email)) {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message: "Format email tidak valid",
+                  path: [index, "email"],
+                });
+              }
             }
-          }
 
-          if (!member.requirementLink || member.requirementLink.trim() === "") {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: "Link berkas persyaratan wajib diisi",
-              path: [index, "requirementLink"],
-            });
-          } else {
-            try {
-              new URL(member.requirementLink);
-            } catch {
+            if (
+              !member.requirementLink ||
+              member.requirementLink.trim() === ""
+            ) {
               ctx.addIssue({
                 code: z.ZodIssueCode.custom,
-                message: "Link berkas persyaratan harus berupa URL yang valid",
+                message: "Link berkas persyaratan wajib diisi",
                 path: [index, "requirementLink"],
               });
+            } else {
+              try {
+                new URL(member.requirementLink);
+              } catch {
+                ctx.addIssue({
+                  code: z.ZodIssueCode.custom,
+                  message:
+                    "Link berkas persyaratan harus berupa URL yang valid",
+                  path: [index, "requirementLink"],
+                });
+              }
             }
           }
-        }
-      });
-    }),
+        });
+      }),
 
-  teamName: z.string().min(1, "Nama team wajib diisi"),
-  institution: z.string().min(1, "Asal instansi wajib diisi"),
-  whatsapp_number: z
-    .string()
-    .min(1, "Nomor WhatsApp wajib diisi")
-    .regex(
-      /^62\d{8,13}$/,
-      "Nomor WhatsApp harus dimulai dengan 62 dan berisi 10-15 digit"
-    )
-    .refine(
-      (val) => val.startsWith("62"),
-      "Nomor WhatsApp harus dimulai dengan 62"
-    )
-    .refine(
-      (val) => /^\d+$/.test(val),
-      "Nomor WhatsApp hanya boleh berisi angka"
-    ),
-  paymentproof_url: z
-    .string()
-    .url("Link bukti pembayaran harus valid")
-    .optional(),
-});
+    teamName: z.string().min(1, "Nama team wajib diisi"),
+    institution: z.string().min(1, "Asal instansi wajib diisi"),
+    whatsapp_number: z
+      .string()
+      .min(1, "Nomor WhatsApp wajib diisi")
+      .regex(
+        /^62\d{8,13}$/,
+        "Nomor WhatsApp harus dimulai dengan 62 dan berisi 10-15 digit"
+      )
+      .refine(
+        (val) => val.startsWith("62"),
+        "Nomor WhatsApp harus dimulai dengan 62"
+      )
+      .refine(
+        (val) => /^\d+$/.test(val),
+        "Nomor WhatsApp hanya boleh berisi angka"
+      ),
+    paymentproof_url: z
+      .string()
+      .url("Link bukti pembayaran harus valid")
+      .optional(),
+  })
+  .superRefine((data, ctx) => {
+    const roleCounts: Record<string, number> = {
+      Hustler: 0,
+      Hipster: 0,
+      Hacker: 0,
+    };
+
+    // Count leader role
+    if (data.leaderRole && roleCounts.hasOwnProperty(data.leaderRole)) {
+      roleCounts[data.leaderRole]++;
+    }
+
+    // Count member roles
+    data.members.forEach((member) => {
+      if (member.member_role && roleCounts.hasOwnProperty(member.member_role)) {
+        roleCounts[member.member_role]++;
+      }
+    });
+
+    // Check for role violations
+    Object.entries(roleCounts).forEach(([role, count]) => {
+      if (count > 2) {
+        if (data.leaderRole === role) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Maksimal 2 orang per role ${role}`,
+            path: ["leaderRole"],
+          });
+        }
+
+        data.members.forEach((member, index) => {
+          if (member.member_role === role) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: `Maksimal 2 orang per role ${role}`,
+              path: ["members", index, "member_role"],
+            });
+          }
+        });
+      }
+    });
+  });
 
 type TeamFormValues = z.infer<typeof teamSchema>;
 
@@ -199,7 +246,8 @@ const isAllInfoComplete = (values: TeamFormValues) => {
 // ======================
 
 export default function TeamProfilePage() {
-  const [isEditMode, setEditMode] = useState(false);
+  const [isMemberEditMode, setMemberEditMode] = useState(false);
+  const [isTeamEditMode, setTeamEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -515,7 +563,7 @@ export default function TeamProfilePage() {
       });
 
       if (membersResponse.ok) {
-        toast.success("Team and member data saved successfully!");
+        toast.success("Team data saved successfully!");
       } else {
         const membersError = await membersResponse.json();
         toast.error(
@@ -529,18 +577,30 @@ export default function TeamProfilePage() {
     }
   };
 
-  const handleEditModeChange = async (newEditMode: boolean) => {
-    console.log("🔥 Edit mode changing:", {
-      from: isEditMode,
+  const handleMemberEditModeChange = async (newEditMode: boolean) => {
+    console.log("Member edit mode changing:", {
+      from: isMemberEditMode,
       to: newEditMode,
     });
 
-    if (isEditMode && !newEditMode) {
+    if (isMemberEditMode && !newEditMode) {
       const currentValues = getValues();
-
       await onSubmit(currentValues);
     }
-    setEditMode(newEditMode);
+    setMemberEditMode(newEditMode);
+  };
+
+  const handleTeamEditModeChange = async (newEditMode: boolean) => {
+    console.log("Team edit mode changing:", {
+      from: isTeamEditMode,
+      to: newEditMode,
+    });
+
+    if (isTeamEditMode && !newEditMode) {
+      const currentValues = getValues();
+      await onSubmit(currentValues);
+    }
+    setTeamEditMode(newEditMode);
   };
 
   const inputClassName =
@@ -557,28 +617,51 @@ export default function TeamProfilePage() {
   return (
     <div className="overflow-y-auto w-full min-h-full pt-16 md:pt-0">
       <SuccessDialog open={false} onClose={() => null} />
-      <HeaderDashboard
-        isEdit
-        topText="Team"
-        bottomText="Profile"
-        isEditMode={isEditMode}
-        setEditMode={handleEditModeChange}
-      />
+      <HeaderDashboard topText="Team" bottomText="Profile" />
 
       {userProfile.isLoggedIn ? (
         <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
           <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
             <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
-              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
+              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
                 <CardTitle className="text-2xl font-medium leading-none">
                   <p>Team</p>
                   <span className="font-bold">Information.</span>
                 </CardTitle>
+
+                {/* Member Edit Button */}
+                <Button
+                  onClick={() => {
+                    if (isMemberEditMode) {
+                      handleMemberEditModeChange(false);
+                    } else {
+                      handleMemberEditModeChange(true);
+                    }
+                  }}
+                  size="sm"
+                  className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
+                    isMemberEditMode
+                      ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
+                      : "bg-white/10 hover:bg-white/20 text-white"
+                  }`}
+                >
+                  {isMemberEditMode ? (
+                    <>
+                      <Check size={14} className="text-white" />
+                      <span className="text-sm">Save</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit size={14} className="text-white" />
+                      <span className="text-sm">Edit</span>
+                    </>
+                  )}
+                </Button>
               </CardHeader>
 
               <CardContent className="max-h-[67vh] overflow-y-auto">
                 <div className="space-y-12 pt-6 tracking-wide">
-                  {isEditMode && !teamDetailsCompleted && (
+                  {isMemberEditMode && !teamDetailsCompleted && (
                     <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
                       <p className="text-yellow-200 font-medium">
                         Fill in Team Data First
@@ -594,7 +677,7 @@ export default function TeamProfilePage() {
                     <div className="flex flex-col gap-3">
                       <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
                         Team Lead
-                        {isEditMode && !teamDetailsCompleted && (
+                        {isMemberEditMode && !teamDetailsCompleted && (
                           <span className="text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded">
                             Fill in the team data first
                           </span>
@@ -613,7 +696,7 @@ export default function TeamProfilePage() {
                             ? "Input your leader team name"
                             : "Fill in the team data first"
                         }
-                        disabled={!isEditMode || !teamDetailsCompleted}
+                        disabled={!isMemberEditMode || !teamDetailsCompleted}
                         className={inputClassName}
                       />
                       {errors.leaderName && (
@@ -635,7 +718,7 @@ export default function TeamProfilePage() {
                             ? "Enter the Leader's Email"
                             : "Fill in the team data first"
                         }
-                        disabled={!isEditMode || !teamDetailsCompleted}
+                        disabled={!isMemberEditMode || !teamDetailsCompleted}
                         className={inputClassName}
                       />
                       {errors.leaderEmail && (
@@ -653,7 +736,9 @@ export default function TeamProfilePage() {
                         control={control}
                         render={({ field }) => (
                           <Select
-                            disabled={!isEditMode || !teamDetailsCompleted}
+                            disabled={
+                              !isMemberEditMode || !teamDetailsCompleted
+                            }
                             value={field.value || ""}
                             onValueChange={field.onChange}
                           >
@@ -701,7 +786,7 @@ export default function TeamProfilePage() {
                               ? "Input Link Github"
                               : "Fill in the team data first"
                           }
-                          disabled={!isEditMode || !teamDetailsCompleted}
+                          disabled={!isMemberEditMode || !teamDetailsCompleted}
                           className={inputClassName}
                         />
                         <div className="w-full flex justify-end pt-2">
@@ -725,7 +810,7 @@ export default function TeamProfilePage() {
                               ? "(Please upload your requirement documents in link format)"
                               : "Fill in the team data first"
                           }
-                          disabled={!isEditMode || !teamDetailsCompleted}
+                          disabled={!isMemberEditMode || !teamDetailsCompleted}
                           className={inputClassName}
                         />
                         {errors.requirementLink && (
@@ -747,14 +832,16 @@ export default function TeamProfilePage() {
                     <div
                       key={member.id}
                       className={`space-y-6 flex flex-col border-t border-white/20 pt-6 ${
-                        isEditMode && !allInfoCompleted ? "opacity-60" : ""
+                        isMemberEditMode && !allInfoCompleted
+                          ? "opacity-60"
+                          : ""
                       }`}
                     >
                       <div className="flex justify-between items-center">
                         <h3 className="font-semibold text-white">
                           Member {index + 1}
                         </h3>
-                        {isEditMode && allInfoCompleted && (
+                        {isMemberEditMode && allInfoCompleted && (
                           <Button
                             type="button"
                             variant="ghost"
@@ -777,7 +864,7 @@ export default function TeamProfilePage() {
                               ? "Enter the Member's Name"
                               : "Complete the team and leader data first"
                           }
-                          disabled={!isEditMode || !allInfoCompleted}
+                          disabled={!isMemberEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -791,7 +878,7 @@ export default function TeamProfilePage() {
                               ? "Enter the Member's Email"
                               : "Complete the team and leader data first"
                           }
-                          disabled={!isEditMode || !allInfoCompleted}
+                          disabled={!isMemberEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -802,7 +889,7 @@ export default function TeamProfilePage() {
                           control={control}
                           render={({ field }) => (
                             <Select
-                              disabled={!isEditMode || !allInfoCompleted}
+                              disabled={!isMemberEditMode || !allInfoCompleted}
                               value={field.value || ""}
                               onValueChange={field.onChange}
                             >
@@ -845,7 +932,7 @@ export default function TeamProfilePage() {
                               ? "(Please provide your portfolio link  optional / can be NULL)"
                               : "Complete the team and leader data first"
                           }
-                          disabled={!isEditMode || !allInfoCompleted}
+                          disabled={!isMemberEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
@@ -859,14 +946,14 @@ export default function TeamProfilePage() {
                               ? "(Please upload your requirement documents in link format)"
                               : "Complete the team and leader data first"
                           }
-                          disabled={!isEditMode || !allInfoCompleted}
+                          disabled={!isMemberEditMode || !allInfoCompleted}
                           className={inputClassName}
                         />
                       </div>
                     </div>
                   ))}
 
-                  {isEditMode && (
+                  {isMemberEditMode && (
                     <div className="w-full flex items-center justify-center pt-6">
                       {allInfoCompleted ? (
                         <Button
@@ -882,7 +969,7 @@ export default function TeamProfilePage() {
                           }
                           className={cn(
                             `bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6`,
-                            fields.length === 3 ? "hidden" : ""
+                            fields.length === 5 ? "hidden" : ""
                           )}
                         >
                           <Plus className="mr-2" /> Add Team Member
@@ -901,11 +988,40 @@ export default function TeamProfilePage() {
 
           <div className="px-4 lg:pl-0 lg:pr-4 pb-8 lg:col-span-1 w-full">
             <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
-              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
+              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
                 <CardTitle className="text-2xl font-medium leading-none">
                   <p>Detail</p>
                   <span className="font-bold">Team.</span>
                 </CardTitle>
+
+                {/* Team Edit Button */}
+                <Button
+                  onClick={() => {
+                    if (isTeamEditMode) {
+                      handleTeamEditModeChange(false);
+                    } else {
+                      handleTeamEditModeChange(true);
+                    }
+                  }}
+                  size="sm"
+                  className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
+                    isTeamEditMode
+                      ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
+                      : "bg-white/10 hover:bg-white/20 text-white"
+                  }`}
+                >
+                  {isTeamEditMode ? (
+                    <>
+                      <Check size={14} className="text-white" />
+                      <span className="text-sm">Save</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit size={14} className="text-white" />
+                      <span className="text-sm">Edit</span>
+                    </>
+                  )}
+                </Button>
               </CardHeader>
 
               <CardContent className="overflow-y-auto max-h-[67vh]">
@@ -917,7 +1033,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="teamName"
                       placeholder="Input your team name"
-                      disabled={!isEditMode}
+                      disabled={!isTeamEditMode}
                       className={inputClassName}
                     />
                     {errors.teamName && (
@@ -931,7 +1047,7 @@ export default function TeamProfilePage() {
                   <div className="flex flex-col gap-3">
                     <Label>Institution*</Label>
                     <RadioGroup
-                      disabled={!isEditMode}
+                      disabled={!isTeamEditMode}
                       value={institution}
                       onValueChange={(value: string) => {
                         setInstitution(value as "telkom" | "nontelkom");
@@ -939,7 +1055,10 @@ export default function TeamProfilePage() {
                         if (value === "telkom") {
                           setValue("institution", "Telkom University");
                         } else {
-                          setValue("institution", "");
+                          const currentValue = getValues("institution");
+                          if (currentValue === "Telkom University") {
+                            setValue("institution", "");
+                          }
                         }
                       }}
                       className="flex flex-col gap-3"
@@ -949,12 +1068,12 @@ export default function TeamProfilePage() {
                           value="telkom"
                           id="telkom"
                           className="border-white text-white"
-                          disabled={!isEditMode}
+                          disabled={!isTeamEditMode}
                         />
                         <Label
                           htmlFor="telkom"
                           className={`cursor-pointer ${
-                            !isEditMode ? "opacity-60" : ""
+                            !isTeamEditMode ? "opacity-60" : ""
                           }`}
                         >
                           Telkom University
@@ -965,12 +1084,12 @@ export default function TeamProfilePage() {
                           value="nontelkom"
                           id="lainnya"
                           className="border-white text-white"
-                          disabled={!isEditMode}
+                          disabled={!isTeamEditMode}
                         />
                         <Label
                           htmlFor="lainnya"
                           className={`cursor-pointer ${
-                            !isEditMode ? "opacity-60" : ""
+                            !isTeamEditMode ? "opacity-60" : ""
                           }`}
                         >
                           Non Telkom
@@ -984,13 +1103,13 @@ export default function TeamProfilePage() {
                           register={register}
                           name="institution"
                           placeholder="Masukkan nama instansi"
-                          disabled={!isEditMode}
+                          disabled={!isTeamEditMode}
                           className={inputClassName}
                         />
                       </div>
                     )}
 
-                    {institution === "telkom" && !isEditMode && (
+                    {institution === "telkom" && !isTeamEditMode && (
                       <div className="mt-3">
                         <div
                           className={`${inputClassName} opacity-60 flex items-center`}
@@ -1014,7 +1133,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="whatsapp_number"
                       placeholder="62812345678"
-                      disabled={!isEditMode}
+                      disabled={!isTeamEditMode}
                       className={inputClassName}
                       type="tel"
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -1043,7 +1162,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="paymentproof_url"
                       placeholder="e.g., https://drive.google.com/abc123"
-                      disabled={!isEditMode}
+                      disabled={!isTeamEditMode}
                       className={inputClassName}
                     />
                     {errors.paymentproof_url && (
@@ -1055,7 +1174,7 @@ export default function TeamProfilePage() {
 
                   {/* CopyableLink */}
                   <CopyableLink
-                    disabled={!isEditMode}
+                    disabled={!isTeamEditMode}
                     label="Publication Materials "
                     text="(Twibbon, Caption, Poster, etc. will be provided by committee. All materials can be accessed here.)"
                   />
@@ -1102,12 +1221,12 @@ export default function TeamProfilePage() {
                         )}
                       </div>
                       <CopyableLink
-                        disabled={!isEditMode}
+                        disabled={!isTeamEditMode}
                         label="BCA ( GISELA SESARIA KUSTHIKA  PUTRI )"
                         text="7285451698"
                       />
                       <CopyableLink
-                        disabled={!isEditMode}
+                        disabled={!isTeamEditMode}
                         label="ShopeePay ( GISELA SESARIA KUSTHIKA PUTRI )"
                         text="081808767771"
                       />
