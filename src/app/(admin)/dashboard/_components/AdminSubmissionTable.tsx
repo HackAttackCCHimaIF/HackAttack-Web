@@ -268,7 +268,7 @@ export default function AdminSubmissionTable() {
                             >
                                 {/* Nama & Role */}
                                 <div className="flex items-center justify-between">
-                                <h3 className="font-semibold text-lg">{member.name}</h3>
+                                <h3 className="font-semibold text-lg ">{member.name}</h3>
                                 <span
                                     className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                     member.role === "Team Leader"

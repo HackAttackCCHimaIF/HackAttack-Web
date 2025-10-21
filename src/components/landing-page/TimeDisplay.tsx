@@ -39,7 +39,7 @@ const TimeUnit = ({ value, label }: { value: string; label: string }) => (
 );
 
 export default function TimeDisplay() {
-  const targetDate = new Date("2025-10-20T09:00:00");
+  const targetDate = new Date("2025-10-27T00:00:00");
 
   const calculateTimeLeft = () => {
     const diff = +targetDate - +new Date();

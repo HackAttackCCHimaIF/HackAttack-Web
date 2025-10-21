@@ -30,12 +30,12 @@ export function SuccessDialog({ open, onClose }: SuccessDialogProps) {
 
           {/* Title */}
           <h2 className="text-xl font-extrabold uppercase leading-tight text-center">
-            Terima Kasih Atas Partisipasi Anda!
+            Awesome! You’ve successfully registered for the HackAttack 2025
           </h2>
 
           {/* Description */}
           <p className="text-gray-300 text-sm text-center">
-            Data mu sedang diperiksa. Kami akan segera menghubungi mu via Email atau website.
+            Your data is being reviewed. We will contact you soon via email or website.
           </p>
         </DialogHeader>
 
@@ -45,7 +45,7 @@ export function SuccessDialog({ open, onClose }: SuccessDialogProps) {
             onClick={onClose}
             className="w-full py-6 text-lg font-semibold rounded-md bg-gradient-to-r from-pink-500 to-pink-600 hover:opacity-90 shadow-md"
           >
-            Omke Gas
+            Close
           </Button>
         </div>
       </DialogContent>
