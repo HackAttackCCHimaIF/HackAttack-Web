@@ -90,8 +90,8 @@ const Navbar = () => {
                 onClick={() => setOpen(!open)}
                 className={`flex items-center gap-1 cursor-pointer transition-colors duration-200 pb-1 ${
                   pathname === "/"
-                    ? "text-pink-400 border-b-2 border-pink-400"
-                    : "hover:text-pink-400"
+                    ? "text-[#EF4B72] border-b-2 border-[#EF4B72]"
+                    : "hover:text-[#EF4B72]"
                 }`}
               >
                 Home
@@ -122,8 +122,8 @@ const Navbar = () => {
               href="/workshop"
               className={`cursor-pointer transition-colors duration-200 pb-1 ${
                 pathname === "/workshop"
-                  ? "text-pink-400 border-b-2 border-pink-400"
-                  : "hover:text-pink-400"
+                  ? "text-[#EF4B72] border-b-2 border-[#EF4B72]"
+                  : "hover:text-[#EF4B72]"
               }`}
             >
               Workshop
@@ -133,8 +133,8 @@ const Navbar = () => {
               href="/merch"
               className={`cursor-pointer transition-colors duration-200 pb-1 ${
                 pathname === "/merch"
-                  ? "text-pink-400 border-b-2 border-pink-400"
-                  : "hover:text-pink-400"
+                  ? "text-[#EF4B72] border-b-2 border-[#EF4B72]"
+                  : "hover:text-[#EF4B72]"
               }`}
             >
               Merch Attack
@@ -205,8 +205,8 @@ const Navbar = () => {
                 onClick={() => setIsHomeOpen(!isHomeOpen)}
                 className={`flex items-center justify-between transition-colors duration-200 ${
                   pathname === "/"
-                    ? "text-pink-400 underline"
-                    : "hover:text-pink-400"
+                    ? "text-[#EF4B72] underline"
+                    : "hover:text-[#EF4B72]"
                 }`}
               >
                 <span>Home</span>
@@ -223,7 +223,7 @@ const Navbar = () => {
                     <Link
                       key={sub.href}
                       href={sub.href}
-                      className="text-sm text-gray-300 hover:text-pink-400"
+                      className="text-sm text-gray-300 hover:text-[#EF4B72]"
                       onClick={() => {
                         setIsHomeOpen(false);
                         setIsOpen(false);
@@ -240,8 +240,8 @@ const Navbar = () => {
               href="/workshop"
               className={`transition-colors duration-200 ${
                 pathname === "/workshop"
-                  ? "text-pink-400 underline"
-                  : "hover:text-pink-400"
+                  ? "text-[#EF4B72] underline underline-offset-4 decoration-2"
+                  : "hover:text-[#EF4B72]"
               }`}
             >
               Workshop
@@ -251,8 +251,8 @@ const Navbar = () => {
               href="/merch"
               className={`transition-colors duration-200 ${
                 pathname === "/merch"
-                  ? "text-pink-400 underline"
-                  : "hover:text-pink-400"
+                  ? "text-[#EF4B72] underline underline-offset-4 decoration-2"
+                  : "hover:text-[#EF4B72]"
               }`}
             >
               Merch Attack

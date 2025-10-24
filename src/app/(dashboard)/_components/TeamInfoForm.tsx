@@ -1254,7 +1254,7 @@ export default function TeamProfilePage() {
                   Feel Free to{" "}
                   <Link
                     href={"/sign-in"}
-                    className="font-bold hover:text-pink-400 duration-200"
+                    className="font-bold hover:text-[#EF4B72] duration-200"
                   >
                     Login
                   </Link>{" "}

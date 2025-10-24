@@ -12,7 +12,7 @@ const MediaPartnerSection = () => {
   return (
     <section className="w-full py-16  backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-6 text-center">
-        <h2 className="text-lg font-medium text-white/70 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-white">
           Our Media Partners
         </h2>
 
