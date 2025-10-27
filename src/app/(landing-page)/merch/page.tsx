@@ -24,7 +24,7 @@ const MerchPage = () => {
               src="/merch/Baju.png"
               alt="T-Shirt"
               fill
-              className="object-contain absolute inset-0 mx-auto my-auto scale-110"
+              className="object-contain absolute inset-0 mx-auto my-auto scale-80"
             />
             <div className="absolute top-8 left-8 flex gap-1 items-center">
               <div className="border-white border rounded-full p-0.5">
@@ -48,13 +48,16 @@ const MerchPage = () => {
 
           {/* Item 2 - Lanyard */}
           <div className="col-span-1 md:col-span-2 relative lg:col-span-2 row-span-3 lg:row-span-2 bg-[#0F75BD]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
-            <Image
-              src="/merch/Lanyard.png"
-              alt="Lanyard"
-              fill
-              className="object-contain absolute inset-0 scale-140"
-            />
-            <div className="absolute bottom-4 px-4 w-full items-center flex flex-row justify-between">
+            <div className="absolute inset-0">
+              <Image
+                src="/merch/Lanyard.png"
+                alt="Lanyard"
+                fill
+                className="object-cover object-center h-full w-full scale-105 transition-transform duration-500 ease-out"
+              />
+            </div>
+
+            <div className="absolute bottom-4 px-4 w-full flex flex-row justify-between items-center">
               <div className="max-w-sm text-white text-end">
                 <h3 className="text-lg font-bold">Lanyard</h3>
                 <p className="text-xs sm:text-sm hidden md:block">
@@ -64,61 +67,65 @@ const MerchPage = () => {
             </div>
           </div>
 
+
           {/* Item 3 - Key Chain */}
           <div className="col-span-3 md:col-span-5 relative lg:col-span-4 lg:row-span-1 row-span-2 bg-[#C7A7BC]/10 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
-            <Image
-              src="/merch/Key Chain.png"
-              alt="Key Chain"
-              fill
-              className="object-contain absolute inset-0 mx-auto my-auto scale-110"
-            />
-            <div className="absolute top-4 px-4 items-start flex">
+            {/* Gambar memenuhi seluruh card */}
+            <div className="absolute inset-0">
+              <Image
+                src="/merch/Key Chain.png"
+                alt="Key Chain"
+                fill
+                className="object-cover object-center h-full w-full scale-110 opacity-80 transition-transform duration-500 ease-out"
+              />
+            </div>
+
+            {/* Teks di bawah kanan */}
+            <div className="absolute bottom-4 right-4 px-4 flex justify-end">
               <div className="max-w-sm text-white text-end">
                 <h3 className="text-lg md:text-xl lg:text-4xl font-bold">Key Chain</h3>
               </div>
             </div>
           </div>
 
+
           {/* Item 4 - Sticker */}
           <div className="col-span-3 w-full md:col-span-5 relative lg:col-span-4 lg:row-span-1 row-span-2 bg-[#A90906]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
             {/* Sticker di kiri */}
-            <Image
+            <div className="absolute inset-y-0 left-0 w-1/2 flex items-center">
+              <Image
                 src="/merch/Sticker.png"
                 alt="Sticker Bundle"
                 fill
-                className="object-contain absolute top-0 scale-110"
-            />
+                className="object-cover object-left h-full w-auto scale-110"
+              />
+            </div>
 
-            {/* Text di kanan
-            <Image
+            {/* Text di kanan */}
+            <div className="absolute inset-y-0 right-0 w-full lg:w-1/4 flex items-center justify-end">
+              <Image
                 src="/merch/text.png"
                 alt="Sticker Text"
                 fill
-                className="object-contain absolute right-0 top-1/2 -translate-y-1/2 opacity-70"
-            /> */}
-
-            {/* Caption */}
-            <div className="absolute bottom-4 right-4 flex items-end">
-                <div className="max-w-sm text-white text-end uppercase">
-                <h3 className="text-lg md:text-xl lg:text-4xl font-bold leading-4">
-                    Sticker
-                    <br />
-                    <span className="text-base">Bundle</span>
-                </h3>
-                </div>
+                className="object-contain object-right h-full w-auto scale-110 opacity-80"
+              />
             </div>
-            </div>
-
+          </div>
 
           {/* Item 5 - Tote Bag */}
           <div className="col-span-3 relative md:col-span-5 lg:col-span-6 row-span-2 h-full flex items-center lg:row-span-1 bg-[#E1C9B0]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
-            <Image
-              src="/merch/Tote Bag.png"
-              alt="Tote Bag"
-              fill
-              className="object-contain absolute inset-0 mx-auto my-auto scale-105 -z-10 opacity-90"
-            />
-            <div className="flex items-center justify-center w-full h-full px-4">
+            {/* Background image — fill tapi tidak terlalu crop */}
+            <div className="absolute inset-0 flex items-end justify-center">
+              <Image
+                src="/merch/Tote Bag.png"
+                alt="Tote Bag"
+                fill
+                className="object-contain object-bottom h-full w-full scale-125 opacity-80 transition-transform duration-500 ease-out"
+              />
+            </div>
+
+            {/* Content */}
+            <div className="relative z-10 flex items-center justify-center w-full h-full px-4">
               <div className="w-full flex flex-col md:flex-row items-center justify-between gap-6 text-white">
                 {/* Left */}
                 <div className="flex flex-col items-start text-center md:text-left leading-none">
@@ -142,6 +149,7 @@ const MerchPage = () => {
               </div>
             </div>
           </div>
+
         </div>
 
         {/* Footer Title */}

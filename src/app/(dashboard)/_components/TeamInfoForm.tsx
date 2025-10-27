@@ -1176,7 +1176,7 @@ export default function TeamProfilePage() {
                   <CopyableLink
                     disabled={!isTeamEditMode}
                     label="Publication Materials "
-                    text="(Twibbon, Caption, Poster, etc. will be provided by committee. All materials can be accessed here.)"
+                    text="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
                   />
 
                   {/* Metode Pembayaran */}
