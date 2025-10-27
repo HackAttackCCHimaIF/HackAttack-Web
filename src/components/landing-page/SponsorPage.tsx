@@ -19,14 +19,9 @@ const SponsorPage = () => {
 
   const sponsors = [
     {
-      label: "KUI",
-      img: "/sponsor/KUI.jpg",
-      desc: "KUI",
-    },
-    {
-      label: "KULITIQ",
-      img: "/sponsor/KULITIQ.jpg",
-      desc: "KULITIQ",
+      label: "Rumah Marta",
+      img: "/sponsor/RumahMarta.jpg",
+      desc: "Rumah Marta",
     },
   ]
 
