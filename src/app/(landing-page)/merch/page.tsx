@@ -114,13 +114,13 @@ const MerchPage = () => {
 
           {/* Item 5 - Tote Bag */}
           <div className="col-span-3 relative md:col-span-5 lg:col-span-6 row-span-2 h-full flex items-center lg:row-span-1 bg-[#E1C9B0]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
-            {/* Background image — fill tapi tidak terlalu crop */}
-            <div className="absolute inset-0 flex items-end justify-center">
+            {/* Background image — posisi di atas (top-0) */}
+            <div className="absolute top-0 left-0 w-full h-full flex justify-center">
               <Image
                 src="/merch/Tote Bag.png"
                 alt="Tote Bag"
                 fill
-                className="object-contain object-bottom h-full w-full scale-125 opacity-80 transition-transform duration-500 ease-out"
+                className="object-contain object-top w-full h-full opacity-80 transition-transform duration-500 ease-out"
               />
             </div>
 
@@ -149,6 +149,7 @@ const MerchPage = () => {
               </div>
             </div>
           </div>
+
 
         </div>
 
