@@ -208,8 +208,8 @@ const SubmissionPage = () => {
 
       <div className="flex-1 w-full overflow-y-auto px-4 pb-5">
         <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl flex flex-col h-fit md:h-full">
-          <CardHeader className="py-4 lg:py-12">
-            <CardTitle className="text-2xl font-medium leading-normal">
+          <CardHeader className="py-4 lg:pt-12 lg:pb-3">
+            <CardTitle className="text-2xl font-medium leading-none">
               <p className="">
                 Halo, Team <span className="font-bold">{teamName}</span>
               </p>

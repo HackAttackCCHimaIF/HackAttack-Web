@@ -6,7 +6,7 @@ import PosterShowcase from "./PosterShowcase"
 
 const HeroWorkshop = () => {
   return (
-    <section className="relative w-full h-screen overflow-hidden">
+    <section className="relative w-full h-[120vh] overflow-hidden">
       {/* Background Map */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -19,7 +19,7 @@ const HeroWorkshop = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-20 flex flex-col lg:grid lg:grid-cols-2 items-center justify-center h-full px-4 sm:px-8 lg:px-16 text-white">
+      <div className="relative pt-32 lg:pt-0 z-20 flex flex-col lg:grid lg:grid-cols-2 xl:items-center justify-center h-full px-4 sm:px-16 text-white">
         {/* Text Content */}
         <div className="flex flex-col items-start justify-center space-y-6 text-left">
           <h1 className="relative inline-block text-[28px] sm:text-[36px] lg:text-[48px] font-bold max-w-xl leading-tight sm:leading-none">
