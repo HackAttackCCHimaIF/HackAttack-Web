@@ -43,7 +43,7 @@ const SponsorPage = () => {
       />
 
       {/* Tirai kiri */}
-      <div className="absolute left-0 top-0 h-full w-[13%] z-20 2xl:flex hidden">
+      <div className="absolute left-0 top-0 h-full w-[14%] z-20 2xl:flex hidden">
         <Image
           src="/landing-page/tirai2.svg"
           alt="tirai kiri"
