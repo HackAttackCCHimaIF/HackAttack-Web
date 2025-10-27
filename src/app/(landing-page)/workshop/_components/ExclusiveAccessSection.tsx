@@ -39,21 +39,24 @@ const WorkshopCard = ({
 }) => (
   <Card className="bg-white/10 backdrop-blur-xs border border-white/10 w-full text-white rounded-md pt-0">
     <CardHeader className="pt-6 rounded-t-xl">
-      <CardTitle className="flex items-center text-xl md:text-2xl lg:text-3xl font-semibold leading-snug gap-3">
-        <div className="w-3 h-10 sm:h-16 bg-[#EF4B72]/60" />
-        <h2>{title}</h2>
+      <CardTitle className="flex items-stretch text-xl md:text-2xl lg:text-3xl font-semibold leading-snug gap-3">
+        <div className="max-w-2 w-full bg-[#EF4B72]/60 rounded-none" />
+        <h2 className="flex items-center">{title}</h2>
       </CardTitle>
     </CardHeader>
-    <CardContent className="max-h-[60vh] overflow-y-auto space-y-6">
+    <CardContent className="max-h-[60vh] overflow-y-auto space-y-6 h-full">
       <InfoRow icon="/calendar.svg" text={date} />
       <InfoRow icon="/clock.svg" text={time} />
-      <div>
+    </CardContent>
+    <CardFooter>
+      <div className="py-2.5 px-4 border rounded-xl">
         <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mb-2">
           Description
         </h3>
-        <p className="text-white text-sm sm:text-base">{description}</p>
+        <p className="text-white/85 text-sm sm:text-base">{description}</p>
+
       </div>
-    </CardContent>
+    </CardFooter>
   </Card>
 );
 
@@ -113,23 +116,23 @@ const ExclusiveAccessSection = () => {
         <CardContent className="h-full grid grid-cols-1 md:grid-cols-2 mt-12 gap-6">
           <WorkshopCard
             title="Decode the Problem: Framing Ideas into Digital Impact for Nusantara"
-            date="Sunday, 2 November 2025"
-            time="07:00 - 08:00 WIB"
+            date="Minggu, 2 November 2025"
+            time="13:00 - 16:00 WIB"
             description="Discover how to turn real-world challenges into sustainable digital solutions. In this workshop, you’ll learn to decode hackathon topics aligned with three SDGs and transform ideas into impactful innovations for Nusantara."
           />
 
           <WorkshopCard
             title="Code the Solution: Prototyping Smart Innovations for Real World Impact"
-            date="Sunday, 16 November 2025"
-            time="07:00 - 08:00 WIB"
-            description="Code the Solution: Prototyping Smart Innovations for Real-World Impact guides participants to transform concepts into interactive digital prototypes — bridging creativity with real-world solutions."
+            date="Minggu, 16 November 2025"
+            time="13:00 - 16:00 WIB"
+            description="'Code the Solution: Prototyping Smart Innovations for Real-World Impact guides participants to transform concepts into interactive digital prototypes — bridging creativity with real-world solutions.'"
           />
 
           {/* Benefit */}
           <Card className="col-span-1 md:col-span-2 bg-white/10 backdrop-blur-xs border border-white/10 w-full text-white rounded-md pt-0">
             <CardHeader className="pt-6 rounded-t-xl">
-              <CardTitle className="flex items-center text-xl sm:text-2xl font-semibold leading-none gap-3">
-                <div className="w-3 h-8 sm:h-12 bg-[#EF4B72]/60" />
+              <CardTitle className="flex items-stretch text-xl md:text-2xl lg:text-3xl font-semibold leading-snug gap-3">
+                <div className="w-full max-w-2 bg-[#EF4B72]/60 rounded-none" />
                 <div className="flex flex-row gap-3 items-center">
                   <Image
                     src="/trophy.svg"
@@ -142,19 +145,31 @@ const ExclusiveAccessSection = () => {
                 </div>
               </CardTitle>
             </CardHeader>
+
             <CardContent>
-              <CardDescription className="text-white space-y-2">
-                <span className="text-lg sm:text-xl md:text-2xl font-semibold mb-2">
-                  Get Your Certificate + TAK!
-                </span>
-                <p className="text-sm sm:text-base">
-                  Join the workshop, boost your portfolio, and earn Student
-                  Activity Transcript (TAK) points to support your graduation at
-                  Telkom University.
-                </p>
+              <CardDescription className="text-white space-y-3">
+                <ul className="list-disc list-inside marker:text-[#EF4B72]/80 space-y-0.5 text-sm sm:text-base leading-relaxed">
+                  <li>
+                    Networking with mentors and other participants.
+                  </li>
+                  <li>
+                    Enhance your portfolio with an idea that blends creativity and impact.
+                  </li>
+                  <li>
+                    Earn an official e-certificate (TAK for Telkom University Students).
+                  </li>
+                  <li>
+                    Strong foundation for hackathon preparation.
+                  </li>
+                  <li>
+                    Bonus GoPay Total 100K for Best Case Solution & Best Projects.
+                  </li>
+                </ul>
               </CardDescription>
             </CardContent>
           </Card>
+
+
         </CardContent>
 
         {/* Footer */}
@@ -163,7 +178,7 @@ const ExclusiveAccessSection = () => {
             href="/workshop/payment"
             className={buttonVariants({
               className:
-                "!rounded-full border !bg-white/10 w-auto !py-6 sm:!py-8 !px-8 sm:!px-12 hover:scale-105 hover:!bg-white/10 hover:border-white/40 transition-colors duration-300",
+                "!rounded-none border !bg-white/10 w-auto border-white/30 !py-6 sm:!py-8 !px-8 sm:!px-12 hover:scale-105 hover:!bg-white/10 hover:border-white/40 transition-colors duration-300",
             })}
           >
             <p className="font-semibold text-xl sm:text-3xl text-white hover:text-white/80 transition-colors duration-300">

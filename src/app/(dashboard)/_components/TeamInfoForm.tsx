@@ -1306,7 +1306,7 @@ export default function TeamProfilePage() {
                   <CopyableLink
                     disabled={!isTeamEditMode}
                     label="Publication Materials "
-                    text="(Twibbon, Caption, Poster, etc. will be provided by committee. All materials can be accessed here.)"
+                    text="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
                   />
 
                   {/* Metode Pembayaran */}
@@ -1634,7 +1634,7 @@ export default function TeamProfilePage() {
                   Feel Free to{" "}
                   <Link
                     href={"/sign-in"}
-                    className="font-bold hover:text-pink-400 duration-200"
+                    className="font-bold hover:text-[#EF4B72] duration-200"
                   >
                     Login
                   </Link>{" "}
