@@ -20,21 +20,36 @@ const MerchPage = () => {
 
           {/* Item 1 - Baju */}
           <div className="col-span-2 relative md:col-span-3 lg:col-span-4 row-span-3 bg-[#BA4300]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
+            {/* T-shirt image */}
             <Image
               src="/merch/Baju.png"
               alt="T-Shirt"
               fill
-              className="object-contain absolute inset-0 mx-auto my-auto scale-80"
+              className="object-contain absolute inset-0 mx-auto my-auto scale-100 lg:scale-90 xl:scale-80 z-10"
             />
+
+            {/* Text overlay — center aligned and responsive */}
+            <div className="absolute inset-y-0 sm:left-1/2 md:left-1/3 xl:left-1/3 -translate-x-1/2 flex items-center justify-center w-[70%] md:w-[60%] lg:w-[60%]">
+              <Image
+                src="/merch/textBaju.png"
+                alt="Sticker Text"
+                fill
+                className="object-contain opacity-100"
+              />
+            </div>
+
+            {/* Decorative dots */}
             <div className="absolute top-8 left-8 flex gap-1 items-center">
               <div className="border-white border rounded-full p-0.5">
                 <div className="rounded-full bg-white size-3.5" />
               </div>
               <div className="bg-black rounded-full size-3.5" />
             </div>
+
+            {/* Bottom text + button */}
             <div className="absolute md:bottom-8 bottom-4 px-4 md:px-8 w-full items-center flex flex-row justify-between">
               <div className="max-w-sm text-white">
-                <p className="text-xs sm:text-sm hidden md:block">
+                <p className="text-xs sm:text-sm hidden lg:block">
                   Soft, comfy, and easy to style—this tee isn’t just clothing, it’s a statement that you’re part of something bigger.
                 </p>
               </div>
@@ -45,6 +60,7 @@ const MerchPage = () => {
               </div>
             </div>
           </div>
+
 
           {/* Item 2 - Lanyard */}
           <div className="col-span-1 md:col-span-2 relative lg:col-span-2 row-span-3 lg:row-span-2 bg-[#0F75BD]/20 backdrop-blur-md rounded-3xl border border-white/20 overflow-hidden">
