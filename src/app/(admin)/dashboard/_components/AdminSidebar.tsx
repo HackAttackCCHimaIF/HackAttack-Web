@@ -157,10 +157,10 @@ export default function AdminSidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:text-white relative transition
-                      ${pathname === item.href ? "text-pink-500 font-semibold" : ""}`}
+                      ${pathname === item.href ? "text-[#EF4B72] font-semibold" : ""}`}
                   >
                     {pathname === item.href && (
-                      <div className="absolute left-0 top-0 h-full w-1 bg-pink-500 rounded-r-md"></div>
+                      <div className="absolute left-0 top-0 h-full w-1 bg-[#EF4B72] rounded-r-md"></div>
                     )}
                     {item.icon}
                     <span>{item.label}</span>

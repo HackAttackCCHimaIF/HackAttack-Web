@@ -5,7 +5,7 @@ import ExclusiveAccessSection from './_components/ExclusiveAccessSection'
 const WorkshopPage = () => {
   return (
     <div className="overflow-hidden">
-        <div className='max-h-screen'>
+        <div className='min-h-screen md:min-h-[110vh] lg:min-h-screen lg:max-h-screen'>
           <HeroWorkshop/>
         </div>
         <div className='min-h-screen' id='ExclusiveAccessSection'>

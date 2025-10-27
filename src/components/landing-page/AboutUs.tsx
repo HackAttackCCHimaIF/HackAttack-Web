@@ -93,7 +93,7 @@ const cardsData = [
           "Networking & Exposure Opportunities",
         ].map((item, i) => (
           <li key={i} className="flex items-start gap-3">
-            <CheckCircle2 className="text-pink-400 mt-1" size={20} />
+            <CheckCircle2 className="text-[#EF4B72] mt-1" size={20} />
             <span>{item}</span>
           </li>
         ))}

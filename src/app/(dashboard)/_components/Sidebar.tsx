@@ -61,15 +61,15 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 key={item.label}
                 href={item.href}
                 className={`flex items-center gap-3 p-3 pb-2 pl-6 rounded-lg text-gray-300 hover:text-white relative transition
-                  ${pathname === item.href ? "text-pink-500 font-semibold" : ""}`}
+                  ${pathname === item.href ? "text-[#EF4B72] font-semibold" : ""}`}
               >
                 {pathname === item.href && (
-                  <div className="absolute left-1 top-0 h-full w-1 bg-pink-500 rounded-md"></div>
+                  <div className="absolute left-1 top-0 h-full w-1 bg-[#EF4B72] rounded-md"></div>
                 )}
                 <div
                   className={cn(
                     `text-white p-2 rounded-full`,
-                    pathname === item.href ? " bg-pink-500/50" : "bg-white/10"
+                    pathname === item.href ? " bg-[#EF4B72]/60" : "bg-white/10"
                   )}
                 >
                   {item.icon}
@@ -94,7 +94,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
             <>
               <Link
                 href="/login"
-                className={buttonVariants({className: "!bg-pink-500/50 hover:!bg-pink-600 text-white !px-4 !py-6"})}
+                className={buttonVariants({className: "!bg-[#EF4B72]/60 hover:!bg-[#EF4B72]/80 text-white !px-4 !py-6"})}
               >
                 <LogIn size={18} />
                 <span>Login</span>
@@ -147,10 +147,10 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:text-white relative transition
-                      ${pathname === item.href ? "text-pink-500 font-semibold" : ""}`}
+                      ${pathname === item.href ? "text-[#EF4B72] font-semibold" : ""}`}
                   >
                     {pathname === item.href && (
-                      <div className="absolute left-0 top-0 h-full w-1 bg-pink-500 rounded-r-md"></div>
+                      <div className="absolute left-0 top-0 h-full w-1 bg-[#EF4B72] rounded-r-md"></div>
                     )}
                     {item.icon}
                     <span>{item.label}</span>
@@ -171,7 +171,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                   <>
                     <a
                       href="/sign-in"
-                      className="flex items-center gap-2 bg-pink-500/60 hover:bg-pink-600 text-white px-4 py-2 rounded-lg transition"
+                      className="flex items-center gap-2 bg-[#EF4B72]/60 hover:bg-[#EF4B72]/80 text-white px-4 py-2 rounded-lg transition"
                     >
                       <LogIn size={18} />
                       <span>Login</span>
