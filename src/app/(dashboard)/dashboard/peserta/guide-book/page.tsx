@@ -12,20 +12,13 @@ const GuideBookPage = () => {
   );
 
   return (
-<<<<<<< HEAD
     <div className="flex flex-col min-h-screen w-full">
-=======
-    <div className="flex flex-col min-h-screen w-full pt-16 md:pt-0">
->>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
       <HeaderDashboard bottomText="Book" topText="Guide" />
 
       <div className="flex-1 flex flex-col pb-5 px-4">
         <Card className="flex-1 bg-white/10 backdrop-blur-md border-3 border-white/10 rounded-2xl text-white">
           <CardContent className="h-full w-full overflow-y-auto p-4 max-h-[80vh]">
-<<<<<<< HEAD
             {/* Grid responsif: 1 kolom di mobile, 2 kolom di md+ */}
-=======
->>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 w-full">
               {guidebookImages.map((src, index) => (
                 <Image

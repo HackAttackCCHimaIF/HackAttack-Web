@@ -1,12 +1,6 @@
 "use client"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-<<<<<<< HEAD
-import { Button } from "@/components/ui/button";
-import { Check, Edit } from "lucide-react";
-import { NotificationDialog } from "./NotificationDialog";
-=======
->>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
 import { useUserStore } from "@/lib/stores/userStore";
 import { NotificationDialog } from "./NotificationDialog";
 
@@ -40,44 +34,6 @@ export const HeaderDashboard = ({
       <div className="flex items-center gap-1 md:gap-4">
         {isLoggedIn ? (
           <>
-<<<<<<< HEAD
-            {isEdit && (
-              <Button
-                onClick={() => {
-                  if (isEditMode) {
-                    onSave?.();
-                    setEditMode?.(false);
-                  } else {
-                    setEditMode?.(true);
-                  }
-                }}
-                size="lg"
-                className={`flex items-center gap-2 rounded-full pl-2 pr-2 !py-6 ${
-                  isEditMode
-                    ? "bg-pink-600/50 hover:bg-pink-700/80 text-white lg:pl-6"
-                    : "bg-white/10 hover:bg-white/20 text-white lg:pr-6"
-                }`}
-              >
-                {isEditMode ? (
-                  <div className="flex items-center gap-3">
-                    <p className="hidden lg:flex">Simpan</p>
-                    <div className="p-2 rounded-full lg:bg-white/10">
-                      <Check size={8} className="text-white" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-full lg:bg-white/10">
-                      <Edit size={8} className="text-white" />
-                    </div>
-                    <p className="hidden lg:flex">Edit Profile</p>
-                  </div>
-                )}
-              </Button>
-            )}
-
-=======
->>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
             <NotificationDialog />
 
             <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
@@ -95,20 +51,7 @@ export const HeaderDashboard = ({
             </div>
           </>
         ) : (
-<<<<<<< HEAD
-          <div className="flex gap-3">
-            {/* <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full !px-4 !py-6">
-              <LogIn />
-              <p className="hidden md:block">Login</p>
-            </Button>
-            <Button className="bg-pink-500/60 hover:bg-pink-600 text-white rounded-full !px-4 !py-6">
-              <UserPlus />
-              <p className="hidden md:block">Register</p>
-            </Button> */}
-          </div>
-=======
           <></>
->>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
         )}
       </div>
     </div>
