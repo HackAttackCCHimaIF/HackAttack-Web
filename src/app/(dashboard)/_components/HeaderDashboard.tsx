@@ -1,25 +1,21 @@
 "use client"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+<<<<<<< HEAD
 import { Button } from "@/components/ui/button";
 import { Check, Edit } from "lucide-react";
 import { NotificationDialog } from "./NotificationDialog";
+=======
+>>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
 import { useUserStore } from "@/lib/stores/userStore";
+import { NotificationDialog } from "./NotificationDialog";
 
 export const HeaderDashboard = ({
-  isEditMode,
-  setEditMode,
   topText,
   bottomText,
-  isEdit,
-  onSave,
 }: {
-  isEditMode?: boolean;
-  isEdit?: boolean;
-  setEditMode?: (mode: boolean) => void;
   topText?: string;
   bottomText: string;
-  onSave?: () => void;
 }) => {
   const { user } = useUserStore();
 
@@ -31,7 +27,7 @@ export const HeaderDashboard = ({
     <div className="py-4 px-4 flex justify-between items-center">
       {/* Judul */}
       <div className="relative inline-block">
-        <div className="absolute -inset-0 bg-white/60 blur-2xl rounded-lg opacity-50"></div>
+        <div className="absolute -inset-0 left-1/8 bg-white/60 blur-2xl rounded-full opacity-50"></div>
         <h1 className="relative text-[28px] sm:text-[36px] font-bold text-start max-w-[240px] pt-2 leading-tight sm:leading-none">
           <span className="block text-white uppercase">{topText}</span>
           <span className="block tracking-wide uppercase py-0.5 px-1 bg-pink-500/50 pr-4 text-white">
@@ -44,6 +40,7 @@ export const HeaderDashboard = ({
       <div className="flex items-center gap-1 md:gap-4">
         {isLoggedIn ? (
           <>
+<<<<<<< HEAD
             {isEdit && (
               <Button
                 onClick={() => {
@@ -79,6 +76,8 @@ export const HeaderDashboard = ({
               </Button>
             )}
 
+=======
+>>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
             <NotificationDialog />
 
             <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
@@ -96,6 +95,7 @@ export const HeaderDashboard = ({
             </div>
           </>
         ) : (
+<<<<<<< HEAD
           <div className="flex gap-3">
             {/* <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full !px-4 !py-6">
               <LogIn />
@@ -106,6 +106,9 @@ export const HeaderDashboard = ({
               <p className="hidden md:block">Register</p>
             </Button> */}
           </div>
+=======
+          <></>
+>>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
         )}
       </div>
     </div>

@@ -3,6 +3,7 @@ import AboutUs from '@/components/landing-page/AboutUs';
 import CountdownPage from '@/components/landing-page/CountdownPage';
 import FAQSection from '@/components/landing-page/FAQSection';
 import HeroSection from '@/components/landing-page/HeroSection';
+import MediaPartnerSection from '@/components/landing-page/MediaPartnerSection';
 import SpeedDating from '@/components/landing-page/SpeedDating';
 import SponsorPage from '@/components/landing-page/SponsorPage';
 import Timeline from '@/components/landing-page/Timeline';
@@ -29,6 +30,9 @@ const LandingPage = () => {
         </div>
          <div className='min-h-screen' id='sponsor'>
           <SponsorPage/>
+        </div>
+        <div className='h-fit' id='mediapartner'>
+          <MediaPartnerSection/>
         </div>
         <div className='h-full' id='faq'>
           <FAQSection/>

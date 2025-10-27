@@ -8,7 +8,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-poppins: var(--font-poppins);
+<<<<<<< HEAD
   --font-koulen: var(--font-koulen);
+=======
+>>>>>>> 6d50bfebcd4180261043d55f74ab1ff907568e63
   --font-playfair: var(--font-playfair);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);

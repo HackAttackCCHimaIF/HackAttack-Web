@@ -1,25 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { ChevronDown } from "lucide-react"
-import { cn } from "@/lib/utility/utils"
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utility/utils";
 
 interface DropdownOption {
-  label: string
-  value: string
+  label: string;
+  value: string;
+  price?: number;
 }
 
 interface InstitutionDropdownProps {
-  placeholder?: string
-  options: DropdownOption[]
-  selected: string[]
-  onChange: (values: string[]) => void
+  placeholder?: string;
+  options: DropdownOption[];
+  selected: string[];
+  onChange: (values: string[]) => void;
 }
 
 export function InstitutionDropdown({
@@ -28,15 +29,15 @@ export function InstitutionDropdown({
   selected,
   onChange,
 }: InstitutionDropdownProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   const handleToggle = (value: string) => {
     if (selected.includes(value)) {
-      onChange(selected.filter((v) => v !== value))
+      onChange([]);
     } else {
-      onChange([...selected, value])
+      onChange([value]);
     }
-  }
+  };
 
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -79,5 +80,5 @@ export function InstitutionDropdown({
         ))}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }

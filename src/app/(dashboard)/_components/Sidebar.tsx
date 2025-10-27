@@ -32,7 +32,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
       <div className="md:hidden fixed top-4 left-4 z-50 w-full">
         <button
           onClick={() => setIsOpen(true)}
-          className="p-3 bg-white/10 rounded-xl backdrop-blur-sm hover:bg-white/20 transition"
+          className="p-3 bg-white/10 rounded-xl backdrop-blur-xl hover:bg-white/20 transition"
         >
           <Menu size={24} className="text-white" />
         </button>
@@ -128,7 +128,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", stiffness: 80 }}
-              className="fixed top-0 left-0 h-full w-64 bg-white/10 backdrop-blur-sm shadow-xl flex flex-col justify-between rounded-r-3xl overflow-hidden z-50 text-white"
+              className="fixed top-0 left-0 h-full w-64 bg-white/10 backdrop-blur-xl shadow-xl flex flex-col justify-between rounded-r-3xl overflow-hidden z-50 text-white"
             >
               <div className="flex justify-between items-center px-6 py-4">
                 <div className="flex items-center gap-2 font-bold">

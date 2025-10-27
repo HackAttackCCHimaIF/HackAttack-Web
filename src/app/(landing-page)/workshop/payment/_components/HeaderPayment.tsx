@@ -8,14 +8,14 @@ export const HeaderPayment = ({
 
   return (
     <div className="pt-32 ">
-        <div className="flex flex-row items-start gap-6 text-white">
+        <div className="flex flex-col lg:flex-row items-start gap-6 px-6 lg:px-0 text-white">
             <Link 
                 href={"/workshop"}
-                className={buttonVariants({className: "rounded-full size-14 bg-transparent border items-center flex justify-center", size: "icon"})}
+                className={buttonVariants({className: "rounded-full md:size-10 size-8 lg:size-14 bg-transparent border items-center flex justify-center", size: "icon"})}
                 >
-                <ChevronLeft className="size-12" strokeWidth={1} />
+                <ChevronLeft className="size-6 md:size-8 lg:size-12" strokeWidth={1} />
             </Link>
-            <div className='text-2xl flex space-y-3 flex-col justify-center sm:text-4xl font-bold mb-3'>
+            <div className='text-2xl flex space-y-3 flex-col justify-center md:text-4xl font-bold mb-3'>
                 <div className="">
                     <span className='bg-gradient-to-r from-[#0f75bd] to-[#64BB48] bg-clip-text text-transparent'>
                     Workshop
@@ -27,7 +27,7 @@ export const HeaderPayment = ({
                     </span>
                 </div>
                 <div>
-                    <p className="text-xl font-semibold">Registration is open, claim your spot today!</p>
+                    <p className="text-lg md:text-xl font-semibold">Registration is open, claim your spot today!</p>
                 </div>
             </div>
         </div>

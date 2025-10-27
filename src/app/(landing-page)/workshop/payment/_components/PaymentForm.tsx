@@ -1,29 +1,143 @@
-"use client"
+"use client";
 
-import React from "react"
-import Image from "next/image"
-import { HeaderPayment } from "./HeaderPayment"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { InstitutionDropdown } from "./InstituionDropdown"
-import { CopyableLink } from "@/components/CopyableLink"
-import { WhatsappInput } from "./WhatsappInput"
-import { Button } from "@/components/ui/button"
+import React, { useState } from "react";
+import Image from "next/image";
+import { HeaderPayment } from "./HeaderPayment";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { InstitutionDropdown } from "./InstituionDropdown";
+import { CopyableLink } from "@/components/CopyableLink";
+import { WhatsappInput } from "./WhatsappInput";
+import { Button } from "@/components/ui/button";
+import { z } from "zod";
+import { toast } from "sonner";
 
 const inputClassName =
-  "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12"
+  "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
+
+const workshopOptions = [
+  {
+    label: "Workshop 1 & 2 (Sunday, 2 & 16 November 2025)",
+    value: "workshop1&2",
+    price: 50000,
+  },
+  {
+    label: "Workshop 1 (Sunday, 2 November 2025)",
+    value: "workshop1",
+    price: 30000,
+  },
+  {
+    label: "Workshop 2 (Sunday, 16 November 2025)",
+    value: "workshop2",
+    price: 30000,
+  },
+];
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email"),
+  institution: z.string().min(1, "Institution is required"),
+  workshop: z.string().min(1, "Workshop is required"),
+  whatsapp: z.string().min(8, "WhatsApp number required"),
+  payment_proof: z
+    .string()
+    .url("Link bukti pembayaran harus berupa URL")
+    .refine(
+      (val) => val.includes("drive.google.com"),
+      "Bukti pembayaran harus berupa link Google Drive"
+    ),
+});
 
 const PaymentForm = () => {
-  const [selectedInstitutions, setSelectedInstitutions] = React.useState<string[]>([])
-  const [selectedWorkshop, setSelectedWorkshop] = React.useState<string[]>([])
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    institution: "",
+    workshop: "",
+    whatsapp: "",
+    payment_proof: "",
+  });
+
+  const getSelectedWorkshopPrice = () => {
+    const selectedWorkshop = workshopOptions.find(
+      (option) => option.value === formData.workshop
+    );
+    return selectedWorkshop ? selectedWorkshop.price : 0;
+  };
+
+  const formatPrice = (price: number) => {
+    const formattedPrice = new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(price);
+    return formattedPrice + "";
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async () => {
+    const parseResult = formSchema.safeParse(formData);
+
+    // ✅ Validasi form
+    if (!parseResult.success) {
+      parseResult.error.issues.forEach((err) => {
+        toast.error(err.message);
+      });
+      return;
+    }
+
+    // ✅ Tampilkan loading toast
+    const loadingToast = toast.loading("Submitting your registration...");
+
+    try {
+      const res = await fetch("/api/workshop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("🎉 Registration successful! We'll contact you soon.", {
+          description: "Check your email or WhatsApp for confirmation.",
+        });
+
+        // Reset form setelah sukses
+        setFormData({
+          name: "",
+          email: "",
+          institution: "",
+          workshop: "",
+          whatsapp: "",
+          payment_proof: "",
+        });
+      } else {
+        toast.error("Failed to register.", {
+          description: data.error || "Please try again later.",
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong.", {
+        description: "Please check your connection or try again.",
+      });
+    } finally {
+      toast.dismiss(loadingToast); // ✅ Tutup loading toast setelah selesai
+    }
+  };
 
   return (
     <div className="min-h-screen">
       <HeaderPayment />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-20 mt-3 gap-4">
-        {/* LEFT CARD - Form Pendaftaran */}
+      {/* grid layout */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 px-6 lg:px-20 mt-3 gap-4">
+        {/* LEFT CARD */}
         <Card className="col-span-1 lg:col-span-2 bg-white/10 backdrop-blur-md border-3 border-white/10 w-full h-full text-white rounded-2xl pt-0">
           <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
             <CardTitle className="text-2xl font-medium leading-none">
@@ -37,27 +151,36 @@ const PaymentForm = () => {
                 {/* Name */}
                 <div className="flex flex-col space-y-3">
                   <Label>Name</Label>
-                  <Input className={inputClassName} placeholder="Input your Name" />
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Input your Name"
+                  />
                 </div>
 
                 {/* Email */}
                 <div className="flex flex-col space-y-3">
                   <Label>Email</Label>
-                  <Input className={inputClassName} placeholder="Input your Email" />
+                  <Input
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Input your Email"
+                  />
                 </div>
 
                 {/* Institution */}
                 <div className="flex flex-col space-y-3">
                   <Label>Your Institution</Label>
-                  <InstitutionDropdown
-                    placeholder="Select Your Institution"
-                    options={[
-                      { label: "Telkom University", value: "telkom" },
-                      { label: "Other Institution", value: "other" },
-                      { label: "ITB", value: "itb" },
-                    ]}
-                    selected={selectedInstitutions}
-                    onChange={setSelectedInstitutions}
+                  <Input
+                    name="institution"
+                    value={formData.institution}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Input your Institution"
                   />
                 </div>
 
@@ -66,12 +189,11 @@ const PaymentForm = () => {
                   <Label>Pick Your Workshop</Label>
                   <InstitutionDropdown
                     placeholder="Select Your Workshop"
-                    options={[
-                      { label: "Workshop 1", value: "workshop1" },
-                      { label: "Workshop 2", value: "workshop2" },
-                    ]}
-                    selected={selectedWorkshop}
-                    onChange={setSelectedWorkshop}
+                    options={workshopOptions}
+                    selected={formData.workshop ? [formData.workshop] : []}
+                    onChange={(val) =>
+                      setFormData({ ...formData, workshop: val[0] })
+                    }
                   />
                 </div>
               </div>
@@ -79,7 +201,8 @@ const PaymentForm = () => {
           </CardContent>
         </Card>
 
-        <div className="pr-4 col-span-1">
+        {/* RIGHT CARD */}
+        <div className="pr-0 lg:pr-4 col-span-1">
           <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
             <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl">
               <CardTitle className="text-2xl font-medium leading-none">
@@ -94,7 +217,12 @@ const PaymentForm = () => {
                 <div className="flex flex-col gap-3">
                   <Label>Your Whatsapp</Label>
                   <WhatsappInput
-                    name="whatsapp_number"
+                    name="whatsapp"
+                    value={formData.whatsapp}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onChange={(e: { target: { value: any } }) =>
+                      setFormData({ ...formData, whatsapp: e.target.value })
+                    }
                     placeholder="Input your WhatsApp number"
                     className={inputClassName}
                     defaultValue="62"
@@ -103,45 +231,66 @@ const PaymentForm = () => {
 
                 {/* Payment Section */}
                 <div className="relative flex flex-col space-y-3">
-                  <Label>Metode Pembayaran.</Label>
+                  <Label>Payment Method*</Label>
                   <div className="flex flex-col space-y-1 text-center">
-                    <p className="text-2xl font-bold">Rp250.000*</p>
-                    <p className="text-sm font-medium text-white/50">
-                      ( Harga pendaftaran tergantung instansi asal Tim )
+                    <p className="text-2xl font-bold">
+                      {formData.workshop
+                        ? formatPrice(getSelectedWorkshopPrice())
+                        : "Rp.-*"}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-center">
                     <Image
-                      src="/dashboard/QR.png"
+                      src="/qris.jpg"
                       width={340}
                       height={340}
                       alt="QR"
-                      className="w-80 rounded-4xl border-10 border-white/10"
+                      className="w-80 p-3 rounded-4xl border-10 border-white/10"
                     />
                   </div>
 
-                  <CopyableLink label="BCA ( Faiq Haqqani )" text="8895558571" />
-                  <CopyableLink label="BRI ( Faiq Haqqani )" text="0131 0104 8271 507" />
+                  <CopyableLink
+                    label="BCA ( a.n. GISELA SESARIA KUSTHIKA  PUTRI )"
+                    text="7285451698"
+                  />
+                  <CopyableLink
+                    label="ShopeePay ( a.n. GISELA SESARIA KUSTHIKA PUTRI )"
+                    text="081808767771"
+                  />
                 </div>
 
                 {/* Payment Proof */}
                 <div className="flex flex-col gap-3">
-                  <Label>Link Bukti Pembayaran</Label>
-                  <Input className={inputClassName} placeholder="Input your Transaction" />
+                  <Label>Payment Proof Link*</Label>
+                  <Input
+                    name="payment_proof"
+                    value={formData.payment_proof}
+                    onChange={handleChange}
+                    className={inputClassName}
+                    placeholder="Masukkan link Google Drive bukti pembayaran"
+                  />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-        <div className="flex items-center w-full justify-center mt-12">
-            <Button className=' border !bg-white/10 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full'>
-                <p className='font-semibold text-xl sm:text-3xl'>Register</p>
-            </Button>
-        </div>
-    </div>
-  )
-}
 
-export default PaymentForm
+      {/* SUBMIT BUTTON */}
+      <div className="flex items-center w-full justify-center mt-12">
+        <Button
+          onClick={handleSubmit}
+          disabled={!formData.payment_proof}
+          className="border !bg-white/10 cursor-pointer hover:!bg-white/20 hover:scale-105 w-fit !py-6 sm:!py-8 !px-8 sm:!px-12 rounded-full disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <p className="font-semibold text-xl md:text-2xl lg:text-3xl hover:text-white/80 transition-colors duration-300">
+            Submit
+          </p>
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default PaymentForm;

@@ -11,7 +11,6 @@ const WorkshopPage = () => {
         <div className='min-h-screen' id='ExclusiveAccessSection'>
           <ExclusiveAccessSection/>
         </div>
-
       </div>
   )
 }
