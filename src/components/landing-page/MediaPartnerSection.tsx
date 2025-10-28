@@ -10,6 +10,14 @@ const partners = [
   // { name: "RPL", logo: "/media/RPL.png" },
   { name: "KMTE", logo: "/media/KMTE.png" },
   { name: "EISD", logo: "/media/EISD Logo.png" },
+  { name: "Motion Laboratory", logo: "/media/motion.png" },
+  { name: "himads", logo: "/media/himads.png" },
+  { name: "FSL", logo: "/media/FSL.png" },
+  { name: "Chevalier Laboratory", logo: "/media/Chevalier.png" },
+  { name: "MBC", logo: "/media/MBC.png" },
+  { name: "UPI", logo: "/media/UPI.png" },
+  { name: "Info Event", logo: "/media/InfoEvent.png" },
+  { name: "Lomba MahasiswaID", logo: "/media/LombaMahasiswaID.png" },
 ]
 
 const MediaPartnerSection = () => {
@@ -27,9 +35,9 @@ const MediaPartnerSection = () => {
             return (
               <div
                 key={partner.name}
-                className={`opacity-85 hover:opacity-100 transition-opacity duration-300 flex justify-center items-center ${
+                className={`opacity-85 hover:opacity-100 duration-300 hover:scale-120 transition-all flex justify-center items-center ${
                   isCPS
-                    ? "md:w-[260px] md:h-[160px] w-[200px] h-[120px]" // lebih besar dari default
+                    ? "md:w-[260px] md:h-[160px] w-[200px] h-[120px]"
                     : "md:w-32 md:h-32 w-24 h-24"
                 }`}
               >
