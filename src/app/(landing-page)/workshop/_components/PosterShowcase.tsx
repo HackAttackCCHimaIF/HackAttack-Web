@@ -26,9 +26,10 @@ const PosterShowcase = () => {
           }`}
         >
           <Image
-            src="/poster/HACKATTACK.PNG"
+            src="/poster/hackattack.PNG"
             alt="HackAttack Workshop 1"
             width={338}
+            priority
             height={332}
             className="rounded-xl shadow-2xl transform rotate-y-10"
           />
@@ -42,10 +43,11 @@ const PosterShowcase = () => {
           }`}
         >
           <Image
-            src="/poster/HACKATTACK.PNG"
+            src="/poster/hackattack.PNG"
             alt="HackAttack Workshop 2"
             width={338}
             height={332}
+            priority
             className="rounded-xl shadow-2xl transform -rotate-y-10"
           />
         </div>
