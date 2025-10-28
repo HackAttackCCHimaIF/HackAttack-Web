@@ -26,7 +26,7 @@ const PosterShowcase = () => {
           }`}
         >
           <Image
-            src="/poster/hackattack.PNG"
+            src="/poster/hackattack.png"
             alt="HackAttack Workshop 1"
             width={338}
             priority
@@ -43,7 +43,7 @@ const PosterShowcase = () => {
           }`}
         >
           <Image
-            src="/poster/hackattack.PNG"
+            src="/poster/hackattack.png"
             alt="HackAttack Workshop 2"
             width={338}
             height={332}
