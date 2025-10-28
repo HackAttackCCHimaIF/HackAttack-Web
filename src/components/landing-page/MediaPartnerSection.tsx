@@ -5,9 +5,9 @@ const partners = [
   { name: "Info Lomba IT", logo: "/media/infoLombaIT.png" },
   { name: "Cyber Physical System Laboratory", logo: "/media/CPS.png" },
   { name: "HMSI", logo: "/media/HMSI.png" },
-  { name: "HMTI", logo: "/media/HMTI.png" },
+  // { name: "HMTI", logo: "/media/HMTI.png" },
   { name: "HMTT Telco", logo: "/media/HMTT Telco.png" },
-  { name: "RPL", logo: "/media/RPL.png" },
+  // { name: "RPL", logo: "/media/RPL.png" },
   { name: "KMTE", logo: "/media/KMTE.png" },
   { name: "EISD", logo: "/media/EISD Logo.png" },
 ]
