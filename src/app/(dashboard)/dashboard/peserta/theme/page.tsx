@@ -42,8 +42,8 @@ const ThemePage = () => {
           </div>
 
           <CardHeader className="pt-12 relative z-10">
-            <CardTitle className="text-2xl font-playfair md:text-3xl lg:text-4xl xl:text-5xl xl:max-w-1/2">
-              Creating <span className="text-[#EF4B72] bg-white"> Digital Solutions</span> for a More Inclusive Indonesia
+            <CardTitle className="text-2xl font-playfair md:text-3xl lg:text-4xl xl:text-5xl max-w-full xl:max-w-2/3 leading-tight">
+              Creating <span className="text-[#EF4B72] bg-white p-0"> Digital Solutions</span> for a More Inclusive Indonesia
             </CardTitle>
           </CardHeader>
 
