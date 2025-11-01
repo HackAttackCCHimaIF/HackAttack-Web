@@ -31,6 +31,7 @@ import { HeaderDashboard } from "./HeaderDashboard";
 import Link from "next/link";
 import { SuccessDialog } from "./SuccessDialog";
 import { toast } from "sonner";
+import { LinkableField } from "@/components/LinkableField";
 
 // ======================
 // Data & Validation Schema
@@ -1173,10 +1174,11 @@ export default function TeamProfilePage() {
                   </div>
 
                   {/* CopyableLink */}
-                  <CopyableLink
+                  <LinkableField
                     disabled={!isTeamEditMode}
-                    label="Publication Materials "
-                    text="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
+                    label="Publication Materials"
+                    openInNewTab
+                    href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
                   />
 
                   {/* Metode Pembayaran */}
