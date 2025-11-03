@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Check, Edit } from "lucide-react";
+import { Plus, Pencil, Check, Edit, FileText } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -619,6 +619,15 @@ export default function TeamProfilePage() {
     <div className="overflow-y-auto w-full min-h-full pt-16 md:pt-0">
       <SuccessDialog open={false} onClose={() => null} />
       <HeaderDashboard topText="Team" bottomText="Profile" />
+
+      <div className="px-4 pt-4 pb-6">
+      <Link href="/guidelines.pdf" target="_blank" rel="noopener noreferrer">
+        <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer flex items-center gap-2 !px-6 !py-5">
+          <FileText className="w-4 h-4" />
+          Guidelines
+        </Button>
+      </Link>
+    </div>
 
       {userProfile.isLoggedIn ? (
         <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
