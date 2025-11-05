@@ -35,6 +35,14 @@ export async function POST(req: Request) {
     }
 
     if (existingTeam) {
+      let newApprovalStatus = existingTeam.approval_status;
+
+      if (existingTeam.approval_status == null) {
+        newApprovalStatus = "Pending";
+      } else if (existingTeam.approval_status == "Rejected") {
+        newApprovalStatus = "Resubmitted";
+      }
+
       const { data, error } = await supabaseServer
         .from("Team")
         .update({
@@ -42,6 +50,7 @@ export async function POST(req: Request) {
           institution: institution,
           whatsapp_number: whatsapp_number,
           paymentproof_url: paymentproof_url,
+          approvalstatus: newApprovalStatus,
           updated_at: new Date(),
         })
         .eq("created_by", userData.id)
