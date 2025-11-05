@@ -8,7 +8,7 @@ import React from "react";
 const RuleBookPage = () => {
   const guidebookImages = Array.from(
     { length: 13 },
-    (_, i) => `/dashboard/Rulebook_page-000${i + 1} 1.png`
+    (_, i) => `/dashboard/rulebook (1)_page-${i + 1}.jpg`
   );
 
   return (

@@ -8,7 +8,7 @@ import React from "react";
 const GuideBookPage = () => {
   const guidebookImages = Array.from(
     { length: 13 },
-    (_, i) => `/dashboard/guide${i + 1}.png`
+    (_, i) => `/dashboard/guidebook_page-${i + 1}.jpg`
   );
 
   return (
@@ -25,10 +25,12 @@ const GuideBookPage = () => {
                   key={index}
                   src={src}
                   alt={`Guide Book Page ${index + 1}`}
-                  width={700}  // setengah dari ukuran besar
+                  width={700}
                   height={1000}
                   className="w-full h-auto rounded-lg object-contain"
                   loading="lazy"
+                  placeholder="blur"
+                  blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAoMBgV4xPPwAAAAASUVORK5CYII="
                 />
               ))}
             </div>
