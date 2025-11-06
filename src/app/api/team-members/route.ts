@@ -73,6 +73,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
+    const { error: updateError } = await supabaseServer
+      .from("Team")
+      .update({
+        approvalstatus: "Submitted",
+      })
+      .eq("id", teamId);
+
+    if (updateError) {
+      console.error("Update error:", updateError);
+      return NextResponse.json({ error: updateError.message }, { status: 400 });
+    }
+
     return NextResponse.json({
       success: true,
       data,

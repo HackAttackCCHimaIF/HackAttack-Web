@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Bs1CircleFill, Bs2CircleFill } from "react-icons/bs";
 import { Plus, Pencil, Check, Edit, FileText } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
@@ -21,8 +22,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
-import { TeamMember, TeamMemberDB } from "@/types/team";
+import { TeamMember, TeamMemberDB, TeamData } from "@/types/team";
 
 import { CopyableLink } from "@/components/CopyableLink";
 import Image from "next/image";
@@ -39,19 +48,97 @@ import { LinkableField } from "@/components/LinkableField";
 
 const teamMemberSchema = z.object({
   name: z.string(),
-  email: z.string(),
-  github: z.string().optional(),
-  requirementLink: z.string(),
+  email: z.email(),
+  github: z.url().optional(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
+  requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
+
+// Separate schema for team data only
+const teamDataSchema = z.object({
+  teamName: z.string().min(1, "Nama team wajib diisi"),
+  institution: z.string().min(1, "Asal instansi wajib diisi"),
+  whatsapp_number: z
+    .string()
+    .min(1, "Nomor WhatsApp wajib diisi")
+    .regex(
+      /^62\d{8,13}$/,
+      "Nomor WhatsApp harus dimulai dengan 62 dan berisi 10-15 digit"
+    )
+    .refine(
+      (val) => val.startsWith("62"),
+      "Nomor WhatsApp harus dimulai dengan 62"
+    )
+    .refine(
+      (val) => /^\d+$/.test(val),
+      "Nomor WhatsApp hanya boleh berisi angka"
+    ),
+  paymentproof_url: z.url().min(1, "URL bukti pembayaran wajib diisi"),
+});
+
+// Separate schema for member data only
+const memberDataSchema = z.object({
+  leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
+  leaderEmail: z.email("Email tidak valid"),
+  leaderGithub: z.url().optional(),
+  leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
+  requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  members: z
+    .array(teamMemberSchema)
+    .max(5, "Maksimal 5 anggota tambahan")
+    .superRefine((members, ctx) => {
+      members.forEach((member, index) => {
+        const hasAnyField =
+          member.name ||
+          member.email ||
+          member.github ||
+          member.requirementLink;
+
+        if (hasAnyField) {
+          if (!member.name || member.name.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Nama anggota wajib diisi",
+              path: [index, "name"],
+            });
+          }
+
+          if (!member.email || member.email.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "Email anggota wajib diisi",
+              path: [index, "email"],
+            });
+          } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(member.email)) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Format email tidak valid",
+                path: [index, "email"],
+              });
+            }
+          }
+
+          if (!member.requirementLink || member.requirementLink.trim() === "") {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: "URL berkas persyaratan wajib diisi",
+              path: [index, "requirementLink"],
+            });
+          }
+        }
+      });
+    }),
+});
 
 const teamSchema = z
   .object({
     leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
-    leaderEmail: z.string().email("Email tidak valid"),
-    leaderGithub: z.string().optional(),
+    leaderEmail: z.email("Email tidak valid"),
+    leaderGithub: z.url().optional(),
     leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-    requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
+    requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 
     members: z
       .array(teamMemberSchema)
@@ -132,10 +219,7 @@ const teamSchema = z
         (val) => /^\d+$/.test(val),
         "Nomor WhatsApp hanya boleh berisi angka"
       ),
-    paymentproof_url: z
-      .string()
-      .url("Link bukti pembayaran harus valid")
-      .optional(),
+    paymentproof_url: z.url().min(1, "URL bukti pembayaran wajib diisi"),
   })
   .superRefine((data, ctx) => {
     const roleCounts: Record<string, number> = {
@@ -181,6 +265,29 @@ const teamSchema = z
   });
 
 type TeamFormValues = z.infer<typeof teamSchema>;
+
+// Validation helper functions
+const validateTeamDataOnly = (data: TeamFormValues) => {
+  const teamDataOnly = {
+    teamName: data.teamName,
+    institution: data.institution,
+    whatsapp_number: data.whatsapp_number,
+    paymentproof_url: data.paymentproof_url,
+  };
+  return teamDataSchema.parse(teamDataOnly);
+};
+
+const validateMemberDataOnly = (data: TeamFormValues) => {
+  const memberDataOnly = {
+    leaderName: data.leaderName,
+    leaderEmail: data.leaderEmail,
+    leaderRole: data.leaderRole,
+    requirementLink: data.requirementLink,
+
+    members: data.members,
+  };
+  return memberDataSchema.parse(memberDataOnly);
+};
 
 // ======================
 // Header Component
@@ -234,12 +341,8 @@ const isTeamDetailsComplete = (values: TeamFormValues) => {
   );
 };
 
-const isLeaderInfoComplete = (values: TeamFormValues) => {
-  return values.leaderName && values.leaderEmail && values.requirementLink;
-};
-
 const isAllInfoComplete = (values: TeamFormValues) => {
-  return isTeamDetailsComplete(values) && isLeaderInfoComplete(values);
+  return isTeamDetailsComplete(values);
 };
 
 // ======================
@@ -256,6 +359,11 @@ export default function TeamProfilePage() {
   const [teamDataLoaded, setTeamDataLoaded] = useState(false);
   const [memberDataLoaded, setMemberDataLoaded] = useState(false);
   const [institution, setInstitution] = useState("");
+  const [teamData, setTeamData] = useState<TeamData | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [confirmDialogType, setConfirmDialogType] = useState<
+    "team" | "member" | null
+  >(null);
   const [userProfile, setUserProfile] = useState({
     name: "User",
     isLoggedIn: false,
@@ -385,9 +493,9 @@ export default function TeamProfilePage() {
   const teamDetailsCompleted = isTeamDetailsComplete(getValues());
   const allInfoCompleted = isAllInfoComplete(getValues());
 
-  useEffect(() => {
-    const loadTeamData = async () => {
-      if (!user?.email || teamDataLoaded) return;
+  const loadTeamData = useCallback(
+    async (forceReload = false) => {
+      if (!user?.email || (!forceReload && teamDataLoaded)) return;
 
       try {
         const response = await fetch(
@@ -398,6 +506,7 @@ export default function TeamProfilePage() {
           const result = await response.json();
 
           if (result.data) {
+            setTeamData(result.data);
             setValue("teamName", result.data.team_name || "");
             setValue("institution", result.data.institution || "");
             setValue("whatsapp_number", result.data.whatsapp_number || "62");
@@ -413,12 +522,17 @@ export default function TeamProfilePage() {
       } catch (error) {
         console.error("Error loading team data:", error);
       } finally {
-        setTeamDataLoaded(true);
+        if (!forceReload) {
+          setTeamDataLoaded(true);
+        }
       }
-    };
+    },
+    [user?.email, setValue, teamDataLoaded, setTeamData, setInstitution]
+  );
 
+  useEffect(() => {
     loadTeamData();
-  }, [user?.email, setValue, teamDataLoaded]);
+  }, [loadTeamData]);
 
   useEffect(() => {
     const loadMemberData = async () => {
@@ -499,9 +613,11 @@ export default function TeamProfilePage() {
     fields.length,
   ]);
 
-  const onSubmit = async (data: TeamFormValues) => {
-    if (!user?.email) return;
-
+  const onSubmitTeam = async (data: TeamFormValues) => {
+    if (!user?.email) {
+      toast.error("User email not found");
+      return;
+    }
     setSaving(true);
     try {
       const teamResponse = await fetch("/api/team", {
@@ -516,7 +632,10 @@ export default function TeamProfilePage() {
         }),
       });
 
-      if (!teamResponse.ok) {
+      if (teamResponse.ok) {
+        toast.success("Team data saved successfully!");
+        await loadTeamData(true);
+      } else {
         const teamError = await teamResponse.json();
         console.error("Failed to save team data:", teamError);
         toast.error(
@@ -524,20 +643,34 @@ export default function TeamProfilePage() {
         );
         return;
       }
+    } catch {
+      toast.error("Network error occurred");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const onSubmitMember = async (data: TeamFormValues) => {
+    if (!user?.email) {
+      toast.error("User email not found");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const teamResponse = await fetch(
+        `/api/team?userEmail=${encodeURIComponent(user.email)}`
+      );
+
+      if (!teamResponse.ok) {
+        const teamError = await teamResponse.json();
+        console.error("Team Data Not Found:", teamError);
+        toast.error(`Team Data Not Found"}`);
+        return;
+      }
 
       const teamResult = await teamResponse.json();
-
-      let teamId = teamResult.data?.id;
-
-      if (!teamId) {
-        const teamFetchResponse = await fetch(
-          `/api/team?userEmail=${encodeURIComponent(user.email)}`
-        );
-        if (teamFetchResponse.ok) {
-          const teamData = await teamFetchResponse.json();
-          teamId = teamData.data?.id;
-        }
-      }
+      const teamId = teamResult.data?.id;
 
       if (!teamId) {
         toast.error("Could not get team ID");
@@ -564,14 +697,17 @@ export default function TeamProfilePage() {
       });
 
       if (membersResponse.ok) {
-        toast.success("Team data saved successfully!");
+        toast.success("Member data saved successfully!");
+        await loadTeamData(true);
       } else {
         const membersError = await membersResponse.json();
         toast.error(
           `Failed to save members: ${membersError.error || "Unknown error"}`
         );
+        return;
       }
-    } catch {
+    } catch (error) {
+      console.error("Member Save:", error);
       toast.error("Network error occurred");
     } finally {
       setSaving(false);
@@ -579,29 +715,72 @@ export default function TeamProfilePage() {
   };
 
   const handleMemberEditModeChange = async (newEditMode: boolean) => {
-    console.log("Member edit mode changing:", {
-      from: isMemberEditMode,
-      to: newEditMode,
-    });
-
     if (isMemberEditMode && !newEditMode) {
       const currentValues = getValues();
-      await onSubmit(currentValues);
+      try {
+        validateMemberDataOnly(currentValues);
+        setConfirmDialogType("member");
+        setShowConfirmDialog(true);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast.error("Please fill the complete member data before saving.");
+          return;
+        }
+        throw error;
+      }
+    } else {
+      setMemberEditMode(newEditMode);
     }
-    setMemberEditMode(newEditMode);
   };
 
   const handleTeamEditModeChange = async (newEditMode: boolean) => {
-    console.log("Team edit mode changing:", {
-      from: isTeamEditMode,
-      to: newEditMode,
-    });
-
     if (isTeamEditMode && !newEditMode) {
+      // Validate only team data before showing confirmation dialog
       const currentValues = getValues();
-      await onSubmit(currentValues);
+      try {
+        validateTeamDataOnly(currentValues);
+        setConfirmDialogType("team");
+        setShowConfirmDialog(true);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          toast.error("Please fill the complete team data before saving.");
+          return;
+        }
+        throw error;
+      }
+    } else {
+      setTeamEditMode(newEditMode);
     }
-    setTeamEditMode(newEditMode);
+  };
+
+  const handleConfirmSaveTeam = async () => {
+    // Team data has already been validated in handleTeamEditModeChange
+    const currentValues = getValues();
+    await onSubmitTeam(currentValues);
+    setShowConfirmDialog(false);
+    setTeamEditMode(false);
+    setConfirmDialogType(null);
+  };
+
+  const handleConfirmSaveMember = async () => {
+    // Member data has already been validated in handleMemberEditModeChange
+    const currentValues = getValues();
+    await onSubmitMember(currentValues);
+    setShowConfirmDialog(false);
+    setMemberEditMode(false);
+    setConfirmDialogType(null);
+  };
+
+  const isEditMemberDisabled = () => {
+    if (!teamData) return false;
+    const status = teamData.approvalstatus;
+    return status != null && status != "Rejected" && status != "Pending";
+  };
+
+  const isEditTeamDisabled = () => {
+    if (!teamData) return false;
+    const status = teamData.approvalstatus;
+    return status != null && status != "Rejected";
   };
 
   const inputClassName =
@@ -618,22 +797,66 @@ export default function TeamProfilePage() {
   return (
     <div className="overflow-y-auto w-full min-h-full pt-16 md:pt-0">
       <SuccessDialog open={false} onClose={() => null} />
+
+      {/* Confirmation Dialog */}
+      <Dialog
+        open={showConfirmDialog}
+        onOpenChange={(open) => {
+          setShowConfirmDialog(open);
+          if (!open) setConfirmDialogType(null);
+        }}
+      >
+        <DialogContent className="bg-gray-900 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle>Confirm Submission</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              {confirmDialogType === "team"
+                ? "Are you sure you want to save these team changes? Once submitted, you won't be able to make changes unless your submission is rejected by the admin."
+                : "Are you sure you want to save these member changes? Once submitted, you won't be able to make changes unless your submission is rejected by the admin."}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowConfirmDialog(false);
+                setConfirmDialogType(null);
+              }}
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={
+                confirmDialogType === "team"
+                  ? handleConfirmSaveTeam
+                  : handleConfirmSaveMember
+              }
+              className="bg-pink-600 hover:bg-pink-700 text-white"
+            >
+              Confirm Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <HeaderDashboard topText="Team" bottomText="Profile" />
 
       <div className="px-4 pt-4 pb-6">
-      <Link href="/guidelines.pdf" target="_blank" rel="noopener noreferrer">
-        <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer flex items-center gap-2 !px-6 !py-5">
-          <FileText className="w-4 h-4" />
-          Guidelines
-        </Button>
-      </Link>
-    </div>
+        <Link href="/guidelines.pdf" target="_blank" rel="noopener noreferrer">
+          <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer flex items-center gap-2 !px-6 !py-5">
+            <FileText className="w-4 h-4" />
+            Guidelines
+          </Button>
+        </Link>
+      </div>
 
       {userProfile.isLoggedIn ? (
         <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
           <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
             <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
+                <Bs2CircleFill className="inline-block text-white mr-2" />
                 <CardTitle className="text-2xl font-medium leading-none">
                   <p>Team</p>
                   <span className="font-bold">Information.</span>
@@ -649,9 +872,12 @@ export default function TeamProfilePage() {
                     }
                   }}
                   size="sm"
+                  disabled={!isMemberEditMode && isEditMemberDisabled()}
                   className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
                     isMemberEditMode
                       ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
+                      : isEditMemberDisabled()
+                      ? "bg-gray-500/50 text-gray-400 cursor-not-allowed"
                       : "bg-white/10 hover:bg-white/20 text-white"
                   }`}
                 >
@@ -683,6 +909,19 @@ export default function TeamProfilePage() {
                     </div>
                   )}
 
+                  {isEditMemberDisabled() && (
+                    <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4 mb-6">
+                      <p className="text-blue-200 font-medium">
+                        Team Data Submitted
+                      </p>
+                      <p className="text-blue-200/80 text-sm mt-1">
+                        Your team data has been submitted and is under review.
+                        You cannot make changes unless your submission is
+                        rejected.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="space-y-6 flex flex-col">
                     <div className="flex flex-col gap-3">
                       <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
@@ -690,6 +929,11 @@ export default function TeamProfilePage() {
                         {isMemberEditMode && !teamDetailsCompleted && (
                           <span className="text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded">
                             Fill in the team data first
+                          </span>
+                        )}
+                        {isEditMemberDisabled() && (
+                          <span className="text-xs bg-blue-500/20 text-blue-200 px-2 py-1 rounded">
+                            Submitted - Under Review
                           </span>
                         )}
                       </h3>
@@ -784,9 +1028,7 @@ export default function TeamProfilePage() {
 
                     {/* Leader GitHub */}
                     <div className="flex flex-col gap-3 w-full">
-                      <Label>
-                        Leader <span className="font-bold">Portfolio*</span>
-                      </Label>
+                      <Label>Leader Github URL</Label>
                       <div>
                         <EditableInput
                           register={register}
@@ -933,14 +1175,14 @@ export default function TeamProfilePage() {
                         )}
                       </div>
                       <div className="flex flex-col gap-3">
-                        <Label>Member Portfolio*</Label>
+                        <Label>Member Github URL*</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.github`}
                           placeholder={
                             allInfoCompleted
-                              ? "(Please provide your portfolio link  optional / can be NULL)"
-                              : "Complete the team and leader data first"
+                              ? "Input Link Github"
+                              : "Fill in the team data first"
                           }
                           disabled={!isMemberEditMode || !allInfoCompleted}
                           className={inputClassName}
@@ -999,10 +1241,34 @@ export default function TeamProfilePage() {
           <div className="px-4 lg:pl-0 lg:pr-4 pb-8 lg:col-span-1 w-full">
             <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
               <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
+                <Bs1CircleFill className="inline-block text-white mr-2" />
                 <CardTitle className="text-2xl font-medium leading-none">
                   <p>Detail</p>
                   <span className="font-bold">Team.</span>
                 </CardTitle>
+
+                {/* Approval Status Indicator */}
+                {teamData?.approvalstatus && (
+                  <div className="absolute top-16 right-4">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        teamData.approvalstatus === "Pending"
+                          ? "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30"
+                          : teamData.approvalstatus === "Accepted"
+                          ? "bg-green-500/20 text-green-300 border border-green-500/30"
+                          : teamData.approvalstatus === "Rejected"
+                          ? "bg-red-500/20 text-red-300 border border-red-500/30"
+                          : teamData.approvalstatus === "Resubmitted"
+                          ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                          : teamData.approvalstatus === "Submitted"
+                          ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                          : "bg-gray-500/20 text-gray-300 border border-gray-500/30"
+                      }`}
+                    >
+                      {teamData.approvalstatus}
+                    </span>
+                  </div>
+                )}
 
                 {/* Team Edit Button */}
                 <Button
@@ -1014,9 +1280,12 @@ export default function TeamProfilePage() {
                     }
                   }}
                   size="sm"
+                  disabled={!isTeamEditMode && isEditTeamDisabled()}
                   className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
                     isTeamEditMode
                       ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
+                      : isEditTeamDisabled()
+                      ? "bg-gray-500/50 text-gray-400 cursor-not-allowed"
                       : "bg-white/10 hover:bg-white/20 text-white"
                   }`}
                 >
