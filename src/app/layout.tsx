@@ -15,10 +15,10 @@ const koulen = Koulen({
   weight: ["400"],
 });
 
-const playfair = Playfair_Display({
+const playFair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
-  weight: ["400", "700", "900"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -34,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${poppins.variable} ${koulen.variable} ${playfair.variable} antialiased font-poppins `}
+        className={`${poppins.variable} ${playFair.variable} ${koulen.variable} antialiased font-poppins `}
       >
         <div>
           {children}

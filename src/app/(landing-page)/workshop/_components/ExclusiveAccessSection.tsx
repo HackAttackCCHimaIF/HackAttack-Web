@@ -116,7 +116,7 @@ const ExclusiveAccessSection = () => {
         <CardContent className="h-full grid grid-cols-1 md:grid-cols-2 mt-12 gap-6">
           <WorkshopCard
             title="Decode the Problem: Framing Ideas into Digital Impact for Nusantara"
-            date="Minggu, 2 November 2025"
+            date="Minggu, 9 November 2025"
             time="13:00 - 16:00 WIB"
             description="Discover how to turn real-world challenges into sustainable digital solutions. In this workshop, you’ll learn to decode hackathon topics aligned with three SDGs and transform ideas into impactful innovations for Nusantara."
           />

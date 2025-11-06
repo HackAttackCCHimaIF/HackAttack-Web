@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Pencil, Check, Edit } from "lucide-react";
 import { Bs1CircleFill, Bs2CircleFill } from "react-icons/bs";
+import { Plus, Pencil, Check, Edit, FileText } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
@@ -40,6 +41,7 @@ import { HeaderDashboard } from "./HeaderDashboard";
 import Link from "next/link";
 import { SuccessDialog } from "./SuccessDialog";
 import { toast } from "sonner";
+import { LinkableField } from "@/components/LinkableField";
 
 // ======================
 // Data & Validation Schema
@@ -841,6 +843,15 @@ export default function TeamProfilePage() {
 
       <HeaderDashboard topText="Team" bottomText="Profile" />
 
+      <div className="px-4 pt-4 pb-6">
+      <Link href="/guidelines.pdf" target="_blank" rel="noopener noreferrer">
+        <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer flex items-center gap-2 !px-6 !py-5">
+          <FileText className="w-4 h-4" />
+          Guidelines
+        </Button>
+      </Link>
+    </div>
+
       {userProfile.isLoggedIn ? (
         <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
           <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
@@ -1442,10 +1453,11 @@ export default function TeamProfilePage() {
                   </div>
 
                   {/* CopyableLink */}
-                  <CopyableLink
+                  <LinkableField
                     disabled={!isTeamEditMode}
-                    label="Publication Materials "
-                    text="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
+                    label="Publication Materials"
+                    openInNewTab
+                    href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
                   />
 
                   {/* Metode Pembayaran */}
