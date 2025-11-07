@@ -354,7 +354,6 @@ export default function TeamProfilePage() {
   const [isTeamEditMode, setTeamEditMode] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [saving, setSaving] = useState(false);
   const [teamDataLoaded, setTeamDataLoaded] = useState(false);
   const [memberDataLoaded, setMemberDataLoaded] = useState(false);
@@ -755,20 +754,24 @@ export default function TeamProfilePage() {
 
   const handleConfirmSaveTeam = async () => {
     // Team data has already been validated in handleTeamEditModeChange
+    setSaving(true);
     const currentValues = getValues();
     await onSubmitTeam(currentValues);
     setShowConfirmDialog(false);
     setTeamEditMode(false);
     setConfirmDialogType(null);
+    setSaving(false);
   };
 
   const handleConfirmSaveMember = async () => {
     // Member data has already been validated in handleMemberEditModeChange
+    setSaving(true);
     const currentValues = getValues();
     await onSubmitMember(currentValues);
     setShowConfirmDialog(false);
     setMemberEditMode(false);
     setConfirmDialogType(null);
+    setSaving(false);
   };
 
   const isEditMemberDisabled = () => {
@@ -832,9 +835,10 @@ export default function TeamProfilePage() {
                   ? handleConfirmSaveTeam
                   : handleConfirmSaveMember
               }
+              disabled={saving}
               className="bg-pink-600 hover:bg-pink-700 text-white"
             >
-              Confirm Save
+              {saving ? "Saving..." : "Confirm Save"}
             </Button>
           </DialogFooter>
         </DialogContent>
