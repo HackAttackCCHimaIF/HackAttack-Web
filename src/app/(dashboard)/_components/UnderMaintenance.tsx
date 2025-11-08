@@ -1,7 +1,9 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 const UnderMaintenance = () => {
   const tapeBg =
@@ -80,23 +82,43 @@ const UnderMaintenance = () => {
 
 
       <Card
-        className="
-            absolute left-1/2 top-1/2
-            -translate-x-1/2 -translate-y-1/2
-            bg-white/10 border border-white/20 backdrop-blur-md
-            px-6 py-4 z-20
-            text-center
-        "
-        >
-        <p
-            className="font-extrabold text-white uppercase tracking-[0.2em]"
-            style={{
-            fontSize: "clamp(1.5rem, 5.5vw, 2.2rem)",
-            }}
-        >
-            Under Maintenance
-        </p>
-        </Card>
+  className="
+    absolute left-1/2 top-1/2
+    -translate-x-1/2 -translate-y-1/2
+    bg-white/10 border border-white/20 backdrop-blur-md
+    px-6 py-6 z-20
+    text-center
+  "
+>
+  <p
+    className="font-extrabold text-white uppercase tracking-[0.2em]"
+    style={{
+      fontSize: "clamp(1.5rem, 5.5vw, 2.2rem)",
+    }}
+  >
+    Under Maintenance
+  </p>
+
+  <p className="text-white/70 text-sm mt-2">
+  System upgrade in progress. Temporary access is available through the form below.
+</p>
+
+<div className="w-full flex items-center justify-center">
+  <Button
+    asChild
+    className="mt-4 bg-[#EF4B72] hover:bg-[#EF4B72]/80 text-white font-bold tracking-wide w-fit"
+  >
+    <Link
+      href="https://forms.gle/3zynftmasD6oKo5J6"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Open Form
+    </Link>
+  </Button>
+</div>
+</Card>
+
 
 
     </div>
