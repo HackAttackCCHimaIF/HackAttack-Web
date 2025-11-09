@@ -34,7 +34,7 @@ export default function LoginPage() {
         setLoading(false);
       }
 
-      const insertData = await fetch("/api/auth/google", {
+      const insertData = await fetch("/api/auth/registration", {
         method: "POST",
         body: JSON.stringify({ email, username: email.split("@")[0] }),
       });

@@ -31,11 +31,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         data: { session },
       } = await supabase.auth.getSession();
 
-      console.log("🔥 Dashboard layout - session:", !!session);
-
       setUser(session?.user ?? null);
 
-      // Update user store
       if (session?.user) {
         setStoreUser(session.user);
       } else {
@@ -50,8 +47,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      console.log("🔥 Auth state change:", _event, !!session);
-
       setUser(session?.user ?? null);
 
       // Update user store on auth state change
@@ -74,7 +69,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const handleConfirmSignOut = async () => {
     await supabase.auth.signOut();
     reset();
-    setUser(null);
     router.push("/");
     setShowLogoutDialog(false);
   };

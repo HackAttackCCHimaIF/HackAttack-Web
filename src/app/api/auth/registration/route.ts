@@ -27,9 +27,12 @@ export async function POST(req: Request) {
 
     const { data, error } = await supabaseServer
       .from("Users")
-      .insert([{ email: body.email, username: body.username }])
+      .upsert(
+        { email: body.email, username: body.username },
+        { onConflict: "email", ignoreDuplicates: true }
+      )
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Insert error:", error);

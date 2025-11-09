@@ -10,7 +10,7 @@ function CompleteRegistrationContent() {
 
   useEffect(() => {
     const completeRegistration = async () => {
-      const username = localStorage.getItem("pending_username");
+      const username = localStorage.getItem("username");
 
       if (email && username) {
         try {
@@ -23,7 +23,6 @@ function CompleteRegistrationContent() {
           const result = await response.json();
 
           if (response.ok && result.success) {
-            localStorage.removeItem("pending_username");
             router.push("/dashboard/peserta");
           } else {
             console.error("Registration failed:", result.error);
@@ -32,8 +31,13 @@ function CompleteRegistrationContent() {
         } catch (error) {
           console.error("Error saving user data:", error);
           router.push("/auth/auth-code-error");
+        } finally {
+          localStorage.removeItem("email");
+          localStorage.removeItem("username");
         }
       } else {
+        localStorage.removeItem("email");
+        localStorage.removeItem("username");
         router.push("/auth/auth-code-error");
       }
     };

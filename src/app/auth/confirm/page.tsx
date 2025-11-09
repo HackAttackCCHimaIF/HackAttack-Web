@@ -17,76 +17,43 @@ function AuthConfirmContent() {
   useEffect(() => {
     const handleAuthConfirm = async () => {
       try {
-        console.log("🔥 Auth confirm started", { token_hash, type });
-
         if (token_hash && type) {
-          // Verify the OTP token
           const { data, error } = await supabase.auth.verifyOtp({
             token_hash,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             type: type as any,
           });
 
-          console.log("🔥 OTP verification result:", {
-            data: !!data.session,
-            error,
-          });
-
           if (error) {
-            console.error("🔥 OTP verification error:", error);
             router.push("/auth/auth-code-error");
             return;
           }
 
           if (data.session?.user) {
             const user = data.session.user;
-            console.log("🔥 User verified:", user.email);
 
-            // Update user store
+            const username = localStorage.getItem("username");
+            const email = localStorage.getItem("email");
+
+            if (!email || !username) {
+              router.push("/auth/auth-code-error");
+              return;
+            }
+
             setUser(user);
 
-            // Check if this is registration or login
-            const pendingUsername = localStorage.getItem("pending_username");
-
-            if (pendingUsername) {
-              console.log("🔥 Registration flow - completing registration");
-              // This is a registration - complete it
+            if (email && username) {
               router.push(
-                `/auth/complete-registration?email=${encodeURIComponent(
-                  user.email || ""
-                )}`
+                `/auth/complete-registration?email=${encodeURIComponent(email)}`
               );
             } else {
-              console.log("🔥 Login flow - going to dashboard");
-              // This is a login - go to dashboard
               router.push("/dashboard/peserta");
             }
           } else {
-            console.log("🔥 No session after OTP verification");
-            router.push("/auth/auth-code-error");
-          }
-        } else {
-          console.log("🔥 Missing token_hash or type");
-          // Try to get existing session
-          const { data, error } = await supabase.auth.getSession();
-
-          if (error) {
-            console.error("🔥 Session error:", error);
-            router.push("/auth/auth-code-error");
-            return;
-          }
-
-          if (data.session?.user) {
-            console.log("🔥 Found existing session");
-            setUser(data.session.user);
-            router.push("/dashboard/peserta");
-          } else {
-            console.log("🔥 No session found");
             router.push("/auth/auth-code-error");
           }
         }
-      } catch (error) {
-        console.error("🔥 Auth confirmation error:", error);
+      } catch {
         router.push("/auth/auth-code-error");
       }
     };

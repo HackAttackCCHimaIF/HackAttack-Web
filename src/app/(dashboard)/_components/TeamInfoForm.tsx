@@ -49,7 +49,7 @@ import { LinkableField } from "@/components/LinkableField";
 const teamMemberSchema = z.object({
   name: z.string(),
   email: z.email(),
-  github: z.url().optional(),
+  github: z.url(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
@@ -80,7 +80,7 @@ const teamDataSchema = z.object({
 const memberDataSchema = z.object({
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderEmail: z.email("Email tidak valid"),
-  leaderGithub: z.url().optional(),
+  leaderGithub: z.url(),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
   members: z
@@ -283,7 +283,7 @@ const validateMemberDataOnly = (data: TeamFormValues) => {
     leaderEmail: data.leaderEmail,
     leaderRole: data.leaderRole,
     requirementLink: data.requirementLink,
-
+    leaderGithub: data.leaderGithub,
     members: data.members,
   };
   return memberDataSchema.parse(memberDataOnly);
@@ -1032,7 +1032,7 @@ export default function TeamProfilePage() {
 
                     {/* Leader GitHub */}
                     <div className="flex flex-col gap-3 w-full">
-                      <Label>Leader Github URL</Label>
+                      <Label>Leader Github URL*</Label>
                       <div>
                         <EditableInput
                           register={register}
@@ -1045,11 +1045,6 @@ export default function TeamProfilePage() {
                           disabled={!isMemberEditMode || !teamDetailsCompleted}
                           className={inputClassName}
                         />
-                        <div className="w-full flex justify-end pt-2">
-                          <p className="text-xs text-left text-white/50">
-                            *Opsional
-                          </p>
-                        </div>
                       </div>
                     </div>
 
@@ -1470,9 +1465,9 @@ export default function TeamProfilePage() {
                       <div className="flex flex-col space-y-1 text-center">
                         <p className="text-2xl font-bold">
                           {institution === "telkom"
-                            ? "Rp150.000*"
+                            ? "200.000*"
                             : institution === "nontelkom"
-                            ? "Rp170.000*"
+                            ? "Rp220.000*"
                             : "Rp-*"}
                         </p>
                         <p className="text-sm font-medium text-white/50">
