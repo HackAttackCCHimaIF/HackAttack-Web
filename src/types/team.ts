@@ -26,19 +26,24 @@ export interface TeamLeader {
   data_url: string;
 }
 
-// export interface TeamFormInput {
-//   // Leader fields
-//   leaderName: string;
-//   leaderEmail: string;
-//   leaderGithub?: string;
-//   requirementLink: string;
+// Team approval status type
+export type ApprovalStatus =
+  | "Pending"
+  | "Accepted"
+  | "Rejected"
+  | "Resubmitted"
+  | "Submitted"
+  | null;
 
-//   // Team members
-//   members: TeamMember[];
-
-//   // Team details
-//   teamName: string;
-//   institution: string;
-//   whatsapp_number: string;
-//   paymentproof_url?: string;
-// }
+// Team data interface
+export interface TeamData {
+  id: string;
+  team_name: string;
+  institution: string;
+  whatsapp_number: string;
+  paymentproof_url?: string;
+  approvalstatus: ApprovalStatus;
+  created_by: string;
+  created_at?: string;
+  updated_at?: string;
+}
