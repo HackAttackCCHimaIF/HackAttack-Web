@@ -3,7 +3,7 @@ import TeamProfilePage from '../../_components/TeamInfoForm'
 import UnderMaintenance from '../../_components/UnderMaintenance'
 
 const DashboardPesertaPage = () => {
-  const MAINTENANCE = true
+  const MAINTENANCE = false
 
   if (MAINTENANCE) {
     return <UnderMaintenance />

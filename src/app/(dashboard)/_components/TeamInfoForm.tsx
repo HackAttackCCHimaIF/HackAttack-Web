@@ -7,13 +7,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray } from "react-hook-form";
 import { supabase } from "@/lib/config/supabase";
 import { User } from "@supabase/supabase-js";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Check, Edit, FileText } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Pencil,
+  ArrowLeft,
+  ArrowRight,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -21,175 +30,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-import { TeamMember, TeamMemberDB } from "@/types/team";
-
-import { CopyableLink } from "@/components/CopyableLink";
+import { toast } from "sonner";
 import Image from "next/image";
 import { cn } from "@/lib/utility/utils";
 import { HeaderDashboard } from "./HeaderDashboard";
-import Link from "next/link";
-import { SuccessDialog } from "./SuccessDialog";
-import { toast } from "sonner";
-import { LinkableField } from "@/components/LinkableField";
+import { CopyableLink } from "@/components/CopyableLink";
 
-// ======================
-// Data & Validation Schema
-// ======================
-
+// =====================
+// Schema
+// =====================
 const teamMemberSchema = z.object({
-  name: z.string(),
-  email: z.string(),
+  name: z.string().min(1, "Member name is required"),
+  email: z.string().email("Invalid member email"),
   github: z.string().optional(),
-  requirementLink: z.string(),
-  member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-}) satisfies z.ZodType<TeamMember>;
+  requirementLink: z.string().optional(),
+  member_role: z.enum(["Hustler", "Hipster", "Hacker"]),
+});
 
-const teamSchema = z
-  .object({
-    leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
-    leaderEmail: z.string().email("Email tidak valid"),
-    leaderGithub: z.string().optional(),
-    leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-    requirementLink: z.string().url("Link berkas persyaratan wajib diisi"),
-
-    members: z
-      .array(teamMemberSchema)
-      .max(5, "Maksimal 5 anggota tambahan")
-      .superRefine((members, ctx) => {
-        members.forEach((member, index) => {
-          const hasAnyField =
-            member.name ||
-            member.email ||
-            member.github ||
-            member.requirementLink;
-
-          if (hasAnyField) {
-            if (!member.name || member.name.trim() === "") {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Nama anggota wajib diisi",
-                path: [index, "name"],
-              });
-            }
-
-            if (!member.email || member.email.trim() === "") {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Email anggota wajib diisi",
-                path: [index, "email"],
-              });
-            } else {
-              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-              if (!emailRegex.test(member.email)) {
-                ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
-                  message: "Format email tidak valid",
-                  path: [index, "email"],
-                });
-              }
-            }
-
-            if (
-              !member.requirementLink ||
-              member.requirementLink.trim() === ""
-            ) {
-              ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                message: "Link berkas persyaratan wajib diisi",
-                path: [index, "requirementLink"],
-              });
-            } else {
-              try {
-                new URL(member.requirementLink);
-              } catch {
-                ctx.addIssue({
-                  code: z.ZodIssueCode.custom,
-                  message:
-                    "Link berkas persyaratan harus berupa URL yang valid",
-                  path: [index, "requirementLink"],
-                });
-              }
-            }
-          }
-        });
-      }),
-
-    teamName: z.string().min(1, "Nama team wajib diisi"),
-    institution: z.string().min(1, "Asal instansi wajib diisi"),
-    whatsapp_number: z
-      .string()
-      .min(1, "Nomor WhatsApp wajib diisi")
-      .regex(
-        /^62\d{8,13}$/,
-        "Nomor WhatsApp harus dimulai dengan 62 dan berisi 10-15 digit"
-      )
-      .refine(
-        (val) => val.startsWith("62"),
-        "Nomor WhatsApp harus dimulai dengan 62"
-      )
-      .refine(
-        (val) => /^\d+$/.test(val),
-        "Nomor WhatsApp hanya boleh berisi angka"
-      ),
-    paymentproof_url: z
-      .string()
-      .url("Link bukti pembayaran harus valid")
-      .optional(),
-  })
-  .superRefine((data, ctx) => {
-    const roleCounts: Record<string, number> = {
-      Hustler: 0,
-      Hipster: 0,
-      Hacker: 0,
-    };
-
-    // Count leader role
-    if (data.leaderRole && roleCounts.hasOwnProperty(data.leaderRole)) {
-      roleCounts[data.leaderRole]++;
-    }
-
-    // Count member roles
-    data.members.forEach((member) => {
-      if (member.member_role && roleCounts.hasOwnProperty(member.member_role)) {
-        roleCounts[member.member_role]++;
-      }
-    });
-
-    // Check for role violations
-    Object.entries(roleCounts).forEach(([role, count]) => {
-      if (count > 2) {
-        if (data.leaderRole === role) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            message: `Maksimal 2 orang per role ${role}`,
-            path: ["leaderRole"],
-          });
-        }
-
-        data.members.forEach((member, index) => {
-          if (member.member_role === role) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              message: `Maksimal 2 orang per role ${role}`,
-              path: ["members", index, "member_role"],
-            });
-          }
-        });
-      }
-    });
-  });
+const teamSchema = z.object({
+  leaderName: z.string().min(1, "Leader name is required"),
+  leaderEmail: z.string().email("Invalid leader email"),
+  leaderGithub: z.string().optional(),
+  leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]),
+  requirementLink: z.string().url().optional(),
+  members: z
+    .array(teamMemberSchema)
+    .min(1, "At least one member required")
+    .max(5, "Maximum 5 members allowed"),
+  teamName: z.string().min(1, "Team name is required"),
+  institution: z.string().min(1, "Institution is required"),
+  whatsapp_number: z
+    .string()
+    .regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
+  paymentproof_url: z.string().url().optional(),
+});
 
 type TeamFormValues = z.infer<typeof teamSchema>;
 
-// ======================
-// Header Component
-// ======================
-
-// ======================
-// Editable Input Component
-// ======================
-
+// =====================
+// Editable Input
+// =====================
 const EditableInput = ({
   register,
   name,
@@ -197,1085 +77,442 @@ const EditableInput = ({
   disabled,
   className = "",
   type = "text",
-  ...props
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-any) => {
-  return (
-    <div className="relative">
-      <Input
-        type={type}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={`${className} ${disabled ? "opacity-60" : ""}`}
-        {...register(name)}
-        {...props}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}: any) => (
+  <div className="relative">
+    <Input
+      type={type}
+      placeholder={placeholder}
+      disabled={disabled}
+      className={`${className} ${disabled ? "opacity-60" : ""}`}
+      {...register(name)}
+    />
+    {!disabled && (
+      <Pencil
+        size={16}
+        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50"
       />
-      {!disabled && (
-        <Pencil
-          size={16}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50"
-        />
-      )}
-    </div>
-  );
-};
+    )}
+  </div>
+);
 
-// ======================
-// Helper Functions
-// ======================
-
-// Add separate validation functions around line 275
-const isTeamDetailsComplete = (values: TeamFormValues) => {
-  return (
-    values.teamName &&
-    values.institution &&
-    values.whatsapp_number &&
-    values.whatsapp_number !== "62"
-  );
-};
-
-const isLeaderInfoComplete = (values: TeamFormValues) => {
-  return values.leaderName && values.leaderEmail && values.requirementLink;
-};
-
-const isAllInfoComplete = (values: TeamFormValues) => {
-  return isTeamDetailsComplete(values) && isLeaderInfoComplete(values);
-};
-
-// ======================
+// =====================
 // Main Component
-// ======================
-
+// =====================
 export default function TeamProfilePage() {
-  const [isMemberEditMode, setMemberEditMode] = useState(false);
-  const [isTeamEditMode, setTeamEditMode] = useState(false);
+  const [step, setStep] = useState(1);
+  const [memberCount, setMemberCount] = useState<number>(2);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [saving, setSaving] = useState(false);
-  const [teamDataLoaded, setTeamDataLoaded] = useState(false);
-  const [memberDataLoaded, setMemberDataLoaded] = useState(false);
-  const [institution, setInstitution] = useState("");
-  const [userProfile, setUserProfile] = useState({
-    name: "User",
-    isLoggedIn: false,
-  });
-
-  useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-
-      if (session?.user?.email) {
-        try {
-          const { data: userData, error } = await supabase
-            .from("Users")
-            .select("username")
-            .eq("email", session.user.email)
-            .single();
-
-          if (!error && userData) {
-            setUserProfile({
-              name:
-                userData.username || session.user.email.split("@")[0] || "User",
-              isLoggedIn: true,
-            });
-          } else {
-            setUserProfile({
-              name:
-                session.user.user_metadata?.username ||
-                session.user.email.split("@")[0] ||
-                "User",
-              isLoggedIn: true,
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUserProfile({
-            name:
-              session.user.user_metadata?.username ||
-              session.user.email.split("@")[0] ||
-              "User",
-            isLoggedIn: true,
-          });
-        }
-      } else {
-        setUserProfile({
-          name: "User",
-          isLoggedIn: false,
-        });
-      }
-
-      setLoading(false);
-    };
-
-    getUser();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
-
-      if (session?.user?.email) {
-        try {
-          const { data: userData, error } = await supabase
-            .from("Users")
-            .select("username")
-            .eq("email", session.user.email)
-            .single();
-
-          if (!error && userData) {
-            setUserProfile({
-              name:
-                userData.username || session.user.email.split("@")[0] || "User",
-              isLoggedIn: true,
-            });
-          } else {
-            setUserProfile({
-              name:
-                session.user.user_metadata?.username ||
-                session.user.email.split("@")[0] ||
-                "User",
-              isLoggedIn: true,
-            });
-          }
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setUserProfile({
-            name:
-              session.user.user_metadata?.username ||
-              session.user.email.split("@")[0] ||
-              "User",
-            isLoggedIn: true,
-          });
-        }
-      } else {
-        setUserProfile({
-          name: "User",
-          isLoggedIn: false,
-        });
-      }
-
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const {
     register,
     control,
+    handleSubmit,
     getValues,
-    setValue,
-    formState: { errors },
   } = useForm<TeamFormValues>({
     resolver: zodResolver(teamSchema),
     defaultValues: {
       whatsapp_number: "62",
+      members: Array(2).fill({
+        name: "",
+        email: "",
+        github: "",
+        requirementLink: "",
+        member_role: "Hustler",
+      }),
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, replace } = useFieldArray({
     control,
     name: "members",
   });
 
-  const teamDetailsCompleted = isTeamDetailsComplete(getValues());
-  const allInfoCompleted = isAllInfoComplete(getValues());
-
+  // Auth
   useEffect(() => {
-    const loadTeamData = async () => {
-      if (!user?.email || teamDataLoaded) return;
-
-      try {
-        const response = await fetch(
-          `/api/team?userEmail=${encodeURIComponent(user.email)}`
-        );
-
-        if (response.ok) {
-          const result = await response.json();
-
-          if (result.data) {
-            setValue("teamName", result.data.team_name || "");
-            setValue("institution", result.data.institution || "");
-            setValue("whatsapp_number", result.data.whatsapp_number || "62");
-            setValue("paymentproof_url", result.data.paymentproof_url || "");
-
-            if (result.data.institution === "Telkom University") {
-              setInstitution("telkom");
-            } else if (result.data.institution) {
-              setInstitution("nontelkom");
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error loading team data:", error);
-      } finally {
-        setTeamDataLoaded(true);
-      }
+    const init = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+      setLoading(false);
     };
+    init();
+  }, []);
 
-    loadTeamData();
-  }, [user?.email, setValue, teamDataLoaded]);
+  const validateLeaderInfo = (values: TeamFormValues) => {
+    const { leaderName, leaderEmail, leaderRole, whatsapp_number } = values;
+    if (!leaderName || !leaderEmail || !leaderRole || !whatsapp_number) {
+      toast.error("Please complete all leader information fields.");
+      return false;
+    }
+    return true;
+  };
 
-  useEffect(() => {
-    const loadMemberData = async () => {
-      if (!user?.email || !teamDataLoaded || memberDataLoaded) return;
-
-      try {
-        const teamResponse = await fetch(
-          `/api/team?userEmail=${encodeURIComponent(user.email)}`
-        );
-
-        if (!teamResponse.ok) {
-          setMemberDataLoaded(true);
-          return;
-        }
-
-        const teamResult = await teamResponse.json();
-        const teamId = teamResult.data?.id;
-
-        if (!teamId) {
-          setMemberDataLoaded(true);
-          return;
-        }
-
-        const membersResponse = await fetch(
-          `/api/team-members?teamId=${teamId}`
-        );
-
-        if (membersResponse.ok) {
-          const membersResult = await membersResponse.json();
-
-          if (membersResult.data && membersResult.data.length > 0) {
-            const members = membersResult.data;
-            const leader = members.find(
-              (member: TeamMemberDB) => member.is_leader
-            );
-            const teamMembers = members.filter(
-              (member: TeamMemberDB) => !member.is_leader
-            );
-
-            if (leader) {
-              setValue("leaderName", leader.name || "");
-              setValue("leaderEmail", leader.email || "");
-              setValue("leaderGithub", leader.github_url || "");
-              setValue("requirementLink", leader.data_url || "");
-              setValue("leaderRole", leader.member_role || "");
-            }
-
-            for (let i = fields.length - 1; i >= 0; i--) {
-              remove(i);
-            }
-
-            teamMembers.forEach((member: TeamMemberDB) => {
-              append({
-                name: member.name || "",
-                email: member.email || "",
-                github: member.github_url || "",
-                requirementLink: member.data_url || "",
-                member_role: member.member_role || undefined,
-              });
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Error loading member data:", error);
-      } finally {
-        setMemberDataLoaded(true);
+  const validateMembersInfo = (values: TeamFormValues) => {
+    for (let i = 0; i < values.members.length; i++) {
+      const member = values.members[i];
+      if (!member.name || !member.email || !member.member_role) {
+        toast.error(`Please complete all fields for Member ${i + 1}.`);
+        return false;
       }
-    };
-
-    loadMemberData();
-  }, [
-    user?.email,
-    teamDataLoaded,
-    memberDataLoaded,
-    setValue,
-    append,
-    remove,
-    fields.length,
-  ]);
+    }
+    return true;
+  };
 
   const onSubmit = async (data: TeamFormValues) => {
-    if (!user?.email) return;
+    // ✅ Final validation before submission
+    if (!validateLeaderInfo(data) || !validateMembersInfo(data)) return;
 
-    setSaving(true);
-    try {
-      const teamResponse = await fetch("/api/team", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          teamName: data.teamName,
-          institution: data.institution,
-          whatsapp_number: data.whatsapp_number,
-          paymentproof_url: data.paymentproof_url,
-          userEmail: user.email,
-        }),
-      });
-
-      if (!teamResponse.ok) {
-        const teamError = await teamResponse.json();
-        console.error("Failed to save team data:", teamError);
-        toast.error(
-          `Failed to save team: ${teamError.error || "Unknown error"}`
-        );
-        return;
-      }
-
-      const teamResult = await teamResponse.json();
-
-      let teamId = teamResult.data?.id;
-
-      if (!teamId) {
-        const teamFetchResponse = await fetch(
-          `/api/team?userEmail=${encodeURIComponent(user.email)}`
-        );
-        if (teamFetchResponse.ok) {
-          const teamData = await teamFetchResponse.json();
-          teamId = teamData.data?.id;
-        }
-      }
-
-      if (!teamId) {
-        toast.error("Could not get team ID");
-        return;
-      }
-
-      const membersResponse = await fetch("/api/team-members", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          teamId: teamId,
-          leader: {
-            name: data.leaderName,
-            email: data.leaderEmail,
-            github_url: data.leaderGithub || null,
-            member_role: data.leaderRole || null,
-            data_url: data.requirementLink,
-          },
-          members:
-            data.members?.filter(
-              (member) => member.name && member.name.trim() !== ""
-            ) || [],
-        }),
-      });
-
-      if (membersResponse.ok) {
-        toast.success("Team data saved successfully!");
-      } else {
-        const membersError = await membersResponse.json();
-        toast.error(
-          `Failed to save members: ${membersError.error || "Unknown error"}`
-        );
-      }
-    } catch {
-      toast.error("Network error occurred");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleMemberEditModeChange = async (newEditMode: boolean) => {
-    console.log("Member edit mode changing:", {
-      from: isMemberEditMode,
-      to: newEditMode,
-    });
-
-    if (isMemberEditMode && !newEditMode) {
-      const currentValues = getValues();
-      await onSubmit(currentValues);
-    }
-    setMemberEditMode(newEditMode);
-  };
-
-  const handleTeamEditModeChange = async (newEditMode: boolean) => {
-    console.log("Team edit mode changing:", {
-      from: isTeamEditMode,
-      to: newEditMode,
-    });
-
-    if (isTeamEditMode && !newEditMode) {
-      const currentValues = getValues();
-      await onSubmit(currentValues);
-    }
-    setTeamEditMode(newEditMode);
+    toast.success("Form submitted successfully!");
+    console.log("✅ Submitted data:", data);
   };
 
   const inputClassName =
-    "bg-white/10 text-white placeholder:text-white/50 rounded-full px-6 py-6 border-1 border-white/10 pr-12";
+    "bg-white/10 text-white placeholder:text-white/50 rounded-full px-5 py-5 border border-white/10 pr-10 w-full";
 
-  if (loading) {
+  const nextStep = () => {
+    const currentValues = getValues();
+
+    // ✅ Step 1 validation
+    if (step === 1) {
+      if (!currentValues.teamName || !currentValues.institution) {
+        toast.error("Please fill all required fields before continuing");
+        return;
+      }
+    }
+
+    // ✅ Step 3 validation (leader + members)
+    if (step === 3) {
+      if (!validateLeaderInfo(currentValues)) return;
+      if (!validateMembersInfo(currentValues)) return;
+    }
+
+    if (step === 2) {
+      replace(
+        Array(memberCount)
+          .fill(null)
+          .map(() => ({
+            name: "",
+            email: "",
+            github: "",
+            requirementLink: "",
+            member_role: "Hustler",
+          }))
+      );
+    }
+
+    setStep((s) => s + 1);
+  };
+
+  const prevStep = () => setStep((s) => s - 1);
+
+  if (loading)
     return (
-      <div className="overflow-y-auto w-full min-h-full flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="text-white flex justify-center items-center h-screen">
+        Loading...
       </div>
     );
-  }
 
   return (
-    <div className="overflow-y-auto w-full min-h-full pt-16 md:pt-0">
-      <SuccessDialog open={false} onClose={() => null} />
-      <HeaderDashboard topText="Team" bottomText="Profile" />
+    <div className="overflow-y-auto w-full min-h-screen text-white">
+      <HeaderDashboard topText="Team" bottomText="Registration" />
 
-      <div className="px-4 pt-4 pb-6">
-      <Link href="/guidelines.pdf" target="_blank" rel="noopener noreferrer">
-        <Button className="bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer flex items-center gap-2 !px-6 !py-5">
-          <FileText className="w-4 h-4" />
-          Guidelines
-        </Button>
-      </Link>
-    </div>
-
-      {userProfile.isLoggedIn ? (
-        <div className="w-full h-full overflow-y-auto lg:gap-x-4 grid grid-cols-1 lg:grid-cols-3">
-          <div className="px-4 lg:pr-0 pb-8 col-span-1 md:col-span-2 w-full">
-            <Card className="bg-white/10 backdrop-blur-md border-3 border-white/10 w-full text-white rounded-2xl pt-0">
-              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
-                <CardTitle className="text-2xl font-medium leading-none">
-                  <p>Team</p>
-                  <span className="font-bold">Information.</span>
-                </CardTitle>
-
-                {/* Member Edit Button */}
-                <Button
-                  onClick={() => {
-                    if (isMemberEditMode) {
-                      handleMemberEditModeChange(false);
-                    } else {
-                      handleMemberEditModeChange(true);
-                    }
-                  }}
-                  size="sm"
-                  className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
-                    isMemberEditMode
-                      ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white"
-                  }`}
-                >
-                  {isMemberEditMode ? (
-                    <>
-                      <Check size={14} className="text-white" />
-                      <span className="text-sm">Save</span>
-                    </>
-                  ) : (
-                    <>
-                      <Edit size={14} className="text-white" />
-                      <span className="text-sm">Edit</span>
-                    </>
+      <div className="flex h-full items-center justify-center">
+        <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-7xl">
+          <div className="w-full px-8 py-10">
+            {/* Step Indicator */}
+            <div className="flex justify-center items-center gap-8 mb-12">
+              {[1, 2, 3, 4].map((num) => (
+                <div key={num} className="flex items-center gap-4">
+                  <div
+                    className={cn(
+                      "flex items-center justify-center rounded-full w-12 h-12 text-lg font-semibold border transition-all duration-300",
+                      step === num
+                        ? "bg-pink-500/50 border-pink-400/50 text-white scale-110"
+                        : step > num
+                        ? "bg-pink-500/50 border-pink-400/50 text-white"
+                        : "border-white/30 text-white/50"
+                    )}
+                  >
+                    {num}
+                  </div>
+                  {num !== 4 && (
+                    <div
+                      className={cn(
+                        "h-[2px] w-16 transition-all duration-300",
+                        step >= num ? "bg-pink-500/50" : "bg-white/20"
+                      )}
+                    ></div>
                   )}
-                </Button>
-              </CardHeader>
+                </div>
+              ))}
+            </div>
 
-              <CardContent className="max-h-[67vh] overflow-y-auto">
-                <div className="space-y-12 pt-6 tracking-wide">
-                  {isMemberEditMode && !teamDetailsCompleted && (
-                    <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4 mb-6">
-                      <p className="text-yellow-200 font-medium">
-                        Fill in Team Data First
-                      </p>
-                      <p className="text-yellow-200/80 text-sm mt-1">
-                        Complete your Team Name, Institution of Origin, and
-                        WhatsApp to continue.
-                      </p>
-                    </div>
-                  )}
-
-                  <div className="space-y-6 flex flex-col">
-                    <div className="flex flex-col gap-3">
-                      <h3 className="font-semibold text-white mb-3 flex items-center gap-2">
-                        Team Lead
-                        {isMemberEditMode && !teamDetailsCompleted && (
-                          <span className="text-xs bg-yellow-500/20 text-yellow-200 px-2 py-1 rounded">
-                            Fill in the team data first
-                          </span>
-                        )}
-                      </h3>
-
-                      {/* Leader Name */}
-
-                      <Label>Leader Name*</Label>
-
-                      <EditableInput
-                        register={register}
-                        name="leaderName"
-                        placeholder={
-                          teamDetailsCompleted
-                            ? "Input your leader team name"
-                            : "Fill in the team data first"
-                        }
-                        disabled={!isMemberEditMode || !teamDetailsCompleted}
-                        className={inputClassName}
-                      />
-                      {errors.leaderName && (
-                        <p className="text-red-400 text-sm">
-                          {errors.leaderName.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Leader Email */}
-                    <div className="flex flex-col gap-3">
-                      <Label>Leader Email*</Label>
-                      <EditableInput
-                        register={register}
-                        name="leaderEmail"
-                        type="email"
-                        placeholder={
-                          teamDetailsCompleted
-                            ? "Enter the Leader's Email"
-                            : "Fill in the team data first"
-                        }
-                        disabled={!isMemberEditMode || !teamDetailsCompleted}
-                        className={inputClassName}
-                      />
-                      {errors.leaderEmail && (
-                        <p className="text-red-400 text-sm">
-                          {errors.leaderEmail.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Leader Role */}
-                    <div className="flex flex-col gap-3">
-                      <Label>Leader Role*</Label>
-                      <Controller
-                        name="leaderRole"
-                        control={control}
-                        render={({ field }) => (
-                          <Select
-                            disabled={
-                              !isMemberEditMode || !teamDetailsCompleted
-                            }
-                            value={field.value || ""}
-                            onValueChange={field.onChange}
-                          >
-                            <SelectTrigger className={inputClassName}>
-                              <SelectValue
-                                placeholder={
-                                  teamDetailsCompleted
-                                    ? "Select Role"
-                                    : "Fill in the team data first"
-                                }
-                              />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Hustler">
-                                Hustler (Business)
-                              </SelectItem>
-                              <SelectItem value="Hipster">
-                                Hipster (Design)
-                              </SelectItem>
-                              <SelectItem value="Hacker">
-                                Hacker (Tech)
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                      {errors.leaderRole && (
-                        <p className="text-red-400 text-sm">
-                          {errors.leaderRole.message}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Leader GitHub */}
-                    <div className="flex flex-col gap-3 w-full">
-                      <Label>
-                        Leader <span className="font-bold">Portfolio*</span>
-                      </Label>
-                      <div>
-                        <EditableInput
-                          register={register}
-                          name="leaderGithub"
-                          placeholder={
-                            teamDetailsCompleted
-                              ? "Input Link Github"
-                              : "Fill in the team data first"
-                          }
-                          disabled={!isMemberEditMode || !teamDetailsCompleted}
-                          className={inputClassName}
-                        />
-                        <div className="w-full flex justify-end pt-2">
-                          <p className="text-xs text-left text-white/50">
-                            *Opsional
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Leader Requirements */}
-                    <div className="flex flex-col gap-2">
-                      <Label>Required Documents*</Label>
-                      <div>
-                        <EditableInput
-                          register={register}
-                          name="requirementLink"
-                          type="url"
-                          placeholder={
-                            teamDetailsCompleted
-                              ? "(Please upload your requirement documents in link format)"
-                              : "Fill in the team data first"
-                          }
-                          disabled={!isMemberEditMode || !teamDetailsCompleted}
-                          className={inputClassName}
-                        />
-                        {errors.requirementLink && (
-                          <p className="text-red-400 text-sm">
-                            {errors.requirementLink.message}
-                          </p>
-                        )}
-                        <div className="w-full flex justify-end pt-2">
-                          <p className="text-white/50 text-xs max-w-xs text-end">
-                            Upload screenshots of all required documents into
-                            one Google Drive folder, then submit the link here.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+            {/* STEP 1 */}
+            {step === 1 && (
+              <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
+                <CardHeader>
+                  <CardTitle className="text-white text-2xl font-semibold">
+                    Step 1 — Team Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex flex-col gap-y-2">
+                    <Label className="text-white text-lg">Team Name</Label>
+                    <EditableInput
+                      register={register}
+                      name="teamName"
+                      placeholder="Enter your team name"
+                      className={inputClassName}
+                    />
                   </div>
 
-                  {fields.map((member, index) => (
-                    <div
-                      key={member.id}
-                      className={`space-y-6 flex flex-col border-t border-white/20 pt-6 ${
-                        isMemberEditMode && !allInfoCompleted
-                          ? "opacity-60"
-                          : ""
-                      }`}
-                    >
-                      <div className="flex justify-between items-center">
-                        <h3 className="font-semibold text-white">
-                          Member {index + 1}
-                        </h3>
-                        {isMemberEditMode && allInfoCompleted && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => remove(index)}
-                            className="text-red-400"
-                          >
-                            Remove
-                          </Button>
-                        )}
-                      </div>
+                  <div className="flex flex-col gap-y-2">
+                    <Label className="text-white text-lg">Institution</Label>
+                    <EditableInput
+                      register={register}
+                      name="institution"
+                      placeholder="Enter your institution"
+                      className={inputClassName}
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                      {/* All member inputs disabled if not all info complete */}
-                      <div className="flex flex-col gap-3">
-                        <Label>Member&apos;s name</Label>
+            {/* STEP 2 */}
+             {step === 2 && ( 
+              <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full"> 
+                <CardHeader> 
+                  <CardTitle className="text-white text-2xl font-semibold"> Step 2 — Team Members Count </CardTitle>
+                  </CardHeader> 
+                  <CardContent className="space-y-6"> <div className="flex flex-col gap-y-2"> 
+                    <Label className="text-white text-lg"> Select Total Members </Label> 
+                    <Select onValueChange={(val) => setMemberCount(Number(val))} value={memberCount.toString()} > 
+                      <SelectTrigger className="bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border border-white/10 w-full"> 
+                      <SelectValue placeholder="Select number of members" /> </SelectTrigger> <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl"> {[2, 3, 4, 5].map((num) => ( 
+                        <SelectItem key={num} value={num.toString()} className="hover:bg-pink-500/30 cursor-pointer" > 
+                          {num} Members 
+                        </SelectItem> ))} 
+                        </SelectContent> 
+                        </Select> 
+                      </div> 
+                    </CardContent> 
+                </Card> 
+              )}
+
+            {/* STEP 3 */}
+            {step === 3 && (
+              <div className="space-y-8 w-full">
+                <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white text-xl">
+                      <UserIcon className="size-6 text-pink-500/50" />
+                      Leader Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="leaderName"
+                      placeholder="Leader name"
+                      className={inputClassName}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="leaderEmail"
+                      placeholder="Leader email"
+                      className={inputClassName}
+                    />
+                    <Controller
+                      name="leaderRole"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value || ""}
+                        >
+                          <SelectTrigger className="bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border border-white/10 w-full">
+                            <SelectValue placeholder="Select Role" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                            <SelectItem
+                              value="Hustler"
+                              className="hover:bg-pink-500/30 cursor-pointer"
+                            >
+                              Hustler
+                            </SelectItem>
+                            <SelectItem
+                              value="Hipster"
+                              className="hover:bg-pink-500/30 cursor-pointer"
+                            >
+                              Hipster
+                            </SelectItem>
+                            <SelectItem
+                              value="Hacker"
+                              className="hover:bg-pink-500/30 cursor-pointer"
+                            >
+                              Hacker
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="whatsapp_number"
+                      placeholder="62812345678"
+                      type="tel"
+                      className={inputClassName}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Members */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
+                  {fields.map((member, index) => (
+                    <Card
+                      key={member.id}
+                      className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full"
+                    >
+                      <CardHeader>
+                        <CardTitle className="text-lg text-white">
+                          <Users className="size-5 text-pink-500/50 mr-2 inline" />
+                          Member {index + 1}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
                         <EditableInput
                           register={register}
                           name={`members.${index}.name`}
-                          placeholder={
-                            allInfoCompleted
-                              ? "Enter the Member's Name"
-                              : "Complete the team and leader data first"
-                          }
-                          disabled={!isMemberEditMode || !allInfoCompleted}
+                          placeholder="Member name"
                           className={inputClassName}
                         />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <Label>Member&apos;s Email</Label>
                         <EditableInput
                           register={register}
                           name={`members.${index}.email`}
-                          placeholder={
-                            allInfoCompleted
-                              ? "Enter the Member's Email"
-                              : "Complete the team and leader data first"
-                          }
-                          disabled={!isMemberEditMode || !allInfoCompleted}
+                          placeholder="Member email"
                           className={inputClassName}
                         />
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <Label>Role</Label>
                         <Controller
                           name={`members.${index}.member_role`}
                           control={control}
                           render={({ field }) => (
                             <Select
-                              disabled={!isMemberEditMode || !allInfoCompleted}
-                              value={field.value || ""}
                               onValueChange={field.onChange}
+                              value={field.value || ""}
                             >
-                              <SelectTrigger className={inputClassName}>
-                                <SelectValue
-                                  placeholder={
-                                    allInfoCompleted
-                                      ? "Select Role"
-                                      : "Complete the team and leader data first"
-                                  }
-                                />
+                              <SelectTrigger className="bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border border-white/10 w-full">
+                                <SelectValue placeholder="Select Role" />
                               </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="Hustler">
-                                  Hustler (Business)
+                              <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                                <SelectItem
+                                  value="Hustler"
+                                  className="hover:bg-pink-500/30 cursor-pointer"
+                                >
+                                  Hustler
                                 </SelectItem>
-                                <SelectItem value="Hipster">
-                                  Hipster (Design)
+                                <SelectItem
+                                  value="Hipster"
+                                  className="hover:bg-pink-500/30 cursor-pointer"
+                                >
+                                  Hipster
                                 </SelectItem>
-                                <SelectItem value="Hacker">
-                                  Hacker (Tech)
+                                <SelectItem
+                                  value="Hacker"
+                                  className="hover:bg-pink-500/30 cursor-pointer"
+                                >
+                                  Hacker
                                 </SelectItem>
                               </SelectContent>
                             </Select>
                           )}
                         />
-                        {errors.members?.[index]?.member_role && (
-                          <p className="text-red-400 text-sm">
-                            {errors.members[index]?.member_role?.message}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex flex-col gap-3">
-                        <Label>Member Portfolio*</Label>
-                        <EditableInput
-                          register={register}
-                          name={`members.${index}.github`}
-                          placeholder={
-                            allInfoCompleted
-                              ? "(Please provide your portfolio link  optional / can be NULL)"
-                              : "Complete the team and leader data first"
-                          }
-                          disabled={!isMemberEditMode || !allInfoCompleted}
-                          className={inputClassName}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label>Required Documents*</Label>
-                        <EditableInput
-                          register={register}
-                          name={`members.${index}.requirementLink`}
-                          placeholder={
-                            allInfoCompleted
-                              ? "(Please upload your requirement documents in link format)"
-                              : "Complete the team and leader data first"
-                          }
-                          disabled={!isMemberEditMode || !allInfoCompleted}
-                          className={inputClassName}
-                        />
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
-
-                  {isMemberEditMode && (
-                    <div className="w-full flex items-center justify-center pt-6">
-                      {allInfoCompleted ? (
-                        <Button
-                          type="button"
-                          onClick={() =>
-                            append({
-                              name: "",
-                              email: "",
-                              github: "",
-                              requirementLink: "",
-                              member_role: undefined,
-                            })
-                          }
-                          className={cn(
-                            `bg-white/10 hover:bg-pink-600 text-white flex items-center rounded-full !p-6`,
-                            fields.length === 5 ? "hidden" : ""
-                          )}
-                        >
-                          <Plus className="mr-2" /> Add Team Member
-                        </Button>
-                      ) : (
-                        <div className="bg-white/5 border border-white/20 rounded-full px-6 py-3 text-white/50 text-sm">
-                          Complete the team and leader data to add members.
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            )}
 
-          <div className="px-4 lg:pl-0 lg:pr-4 pb-8 lg:col-span-1 w-full">
-            <Card className="bg-white/10 backdrop-blur-md border border-white/10 w-full text-white rounded-2xl pt-0">
-              <CardHeader className="bg-white/10 pb-4 pt-6 rounded-t-xl relative">
-                <CardTitle className="text-2xl font-medium leading-none">
-                  <p>Detail</p>
-                  <span className="font-bold">Team.</span>
-                </CardTitle>
-
-                {/* Team Edit Button */}
-                <Button
-                  onClick={() => {
-                    if (isTeamEditMode) {
-                      handleTeamEditModeChange(false);
-                    } else {
-                      handleTeamEditModeChange(true);
-                    }
-                  }}
-                  size="sm"
-                  className={`absolute top-4 right-4 flex items-center gap-2 rounded-full px-3 py-2 ${
-                    isTeamEditMode
-                      ? "bg-pink-600/50 hover:bg-pink-700/80 text-white"
-                      : "bg-white/10 hover:bg-white/20 text-white"
-                  }`}
-                >
-                  {isTeamEditMode ? (
-                    <>
-                      <Check size={14} className="text-white" />
-                      <span className="text-sm">Save</span>
-                    </>
-                  ) : (
-                    <>
-                      <Edit size={14} className="text-white" />
-                      <span className="text-sm">Edit</span>
-                    </>
-                  )}
-                </Button>
-              </CardHeader>
-
-              <CardContent className="overflow-y-auto max-h-[67vh]">
-                <div className="space-y-6 flex flex-col">
-                  {/* Nama Team */}
-                  <div className="flex flex-col gap-3">
-                    <Label>Team Name*</Label>
-                    <EditableInput
-                      register={register}
-                      name="teamName"
-                      placeholder="Input your team name"
-                      disabled={!isTeamEditMode}
-                      className={inputClassName}
+            {/* STEP 4 */}
+            {step === 4 && (
+              <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
+                <CardHeader>
+                  <CardTitle className="text-white text-2xl font-semibold">
+                    Step 4 — Payment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-row gap-3">
+                  <div className="text-center w-fit">
+                    <Image
+                      src="/qris.jpg"
+                      width={320}
+                      height={320}
+                      alt="QR Payment"
+                      className="mx-auto rounded-lg"
                     />
-                    {errors.teamName && (
-                      <p className="text-red-400 text-sm">
-                        {errors.teamName.message}
-                      </p>
-                    )}
                   </div>
 
-                  {/* Asal Instansi */}
-                  <div className="flex flex-col gap-3">
-                    <Label>Institution*</Label>
-                    <RadioGroup
-                      disabled={!isTeamEditMode}
-                      value={institution}
-                      onValueChange={(value: string) => {
-                        setInstitution(value as "telkom" | "nontelkom");
-
-                        if (value === "telkom") {
-                          setValue("institution", "Telkom University");
-                        } else {
-                          const currentValue = getValues("institution");
-                          if (currentValue === "Telkom University") {
-                            setValue("institution", "");
-                          }
-                        }
-                      }}
-                      className="flex flex-col gap-3"
-                    >
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="telkom"
-                          id="telkom"
-                          className="border-white text-white"
-                          disabled={!isTeamEditMode}
-                        />
-                        <Label
-                          htmlFor="telkom"
-                          className={`cursor-pointer ${
-                            !isTeamEditMode ? "opacity-60" : ""
-                          }`}
-                        >
-                          Telkom University
-                        </Label>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem
-                          value="nontelkom"
-                          id="lainnya"
-                          className="border-white text-white"
-                          disabled={!isTeamEditMode}
-                        />
-                        <Label
-                          htmlFor="lainnya"
-                          className={`cursor-pointer ${
-                            !isTeamEditMode ? "opacity-60" : ""
-                          }`}
-                        >
-                          Non Telkom
-                        </Label>
-                      </div>
-                    </RadioGroup>
-
-                    {institution === "nontelkom" && (
-                      <div className="mt-3">
-                        <EditableInput
-                          register={register}
-                          name="institution"
-                          placeholder="Masukkan nama instansi"
-                          disabled={!isTeamEditMode}
-                          className={inputClassName}
-                        />
-                      </div>
-                    )}
-
-                    {institution === "telkom" && !isTeamEditMode && (
-                      <div className="mt-3">
-                        <div
-                          className={`${inputClassName} opacity-60 flex items-center`}
-                        >
-                          Telkom University
-                        </div>
-                      </div>
-                    )}
-
-                    {errors.institution && (
-                      <p className="text-red-400 text-sm">
-                        {errors.institution.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Whatsapp Perwakilan */}
-                  <div className="flex flex-col gap-3">
-                    <Label>Leader&apos;s WhatsApp</Label>
-                    <EditableInput
-                      register={register}
-                      name="whatsapp_number"
-                      placeholder="62812345678"
-                      disabled={!isTeamEditMode}
-                      className={inputClassName}
-                      type="tel"
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      onInput={(e: any) => {
-                        let value = e.target.value.replace(/\D/g, "");
-                        if (!value.startsWith("62")) {
-                          value = "62" + value.replace(/^62*/, "");
-                        }
-                        if (value.length > 15) {
-                          value = value.substring(0, 15);
-                        }
-                        e.target.value = value;
-                      }}
-                    />
-                    {errors.whatsapp_number && (
-                      <p className="text-red-400 text-sm">
-                        {errors.whatsapp_number.message}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Payment Proof */}
-                  <div className="flex flex-col gap-3">
-                    <Label>Payment Proof Link*</Label>
+                  <div className="w-3/4 flex flex-col gap-3">
+                    <p className="text-4xl font-bold text-white">Rp150.000</p>
                     <EditableInput
                       register={register}
                       name="paymentproof_url"
-                      placeholder="e.g., https://drive.google.com/abc123"
-                      disabled={!isTeamEditMode}
+                      placeholder="https://drive.google.com/..."
                       className={inputClassName}
                     />
-                    {errors.paymentproof_url && (
-                      <p className="text-red-400 text-sm">
-                        {errors.paymentproof_url.message}
-                      </p>
-                    )}
+                    <CopyableLink
+                      customLabel={
+                        <div>
+                          <span className="text-white">
+                            BCA ( GISELA SESARIA KUSTHIKA PUTRI )
+                          </span>
+                        </div>
+                      }
+                      text="7285451698"
+                    />
                   </div>
+                </CardContent>
+              </Card>
+            )}
 
-                  {/* CopyableLink */}
-                  <LinkableField
-                    disabled={!isTeamEditMode}
-                    label="Publication Materials"
-                    openInNewTab
-                    href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
-                  />
+            {/* Navigation Buttons */}
+            <div className="flex justify-between items-center mt-12 w-full">
+              {step > 1 ? (
+                <Button
+                  type="button"
+                  onClick={prevStep}
+                  className="bg-white/10 hover:bg-white/20 text-white rounded-full !px-8 !py-6 backdrop-blur-sm"
+                >
+                  <ArrowLeft className="" /> Back
+                </Button>
+              ) : (
+                <div />
+              )}
 
-                  {/* Metode Pembayaran */}
-                  <div className="relative flex flex-col">
-                    <div className="relative w-full flex flex-col space-y-3 justify-center">
-                      <Label>Payment Method</Label>
-                      <div className="flex flex-col space-y-1 text-center">
-                        <p className="text-2xl font-bold">
-                          {institution === "telkom"
-                            ? "Rp150.000*"
-                            : institution === "nontelkom"
-                            ? "Rp170.000*"
-                            : "Rp-*"}
-                        </p>
-                        <p className="text-sm font-medium text-white/50">
-                          {institution === "telkom"
-                            ? "( Harga khusus untuk mahasiswa Telkom University )"
-                            : institution === "nontelkom"
-                            ? "( Harga pendaftaran untuk instansi lainnya )"
-                            : "( Pilih instansi untuk melihat harga pendaftaran )"}
-                        </p>
-                      </div>
-                      <div className="before:content-[''] flex items-center justify-center ">
-                        {institution === "telkom" ? (
-                          <Image
-                            src="/qris.jpg"
-                            width={340}
-                            height={340}
-                            alt="QR Telkom"
-                            className="w-80 p-4 rounded-4xl border-10 border-white/10"
-                          />
-                        ) : institution === "nontelkom" ? (
-                          <Image
-                            src="/qris.jpg"
-                            width={340}
-                            height={340}
-                            alt="QR Telkom"
-                            className="w-80 p-4 rounded-4xl border-10 border-white/10"
-                          />
-                        ) : (
-                          ""
-                        )}
-                      </div>
-                      <CopyableLink
-                        disabled={!isTeamEditMode}
-                        label="BCA ( GISELA SESARIA KUSTHIKA  PUTRI )"
-                        text="7285451698"
-                      />
-                      <CopyableLink
-                        disabled={!isTeamEditMode}
-                        label="ShopeePay ( GISELA SESARIA KUSTHIKA PUTRI )"
-                        text="081808767771"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              {step < 4 ? (
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  className="bg-pink-500/50 hover:bg-pink-600/50 duration-200 transition-all text-white rounded-full !px-8 !py-6"
+                >
+                  Next <ArrowRight className="" />
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  className="bg-green-500/50 hover:bg-green-600/50 text-white rounded-full px-8 py-6"
+                >
+                  Submit
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex flex-col pb-5 px-4 h-full">
-          <Card className="flex flex-col md:flex-1 bg-white/10 backdrop-blur-md border-3 border-white/10 rounded-2xl text-white h-full md:min-h-[calc(100vh-8.5rem)]">
-            <CardContent className="flex-1 flex items-center justify-center">
-              <div className="max-w-xl text-center px-4">
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium tracking-wide">
-                  Welcome Participants
-                </p>
-                <h2 className="font-bold text-4xl sm:text-5xl lg:text-6xl leading-tight">
-                  HACKATTACK
-                  <br />
-                  2025
-                </h2>
-                <p className="text-sm sm:text-base mt-4">
-                  Feel Free to{" "}
-                  <Link
-                    href={"/sign-in"}
-                    className="font-bold hover:text-[#EF4B72] duration-200"
-                  >
-                    Login
-                  </Link>{" "}
-                  First
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+        </form>
+      </div>
     </div>
   );
 }

@@ -26,7 +26,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { reset, setUser: setStoreUser } = useUserStore();
   const router = useRouter();
 
-  const MAINTENANCE_MODE = true; 
+  const MAINTENANCE_MODE = false; 
 
   useEffect(() => {
     const getUser = async () => {
