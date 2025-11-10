@@ -8,11 +8,9 @@ import { useFieldArray } from "react-hook-form";
 import { supabase } from "@/lib/config/supabase";
 import { User } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
-  Pencil,
   ArrowLeft,
   ArrowRight,
   User as UserIcon,
@@ -40,13 +38,14 @@ import {
 } from "@/components/ui/tooltip";
 import Team from "@/lib/types/team";
 import { Members } from "@/lib/types/teamMember";
+import { EditableInput } from "./EditableInput";
 
 // =====================
 // Schema
 // =====================
 const teamMemberSchema = z.object({
   name: z.string(),
-  email: z.email(),
+  email: z.string().email("Invalid email").nonempty("Email is required"),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
@@ -68,34 +67,6 @@ const teamDataSchema = z.object({
 
 type TeamFormValues = z.infer<typeof teamDataSchema>;
 
-// =====================
-// Editable Input
-// =====================
-const EditableInput = ({
-  register,
-  name,
-  placeholder,
-  disabled,
-  className = "",
-  type = "text",
-}: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-any) => (
-  <div className="relative">
-    <Input
-      type={type}
-      placeholder={placeholder}
-      disabled={disabled}
-      className={`${className} ${disabled ? "opacity-60" : ""}`}
-      {...register(name)}
-    />
-    {!disabled && (
-      <Pencil
-        size={16}
-        className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/50"
-      />
-    )}
-  </div>
-);
 
 // =====================
 // Main Component
@@ -113,7 +84,7 @@ export default function TeamProfilePage() {
   const [teamMembers, setTeamMembers] = useState<Members[]>([]);
   const [editRejected, setEditRejected] = useState(false);
 
-  const { register, control, handleSubmit, getValues, reset } =
+  const { register, control, handleSubmit, getValues, reset, trigger, formState: {errors} } =
     useForm<TeamFormValues>({
       resolver: zodResolver(teamDataSchema),
       defaultValues: {
@@ -316,20 +287,33 @@ export default function TeamProfilePage() {
   const inputClassName =
     "bg-white/10 text-white placeholder:text-white/50 rounded-full px-5 py-5 border border-white/10 pr-10 w-full";
 
-  const nextStep = () => {
-    const currentValues = getValues();
+  const nextStep = async () => {
+    let fieldsToValidate: (keyof TeamFormValues)[] = [];
 
-    // ✅ Step 1 validation
+    if (step === 1) fieldsToValidate = ["teamName", "institution"];
+    if (step === 2) fieldsToValidate = []; // tidak ada field input manual
+    if (step === 3)
+      fieldsToValidate = [
+        "leaderName",
+        "leaderRole",
+        "whatsapp_number",
+        "data_url",
+        "members",
+      ];
+    if (step === 4) fieldsToValidate = ["paymentproof_url"];
+
+    const isValid = await trigger(fieldsToValidate);
+
+    if (!isValid) {
+      toast.error("Please fix the errors before continuing.");
+      return;
+    }
+
     if (step === 1) {
-      if (!currentValues.teamName || !currentValues.institution) {
-        toast.error("Please fill all required fields before continuing");
-        return;
-      }
-
-      const price = currentValues.institution.toLowerCase().includes("telkom")
-        ? "Rp 200.000"
-        : "Rp 220.000";
-      setInstitutionPrice(price);
+      const inst = getValues("institution");
+      setInstitutionPrice(
+        inst.toLowerCase().includes("telkom") ? "Rp 200.000" : "Rp 220.000"
+      );
     }
 
     if (step === 2) {
@@ -345,21 +329,9 @@ export default function TeamProfilePage() {
       );
     }
 
-    // ✅ Step 3 validation (leader + members)
-    if (step === 3) {
-      if (!validateLeaderInfo(currentValues)) return;
-      if (!validateMembersInfo(currentValues)) return;
-    }
-
-    // if (step === 4) {
-    //   if (!currentValues.paymentproof_url) {
-    //     toast.error("Please upload payment proof before continuing");
-    //     return;
-    //   }
-    // }
-
     setStep((s) => s + 1);
   };
+
 
   const prevStep = () => setStep((s) => s - 1);
 
@@ -589,32 +561,56 @@ export default function TeamProfilePage() {
         >
           <div className="w-full px-8 py-10">
             {/* Step Indicator */}
-            <div className="flex justify-center items-center gap-8 mb-12">
-              {[1, 2, 3, 4].map((num) => (
-                <div key={num} className="flex items-center gap-4">
+            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mb-12">
+            {[1, 2, 3, 4].map((num, idx) => (
+              <div
+                key={num}
+                className={cn(
+                  "flex items-center relative",
+                  "flex-col sm:flex-row"
+                )}
+              >
+                {/* Circle */}
+                <div
+                  className={cn(
+                    "flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg font-semibold border transition-all duration-300 z-10",
+                    step === num
+                      ? "bg-pink-500/70 border-pink-400/60 text-white scale-110"
+                      : step > num
+                      ? "bg-pink-500/50 border-pink-400/50 text-white"
+                      : "border-white/30 text-white/50"
+                  )}
+                >
+                  {num}
+                </div>
+
+                {/* === Vertical line for mobile === */}
+                {idx !== 4 && (
                   <div
                     className={cn(
-                      "flex items-center justify-center rounded-full w-12 h-12 text-lg font-semibold border transition-all duration-300",
-                      step === num
-                        ? "bg-pink-500/50 border-pink-400/50 text-white scale-110"
-                        : step > num
-                        ? "bg-pink-500/50 border-pink-400/50 text-white"
-                        : "border-white/30 text-white/50"
+                      "absolute top-full left-1/2 -translate-x-1/2 w-[2px] h-6",
+                      "bg-white/20 sm:hidden",
+                      step > num ? "bg-pink-500/50" : "bg-white/20"
                     )}
-                  >
-                    {num}
-                  </div>
-                  {num !== 4 && (
-                    <div
-                      className={cn(
-                        "h-[2px] w-16 transition-all duration-300",
-                        step >= num ? "bg-pink-500/50" : "bg-white/20"
-                      )}
-                    ></div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  ></div>
+                )}
+
+                {/* === Horizontal line for desktop === */}
+                {idx !== 3 && (
+                  <div
+                    className={cn(
+                      "hidden sm:block transition-all duration-300",
+                      "w-16 h-[2px]",
+                      step > num ? "bg-pink-500/50" : "bg-white/20",
+                      "mx-4"
+                    )}
+                  ></div>
+                )}
+              </div>
+            ))}
+          </div>
+
+
 
             {/* STEP 1 */}
             {step === 1 && (
@@ -631,6 +627,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="teamName"
                       placeholder="Enter your team name"
+                      error={errors.teamName?.message}
                       className={inputClassName}
                     />
                   </div>
@@ -641,6 +638,7 @@ export default function TeamProfilePage() {
                       register={register}
                       name="institution"
                       placeholder="Enter your institution"
+                      error={errors.institution?.message}
                       className={inputClassName}
                     />
                   </div>
@@ -726,46 +724,65 @@ export default function TeamProfilePage() {
                       name="leaderName"
                       placeholder="Leader name"
                       className={inputClassName}
+                      error={errors.leaderName?.message}
                     />
                     <Controller
                       name="leaderRole"
                       control={control}
                       render={({ field }) => (
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ""}
-                        >
-                          <SelectTrigger className="bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border border-white/10 w-full">
-                            <SelectValue placeholder="Select Role" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-                            <SelectItem
-                              value="Hustler"
-                              className="hover:bg-pink-500/30 cursor-pointer"
+                        <div className="flex flex-col w-full">
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || ""}
+                          >
+                            <SelectTrigger
+                              className={cn(
+                                "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
+                                errors.leaderRole?.message
+                                  ? "border-red-500/70 focus-visible:ring-red-500/40"
+                                  : "border-white/10"
+                              )}
                             >
-                              Hustler
-                            </SelectItem>
-                            <SelectItem
-                              value="Hipster"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hipster
-                            </SelectItem>
-                            <SelectItem
-                              value="Hacker"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hacker
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
+
+                            <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                              <SelectItem
+                                value="Hustler"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hustler
+                              </SelectItem>
+                              <SelectItem
+                                value="Hipster"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hipster
+                              </SelectItem>
+                              <SelectItem
+                                value="Hacker"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hacker
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          {errors.leaderRole?.message && (
+                            <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                              {errors.leaderRole.message}
+                            </span>
+                          )}
+                        </div>
                       )}
                     />
+
                     <EditableInput
                       register={register}
-                      name="requirementLink"
+                      name="data_url"
                       placeholder="Requirement URL"
                       className={inputClassName}
+                      error={errors.data_url?.message}
                     />
                     <EditableInput
                       register={register}
@@ -773,6 +790,8 @@ export default function TeamProfilePage() {
                       placeholder="62812345678"
                       type="tel"
                       className={inputClassName}
+                      error={errors.whatsapp_number?.message}
+
                     />
                   </CardContent>
                 </Card>
@@ -791,59 +810,85 @@ export default function TeamProfilePage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
+                        {/* === Member Name === */}
                         <EditableInput
                           register={register}
                           name={`members.${index}.name`}
                           placeholder="Member name"
                           className={inputClassName}
+                          error={errors.members?.[index]?.name?.message}
                         />
+
+                        {/* === Member Email === */}
                         <EditableInput
                           register={register}
                           name={`members.${index}.email`}
                           placeholder="Member email"
                           className={inputClassName}
+                          error={errors.members?.[index]?.email?.message}
                         />
+
+                        {/* === Requirement Link === */}
                         <EditableInput
                           register={register}
                           name={`members.${index}.requirementLink`}
                           placeholder="Requirement URL"
                           className={inputClassName}
+                          error={errors.members?.[index]?.requirementLink?.message}
                         />
+
+                        {/* === Member Role (Dropdown) === */}
                         <Controller
                           name={`members.${index}.member_role`}
                           control={control}
                           render={({ field }) => (
-                            <Select
-                              onValueChange={field.onChange}
-                              value={field.value || ""}
-                            >
-                              <SelectTrigger className="bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border border-white/10 w-full">
-                                <SelectValue placeholder="Select Role" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-                                <SelectItem
-                                  value="Hustler"
-                                  className="hover:bg-pink-500/30 cursor-pointer"
-                                >
-                                  Hustler
-                                </SelectItem>
-                                <SelectItem
-                                  value="Hipster"
-                                  className="hover:bg-pink-500/30 cursor-pointer"
-                                >
-                                  Hipster
-                                </SelectItem>
-                                <SelectItem
-                                  value="Hacker"
-                                  className="hover:bg-pink-500/30 cursor-pointer"
-                                >
-                                  Hacker
-                                </SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <div className="flex flex-col w-full">
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || ""}
+                              >
+                                <SelectTrigger className={cn(
+                                  "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
+                                  errors.members?.[index]?.member_role?.message
+                                    ? "border-red-500/70 focus-visible:ring-red-500/40"
+                                    : "border-white/10"
+                                )}>
+                                  <SelectValue placeholder="Select Role" />
+                                </SelectTrigger>
+
+                                <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                                  <SelectItem
+                                    value="Hustler"
+                                    className="hover:bg-pink-500/30 cursor-pointer"
+                                  >
+                                    Hustler
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="Hipster"
+                                    className="hover:bg-pink-500/30 cursor-pointer"
+                                  >
+                                    Hipster
+                                  </SelectItem>
+                                  <SelectItem
+                                    value="Hacker"
+                                    className="hover:bg-pink-500/30 cursor-pointer"
+                                  >
+                                    Hacker
+                                  </SelectItem>
+                                </SelectContent>
+                              </Select>
+
+                              {/* Error message for dropdown */}
+                              {errors.members?.[index]?.member_role?.message && (
+                                <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                                  {errors.members[index]?.member_role?.message}
+                                </span>
+                              )}
+                            </div>
                           )}
                         />
                       </CardContent>
+
                     </Card>
                   ))}
                 </div>
@@ -858,36 +903,45 @@ export default function TeamProfilePage() {
                     Step 4 — Payment
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-row gap-3">
-                  <div className="text-center w-fit">
+
+                <CardContent
+                  className="
+                    flex flex-col md:flex-row 
+                    items-center md:items-start 
+                    gap-6 md:gap-8
+                  "
+                >
+                  {/* === QR Image === */}
+                  <div className="w-full md:w-fit flex justify-center">
                     <Image
                       src="/qris.jpg"
                       width={320}
                       height={320}
                       alt="QR Payment"
-                      className="mx-auto rounded-lg"
+                      className="rounded-xl w-64 md:w-80 h-auto"
                     />
                   </div>
 
-                  <div className="w-3/4 flex flex-col gap-3">
-                    <p className="text-4xl font-bold text-white">
+                  {/* === Right Side (Text + Input + Copyable Link) === */}
+                  <div className="w-full md:w-3/4 flex flex-col gap-4 text-center md:text-left">
+                    <p className="text-3xl md:text-4xl font-bold text-white">
                       {institutionPrice}
                     </p>
+
                     <EditableInput
                       register={register}
                       name="paymentproof_url"
                       placeholder="https://drive.google.com/..."
                       className={inputClassName}
                       onKeyDown={(e: KeyboardEvent) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                        }
+                        if (e.key === "Enter") e.preventDefault();
                       }}
                     />
+
                     <CopyableLink
                       customLabel={
                         <div>
-                          <span className="text-white">
+                          <span className="text-white font-medium">
                             BCA ( GISELA SESARIA KUSTHIKA PUTRI )
                           </span>
                         </div>
@@ -898,6 +952,7 @@ export default function TeamProfilePage() {
                 </CardContent>
               </Card>
             )}
+
 
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center mt-12 w-full">
