@@ -13,7 +13,7 @@ export interface TeamMemberDB {
   name: string;
   email: string | null;
   github_url: string | null;
-  data_url: string | null;
+  requirementLink: string | null;
   is_leader: boolean;
   created_at?: string;
   member_role: "Hustler" | "Hipster" | "Hacker";
@@ -23,7 +23,7 @@ export interface TeamLeader {
   name: string;
   email: string;
   github_url?: string | null;
-  data_url: string;
+  requirementLink: string | null;
 }
 
 // Team approval status type

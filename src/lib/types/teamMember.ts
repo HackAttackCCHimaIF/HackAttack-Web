@@ -6,14 +6,14 @@ export default interface TeamMember {
   name: string;
   role: TeamMemberRole;
   created_at: string;
-  data_url: string;
+  requirementLink: string;
 }
 
 export interface Members {
   id: string;
   name: string;
   email: string;
-  data_url: string;
+  requirementLink: string;
   member_role?: TeamMemberRole | undefined;
   is_leader: boolean;
 }

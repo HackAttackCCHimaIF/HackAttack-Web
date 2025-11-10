@@ -45,7 +45,7 @@ import { EditableInput } from "./EditableInput";
 // =====================
 const teamMemberSchema = z.object({
   name: z.string(),
-  email: z.string().email("Invalid email").nonempty("Email is required"),
+  email: z.email("Invalid email").nonempty("Email is required"),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
@@ -57,16 +57,15 @@ const teamDataSchema = z.object({
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
-  data_url: z.url("URL berkas persyaratan wajib diisi"),
+  requirementLink: z.url("URL berkas persyaratan wajib diisi"),
   members: z
     .array(teamMemberSchema)
     .min(1, "At least one member required")
     .max(5, "Maximum 5 members allowed"),
-  paymentproof_url: z.string().url().optional(),
+  paymentproof_url: z.url(),
 });
 
 type TeamFormValues = z.infer<typeof teamDataSchema>;
-
 
 // =====================
 // Main Component
@@ -84,19 +83,26 @@ export default function TeamProfilePage() {
   const [teamMembers, setTeamMembers] = useState<Members[]>([]);
   const [editRejected, setEditRejected] = useState(false);
 
-  const { register, control, handleSubmit, getValues, reset, trigger, formState: {errors} } =
-    useForm<TeamFormValues>({
-      resolver: zodResolver(teamDataSchema),
-      defaultValues: {
-        whatsapp_number: "62",
-        members: Array(2).fill({
-          name: "",
-          email: "",
-          requirementLink: "",
-          member_role: null,
-        }),
-      },
-    });
+  const {
+    register,
+    control,
+    handleSubmit,
+    getValues,
+    reset,
+    trigger,
+    formState: { errors },
+  } = useForm<TeamFormValues>({
+    resolver: zodResolver(teamDataSchema),
+    defaultValues: {
+      whatsapp_number: "62",
+      members: Array(2).fill({
+        name: "",
+        email: "",
+        requirementLink: "",
+        member_role: null,
+      }),
+    },
+  });
 
   const { fields, replace } = useFieldArray({
     control,
@@ -105,6 +111,8 @@ export default function TeamProfilePage() {
 
   // Auth and team data fetch
   useEffect(() => {
+    let isMounted = true;
+
     const init = async () => {
       const {
         data: { session },
@@ -117,7 +125,8 @@ export default function TeamProfilePage() {
           const response = await fetch(
             `/api/team?userEmail=${encodeURIComponent(session.user.email)}`
           );
-          if (response.ok) {
+
+          if (response.ok && isMounted) {
             const result = await response.json();
             if (result.data?.teamData) {
               setTeamData(result.data.teamData);
@@ -138,32 +147,20 @@ export default function TeamProfilePage() {
         }
       }
 
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
     init();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const validateLeaderInfo = (values: TeamFormValues) => {
-    const { leaderName, leaderRole, whatsapp_number } = values;
-    if (!leaderName || !leaderRole || !whatsapp_number) {
-      toast.error("Please complete all leader information fields.");
-      return false;
-    }
-    return true;
-  };
-
-  const validateMembersInfo = (values: TeamFormValues) => {
-    for (let i = 0; i < values.members.length; i++) {
-      const member = values.members[i];
-      if (!member.name || !member.email || !member.member_role) {
-        toast.error(`Please complete all fields for Member ${i + 1}.`);
-        return false;
-      }
-    }
-    return true;
-  };
-
   const handleRejectionClick = () => {
+    setIsSubmitting(false);
+
     if (teamData && teamMembers.length > 0) {
       const leader = teamMembers.find((member) => member.is_leader);
       const regularMembers = teamMembers.filter((member) => !member.is_leader);
@@ -174,7 +171,7 @@ export default function TeamProfilePage() {
         leaderName: leader?.name || "",
         leaderRole: leader?.member_role || undefined,
         whatsapp_number: teamData.whatsapp_number?.toString() || "62",
-        requirementLink: leader?.data_url || "",
+        requirementLink: leader?.requirementLink || "",
         paymentproof_url: teamData.paymentproof_url || undefined,
       };
 
@@ -184,7 +181,7 @@ export default function TeamProfilePage() {
         regularMembers.map((member) => ({
           name: member.name || "",
           email: member.email || "",
-          requirementLink: member.data_url || "",
+          requirementLink: member.requirementLink || "",
           member_role: member.member_role || undefined,
         }))
       );
@@ -202,6 +199,8 @@ export default function TeamProfilePage() {
   };
 
   const onSubmitRejected = async () => {
+    setIsSubmitting(true);
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -226,6 +225,10 @@ export default function TeamProfilePage() {
         body: JSON.stringify({ leaderEmail, ...currentValues }),
       });
 
+      if (!submitData.ok) {
+        throw new Error("Failed to submit form");
+      }
+
       const res = await submitData.json();
 
       if (res.error) {
@@ -235,10 +238,13 @@ export default function TeamProfilePage() {
       toast.success("Form resubmitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+      window.location.reload();
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -251,6 +257,7 @@ export default function TeamProfilePage() {
     const leaderEmail = user?.email;
     if (!leaderEmail) {
       toast.error("User not authenticated.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -258,6 +265,7 @@ export default function TeamProfilePage() {
 
     if (!paymentProof) {
       toast.error("Please upload payment proof.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -269,6 +277,10 @@ export default function TeamProfilePage() {
         body: JSON.stringify({ leaderEmail, ...currentValues }),
       });
 
+      if (!submitData.ok) {
+        throw new Error("Failed to submit form");
+      }
+
       const res = await submitData.json();
 
       if (res.error) {
@@ -278,9 +290,12 @@ export default function TeamProfilePage() {
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+      window.location.reload();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -297,7 +312,7 @@ export default function TeamProfilePage() {
         "leaderName",
         "leaderRole",
         "whatsapp_number",
-        "data_url",
+        "requirementLink",
         "members",
       ];
     if (step === 4) fieldsToValidate = ["paymentproof_url"];
@@ -316,7 +331,7 @@ export default function TeamProfilePage() {
       );
     }
 
-    if (step === 2) {
+    if (step === 2 && getValues("members").length === 0) {
       replace(
         Array(memberCount)
           .fill(null)
@@ -331,7 +346,6 @@ export default function TeamProfilePage() {
 
     setStep((s) => s + 1);
   };
-
 
   const prevStep = () => setStep((s) => s - 1);
 
@@ -451,7 +465,7 @@ export default function TeamProfilePage() {
                       Requirement Document
                     </Label>
                     <a
-                      href={leader.data_url}
+                      href={leader.requirementLink}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-pink-400 hover:text-pink-300 underline"
@@ -505,21 +519,19 @@ export default function TeamProfilePage() {
                             </Label>
                             <p className="text-white">{member.member_role}</p>
                           </div>
-                          {member.data_url && (
-                            <div>
-                              <Label className="text-white/70 text-sm">
-                                Requirement
-                              </Label>
-                              <a
-                                href={member.data_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-pink-400 hover:text-pink-300 underline text-sm"
-                              >
-                                View Document
-                              </a>
-                            </div>
-                          )}
+                          <div>
+                            <Label className="text-white/70 text-sm">
+                              Requirement
+                            </Label>
+                            <a
+                              href={member.requirementLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-pink-400 hover:text-pink-300 underline text-sm"
+                            >
+                              View Document
+                            </a>
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -562,55 +574,53 @@ export default function TeamProfilePage() {
           <div className="w-full px-8 py-10">
             {/* Step Indicator */}
             <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mb-12">
-            {[1, 2, 3, 4].map((num, idx) => (
-              <div
-                key={num}
-                className={cn(
-                  "flex items-center relative",
-                  "flex-col sm:flex-row"
-                )}
-              >
-                {/* Circle */}
+              {[1, 2, 3, 4].map((num, idx) => (
                 <div
+                  key={num}
                   className={cn(
-                    "flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg font-semibold border transition-all duration-300 z-10",
-                    step === num
-                      ? "bg-pink-500/70 border-pink-400/60 text-white scale-110"
-                      : step > num
-                      ? "bg-pink-500/50 border-pink-400/50 text-white"
-                      : "border-white/30 text-white/50"
+                    "flex items-center relative",
+                    "flex-col sm:flex-row"
                   )}
                 >
-                  {num}
+                  {/* Circle */}
+                  <div
+                    className={cn(
+                      "flex items-center justify-center rounded-full w-10 h-10 sm:w-12 sm:h-12 text-base sm:text-lg font-semibold border transition-all duration-300 z-10",
+                      step === num
+                        ? "bg-pink-500/70 border-pink-400/60 text-white scale-110"
+                        : step > num
+                        ? "bg-pink-500/50 border-pink-400/50 text-white"
+                        : "border-white/30 text-white/50"
+                    )}
+                  >
+                    {num}
+                  </div>
+
+                  {/* === Vertical line for mobile === */}
+                  {idx !== 4 && (
+                    <div
+                      className={cn(
+                        "absolute top-full left-1/2 -translate-x-1/2 w-[2px] h-6",
+                        "bg-white/20 sm:hidden",
+                        step > num ? "bg-pink-500/50" : "bg-white/20"
+                      )}
+                    ></div>
+                  )}
+
+                  {/* === Horizontal line for desktop === */}
+                  {idx !== 3 && (
+                    <div
+                      className={cn(
+                        "hidden sm:block transition-all duration-300",
+                        "w-16 h-[2px]",
+                        step > num ? "bg-pink-500/50" : "bg-white/20",
+                        "mx-4"
+                      )}
+                    ></div>
+                  )}
                 </div>
-
-                {/* === Vertical line for mobile === */}
-                {idx !== 4 && (
-                  <div
-                    className={cn(
-                      "absolute top-full left-1/2 -translate-x-1/2 w-[2px] h-6",
-                      "bg-white/20 sm:hidden",
-                      step > num ? "bg-pink-500/50" : "bg-white/20"
-                    )}
-                  ></div>
-                )}
-
-                {/* === Horizontal line for desktop === */}
-                {idx !== 3 && (
-                  <div
-                    className={cn(
-                      "hidden sm:block transition-all duration-300",
-                      "w-16 h-[2px]",
-                      step > num ? "bg-pink-500/50" : "bg-white/20",
-                      "mx-4"
-                    )}
-                  ></div>
-                )}
-              </div>
-            ))}
-          </div>
-
-
+              ))}
+            </div>
 
             {/* STEP 1 */}
             {step === 1 && (
@@ -779,10 +789,10 @@ export default function TeamProfilePage() {
 
                     <EditableInput
                       register={register}
-                      name="data_url"
+                      name="requirementLink"
                       placeholder="Requirement URL"
                       className={inputClassName}
-                      error={errors.data_url?.message}
+                      error={errors.requirementLink?.message}
                     />
                     <EditableInput
                       register={register}
@@ -791,7 +801,6 @@ export default function TeamProfilePage() {
                       type="tel"
                       className={inputClassName}
                       error={errors.whatsapp_number?.message}
-
                     />
                   </CardContent>
                 </Card>
@@ -834,7 +843,9 @@ export default function TeamProfilePage() {
                           name={`members.${index}.requirementLink`}
                           placeholder="Requirement URL"
                           className={inputClassName}
-                          error={errors.members?.[index]?.requirementLink?.message}
+                          error={
+                            errors.members?.[index]?.requirementLink?.message
+                          }
                         />
 
                         {/* === Member Role (Dropdown) === */}
@@ -847,12 +858,15 @@ export default function TeamProfilePage() {
                                 onValueChange={field.onChange}
                                 value={field.value || ""}
                               >
-                                <SelectTrigger className={cn(
-                                  "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
-                                  errors.members?.[index]?.member_role?.message
-                                    ? "border-red-500/70 focus-visible:ring-red-500/40"
-                                    : "border-white/10"
-                                )}>
+                                <SelectTrigger
+                                  className={cn(
+                                    "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
+                                    errors.members?.[index]?.member_role
+                                      ?.message
+                                      ? "border-red-500/70 focus-visible:ring-red-500/40"
+                                      : "border-white/10"
+                                  )}
+                                >
                                   <SelectValue placeholder="Select Role" />
                                 </SelectTrigger>
 
@@ -879,7 +893,8 @@ export default function TeamProfilePage() {
                               </Select>
 
                               {/* Error message for dropdown */}
-                              {errors.members?.[index]?.member_role?.message && (
+                              {errors.members?.[index]?.member_role
+                                ?.message && (
                                 <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
                                   {errors.members[index]?.member_role?.message}
                                 </span>
@@ -888,7 +903,6 @@ export default function TeamProfilePage() {
                           )}
                         />
                       </CardContent>
-
                     </Card>
                   ))}
                 </div>
@@ -952,7 +966,6 @@ export default function TeamProfilePage() {
                 </CardContent>
               </Card>
             )}
-
 
             {/* Navigation Buttons */}
             <div className="flex justify-between items-center mt-12 w-full">

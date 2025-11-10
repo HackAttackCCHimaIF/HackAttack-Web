@@ -11,7 +11,6 @@ export async function POST(req: Request) {
       institution,
       leaderName,
       requirementLink,
-      data_url,
       leaderRole,
       whatsapp_number,
       members,
@@ -70,7 +69,7 @@ export async function POST(req: Request) {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
-        data_url: requirementLink || data_url,
+        requirementLink: requirementLink,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -78,7 +77,7 @@ export async function POST(req: Request) {
         team_id: teamData.id,
         name: member.name,
         email: member.email,
-        data_url: member.data_url || requirementLink || data_url,
+        requirementLink: member.requirementLink,
         member_role: member.member_role,
         is_leader: false,
       })),
@@ -208,6 +207,7 @@ export async function PUT(req: Request) {
         .upsert({
           email: leaderEmail,
           name: leaderName,
+          updated_at: new Date(),
         })
         .select()
         .single();
@@ -233,6 +233,7 @@ export async function PUT(req: Request) {
         whatsapp_number: whatsapp_number,
         paymentproof_url: paymentproof_url,
         approvalstatus: "Resubmitted",
+        updated_at: new Date(),
       })
       .eq("created_by", userData?.id)
       .select()
@@ -249,7 +250,7 @@ export async function PUT(req: Request) {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
-        data_url: requirementLink,
+        requirementLink: requirementLink,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -257,7 +258,7 @@ export async function PUT(req: Request) {
         team_id: teamData.id,
         name: member.name,
         email: member.email,
-        data_url: member.data_url,
+        requirementLink: member.requirementLink,
         member_role: member.member_role,
         is_leader: false,
       })),
