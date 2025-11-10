@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import UnderMaintenance from "./_components/UnderMaintenance";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -24,6 +25,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const { reset, setUser: setStoreUser } = useUserStore();
   const router = useRouter();
+
+  const MAINTENANCE_MODE = false; 
 
   useEffect(() => {
     const getUser = async () => {
@@ -49,7 +52,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
 
-      // Update user store on auth state change
       if (session?.user) {
         setStoreUser(session.user);
       } else {
@@ -81,6 +83,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (MAINTENANCE_MODE) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-black">
+        <UnderMaintenance />
       </div>
     );
   }
