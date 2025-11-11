@@ -26,7 +26,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { reset, setUser: setStoreUser } = useUserStore();
   const router = useRouter();
 
-  const MAINTENANCE_MODE = true; 
+  const MAINTENANCE_MODE = false; 
 
   useEffect(() => {
     const getUser = async () => {
@@ -71,7 +71,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const handleConfirmSignOut = async () => {
     await supabase.auth.signOut();
     reset();
-    setUser(null);
     router.push("/");
     setShowLogoutDialog(false);
   };

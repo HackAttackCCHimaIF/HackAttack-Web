@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useUserStore } from "@/lib/stores/userStore";
-import { NotificationDialog } from "./NotificationDialog";
 
 export const HeaderDashboard = ({
   topText,
@@ -14,8 +13,7 @@ export const HeaderDashboard = ({
   const { user } = useUserStore();
 
   const isLoggedIn = !!user;
-  const displayName =
-    user?.user_metadata?.full_name || user?.email || "User";
+  const displayName = user?.user_metadata?.full_name || user?.email || "User";
 
   return (
     <div className="py-4 px-4 flex justify-between items-center">
@@ -34,8 +32,6 @@ export const HeaderDashboard = ({
       <div className="flex items-center gap-1 md:gap-4">
         {isLoggedIn ? (
           <>
-            <NotificationDialog />
-
             <div className="flex items-center gap-3 rounded-full px-4 py-2 text-white">
               <div className="flex-col text-right lg:flex hidden">
                 <p className="text-xs text-white/60">Selamat Datang,</p>

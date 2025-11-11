@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Handle Login Via Google
   const handleGoogleSignIn = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -33,10 +34,12 @@ export default function RegisterPage() {
     if (error) toast.error(error.message);
   };
 
+  // Handle Register Via Username and Email
   const handleRegister = async () => {
     setLoading(true);
 
-    localStorage.setItem("pending_username", username);
+    localStorage.setItem("username", username);
+    localStorage.setItem("email", email);
 
     const { error } = await supabase.auth.signInWithOtp({
       email,
@@ -47,7 +50,6 @@ export default function RegisterPage() {
 
     if (error) {
       toast.error(error.message);
-      localStorage.removeItem("pending_username");
     } else {
       toast.success("Check your email for the verification link!");
     }
@@ -248,7 +250,7 @@ export default function RegisterPage() {
           priority
         />
 
-         <Image
+        <Image
           src="/auth/merah.png"
           alt="Garuda"
           width={1200}

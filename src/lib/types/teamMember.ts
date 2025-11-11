@@ -4,11 +4,16 @@ export default interface TeamMember {
   id: string;
   team_id: string;
   name: string;
-  nim: string;
   role: TeamMemberRole;
-  cv_link: string;
-  porto_link: string;
-  ktm_link: string;
-  twibbon_link: string;
   created_at: string;
+  requirementLink: string;
+}
+
+export interface Members {
+  id: string;
+  name: string;
+  email: string;
+  requirementLink: string;
+  member_role?: TeamMemberRole | undefined;
+  is_leader: boolean;
 }
