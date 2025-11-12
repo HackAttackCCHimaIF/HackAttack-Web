@@ -238,6 +238,8 @@ export default function TeamProfilePage() {
       toast.success("Form resubmitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+      window.location.reload();
+
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -288,6 +290,7 @@ export default function TeamProfilePage() {
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+      window.location.reload();
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -360,27 +363,33 @@ export default function TeamProfilePage() {
 
       <div className="flex h-full items-center justify-center">
         <div className="w-full max-w-7xl">
-          {/* Team Information */}
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
-            <CardHeader className="grid grid-cols-2 w-full">
-              <CardTitle className="text-white text-2xl font-semibold justify-self-start">
-                Team Information
-              </CardTitle>
+          <div className="w-full px-8 py-10">
+            {/* Team Status Badge */}
+            <div className="flex justify-center mb-8">
               <button
                 disabled={teamData?.approvalstatus !== "Rejected"}
                 onClick={() => handleRejectionClick()}
                 className={cn(
-                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors justify-self-end",
+                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors",
                   teamData?.approvalstatus === "Accepted"
                     ? "bg-green-600 text-white cursor-default"
                     : teamData?.approvalstatus === "Rejected"
-                    ? "bg-red-600 hover:bg-red-800 text-white"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
                     : "bg-blue-600 text-white cursor-default",
                   teamData?.approvalstatus !== "Rejected"
                 )}
               >
                 Status: {teamData?.approvalstatus}
               </button>
+            </div>
+          </div>
+
+          {/* Team Information */}
+          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
+            <CardHeader>
+              <CardTitle className="text-white text-2xl font-semibold">
+                Team Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
