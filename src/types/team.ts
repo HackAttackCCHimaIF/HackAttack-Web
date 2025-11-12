@@ -2,8 +2,8 @@
 export interface TeamMember {
   name: string;
   email: string;
-  github?: string;
   requirementLink: string;
+  github_url: string;
   member_role?: "Hustler" | "Hipster" | "Hacker";
 }
 
@@ -22,7 +22,7 @@ export interface TeamMemberDB {
 export interface TeamLeader {
   name: string;
   email: string;
-  github_url?: string | null;
+  github_url: string | null;
   requirementLink: string | null;
 }
 

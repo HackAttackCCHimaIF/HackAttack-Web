@@ -48,6 +48,7 @@ const teamMemberSchema = z.object({
   email: z.email("Invalid email").nonempty("Email is required"),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
 }) satisfies z.ZodType<TeamMember>;
 
 // Separate schema for member data only
@@ -58,6 +59,7 @@ const teamDataSchema = z.object({
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
   members: z
     .array(teamMemberSchema)
     .min(1, "At least one member required")
@@ -76,7 +78,7 @@ export default function TeamProfilePage() {
   const [, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [institutionPrice, setInstitutionPrice] = useState<string | null>(null);
-  const [, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setSubmittedData] = useState<TeamFormValues | null>(null);
   const [teamData, setTeamData] = useState<Team | null>(null);
@@ -100,6 +102,7 @@ export default function TeamProfilePage() {
         email: "",
         requirementLink: "",
         member_role: null,
+        github_url: "",
       }),
     },
   });
@@ -158,6 +161,22 @@ export default function TeamProfilePage() {
     };
   }, []);
 
+  const refreshTeamData = async (leaderEmail: string) => {
+    try {
+      const response = await fetch(
+        `/api/team?userEmail=${encodeURIComponent(leaderEmail)}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setTeamData(result.data.teamData);
+        setTeamMembers(result.data.membersData || []);
+        setEditRejected(false);
+      }
+    } catch (error) {
+      console.error("Error refreshing team data:", error);
+    }
+  };
+
   const handleRejectionClick = () => {
     setIsSubmitting(false);
 
@@ -183,6 +202,7 @@ export default function TeamProfilePage() {
           email: member.email || "",
           requirementLink: member.requirementLink || "",
           member_role: member.member_role || undefined,
+          github_url: member.github_url,
         }))
       );
 
@@ -207,6 +227,8 @@ export default function TeamProfilePage() {
     const leaderEmail = user?.email;
     if (!leaderEmail) {
       toast.error("User not authenticated.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -214,6 +236,8 @@ export default function TeamProfilePage() {
 
     if (!paymentProof) {
       toast.error("Please upload payment proof.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -238,8 +262,8 @@ export default function TeamProfilePage() {
       toast.success("Form resubmitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
-      window.location.reload();
 
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -290,7 +314,8 @@ export default function TeamProfilePage() {
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
-      window.location.reload();
+
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -338,6 +363,7 @@ export default function TeamProfilePage() {
           .map(() => ({
             name: "",
             email: "",
+            github_url: "",
             requirementLink: "",
             member_role: "Hustler",
           }))
@@ -461,6 +487,17 @@ export default function TeamProfilePage() {
                     <p className="text-white text-lg">{leader.member_role}</p>
                   </div>
                   <div>
+                    <Label className="text-white/70 text-sm">Github URL</Label>
+                    <a
+                      href={leader.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pink-400 hover:text-pink-300 underline"
+                    >
+                      View Github Profile
+                    </a>
+                  </div>{" "}
+                  <div>
                     <Label className="text-white/70 text-sm">
                       Requirement Document
                     </Label>
@@ -521,6 +558,19 @@ export default function TeamProfilePage() {
                           </div>
                           <div>
                             <Label className="text-white/70 text-sm">
+                              Github
+                            </Label>
+                            <a
+                              href={member.github_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-pink-400 hover:text-pink-300 underline text-sm"
+                            >
+                              View Github Profile
+                            </a>
+                          </div>
+                          <div>
+                            <Label className="text-white/70 text-sm">
                               Requirement
                             </Label>
                             <a
@@ -546,11 +596,12 @@ export default function TeamProfilePage() {
 
   // Conditional rendering based on approval status and edit state
   const shouldShowReadOnly =
-    teamData?.approvalstatus &&
-    ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
-      teamData.approvalstatus
-    ) &&
-    !editRejected;
+    (teamData?.approvalstatus &&
+      ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
+        teamData.approvalstatus
+      ) &&
+      !editRejected) ||
+    isSubmitted;
 
   // Show read-only view if team is submitted/accepted and not in edit mode
   if (shouldShowReadOnly) {
@@ -786,7 +837,15 @@ export default function TeamProfilePage() {
                         </div>
                       )}
                     />
-
+                  </CardContent>
+                  <CardContent className="grid grid-cols-3 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="github_url"
+                      placeholder="Github URL"
+                      className={inputClassName}
+                      error={errors.github_url?.message}
+                    />
                     <EditableInput
                       register={register}
                       name="requirementLink"
@@ -846,6 +905,15 @@ export default function TeamProfilePage() {
                           error={
                             errors.members?.[index]?.requirementLink?.message
                           }
+                        />
+
+                        {/* === Github URL === */}
+                        <EditableInput
+                          register={register}
+                          name={`members.${index}.github_url`}
+                          placeholder="Github URL"
+                          className={inputClassName}
+                          error={errors.members?.[index]?.github_url?.message}
                         />
 
                         {/* === Member Role (Dropdown) === */}
