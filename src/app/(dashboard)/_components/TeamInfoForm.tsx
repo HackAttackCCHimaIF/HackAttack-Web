@@ -46,7 +46,6 @@ import { EditableInput } from "./EditableInput";
 const teamMemberSchema = z.object({
   name: z.string(),
   email: z.email("Invalid email").nonempty("Email is required"),
-  github_url: z.string().optional(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
@@ -57,14 +56,13 @@ const teamDataSchema = z.object({
   institution: z.string().min(1, "Institution is required"),
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-  github_url: z.string().optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
   members: z
     .array(teamMemberSchema)
     .min(1, "At least one member required")
     .max(5, "Maximum 5 members allowed"),
-  paymentproof_url: z.string(),
+  paymentproof_url: z.url(),
 });
 
 type TeamFormValues = z.infer<typeof teamDataSchema>;
@@ -93,25 +91,17 @@ export default function TeamProfilePage() {
     reset,
     trigger,
     formState: { errors },
-      } = useForm<TeamFormValues>({
-        resolver: zodResolver(teamDataSchema),
-        defaultValues: {
-        teamName: "",
-        institution: "",
-        leaderName: "",
-        leaderRole: undefined,
-        github_url: "", 
-        whatsapp_number: "62",
+  } = useForm<TeamFormValues>({
+    resolver: zodResolver(teamDataSchema),
+    defaultValues: {
+      whatsapp_number: "62",
+      members: Array(2).fill({
+        name: "",
+        email: "",
         requirementLink: "",
-        members: Array(2).fill({
-          name: "",
-          email: "",
-          github_url: "", 
-          requirementLink: "",
-          member_role: undefined,
-        }),
-        paymentproof_url: "",
-      },
+        member_role: null,
+      }),
+    },
   });
 
   const { fields, replace } = useFieldArray({
@@ -137,38 +127,21 @@ export default function TeamProfilePage() {
           );
 
           if (response.ok && isMounted) {
-  const result = await response.json();
+            const result = await response.json();
+            if (result.data?.teamData) {
+              setTeamData(result.data.teamData);
+              setTeamMembers(result.data.membersData || []);
 
-  console.log("%c[API RESPONSE] /api/team →", "color:#00d9ff;font-weight:bold;", result);
-
-  if (result.data?.teamData) {
-    console.log("%c✅ TEAM DATA FETCHED", "color:#4ade80;font-weight:bold;", result.data.teamData);
-    console.log("%c👥 MEMBERS DATA:", "color:#facc15;font-weight:bold;", result.data.membersData);
-
-    setTeamData(result.data.teamData);
-    setTeamMembers(result.data.membersData || []);
-
-    // Debug approval status
-    console.log(
-      "%c🔎 APPROVAL STATUS:",
-      "color:#a78bfa;font-weight:bold;",
-      result.data.teamData.approvalstatus
-    );
-
-    if (
-      result.data.teamData.approvalstatus &&
-      ["Approved", "Rejected", "Submitted"].includes(result.data.teamData.approvalstatus)
-    ) {
-      setIsSubmitted(true);
-    }
-    else {
-      console.log("%c⚠️ approvalstatus not matched:", "color:orange;", result.data.teamData.approvalstatus);
-    }
-  } else {
-    console.log("%c❌ No team data found in API result", "color:red;font-weight:bold;", result);
-  }
-}
-
+              // If the team already submitted, set as submitted
+              if (
+                result.data.teamData.approvalstatus.includes("Approved") ||
+                result.data.teamData.approvalstatus.includes("Rejected") ||
+                result.data.teamData.approvalstatus.includes("Submitted")
+              ) {
+                setIsSubmitted(true);
+              }
+            }
+          }
         } catch (error) {
           console.error("Error fetching team data:", error);
         }
@@ -386,7 +359,7 @@ export default function TeamProfilePage() {
       <HeaderDashboard topText="Team" bottomText="Information" />
 
       <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-7xl px-3">
+        <div className="w-full max-w-7xl">
           {/* Team Information */}
           <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
             <CardHeader className="grid grid-cols-2 w-full">
@@ -719,125 +692,109 @@ export default function TeamProfilePage() {
             {step === 3 && (
               <div className="space-y-8 w-full">
                 <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-2 text-white text-lg sm:text-xl flex-wrap">
-                    <div className="flex items-center gap-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white text-xl">
                       <UserIcon className="size-6 text-pink-500/50" />
-                      <span>Leader Information</span>
-                    </div>
-
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            className="text-white/60 hover:text-white transition-colors"
+                      Leader Information
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-white/60 hover:text-white"
+                            >
+                              <InfoIcon className="size-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="max-w-xs text-sm"
                           >
-                            <InfoIcon className="size-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="max-w-xs text-sm"
-                        >
-                          <p>
-                            Pemberitahuan terkait data Tim akan dikirimkan ke
-                            email yang digunakan untuk Login/Signin.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </CardTitle>
-                </CardHeader>
-
-                {/* Grid Responsive */}
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
-                  <EditableInput
-                    register={register}
-                    name="leaderName"
-                    placeholder="Leader name"
-                    className={inputClassName}
-                    error={errors.leaderName?.message}
-                  />
-
-                  <Controller
-                    name="leaderRole"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="flex flex-col w-full">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ""}
-                        >
-                          <SelectTrigger
-                            className={cn(
-                              "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
-                              errors.leaderRole?.message
-                                ? "border-red-500/70 focus-visible:ring-red-500/40"
-                                : "border-white/10"
-                            )}
+                            <p>
+                              Pemberitahuan terkait data Tim akan dikirimkan ke
+                              email yang digunakan untuk Login/Signin.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="leaderName"
+                      placeholder="Leader name"
+                      className={inputClassName}
+                      error={errors.leaderName?.message}
+                    />
+                    <Controller
+                      name="leaderRole"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="flex flex-col w-full">
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || ""}
                           >
-                            <SelectValue placeholder="Select Role" />
-                          </SelectTrigger>
-
-                          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-                            <SelectItem
-                              value="Hustler"
-                              className="hover:bg-pink-500/30 cursor-pointer"
+                            <SelectTrigger
+                              className={cn(
+                                "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
+                                errors.leaderRole?.message
+                                  ? "border-red-500/70 focus-visible:ring-red-500/40"
+                                  : "border-white/10"
+                              )}
                             >
-                              Hustler
-                            </SelectItem>
-                            <SelectItem
-                              value="Hipster"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hipster
-                            </SelectItem>
-                            <SelectItem
-                              value="Hacker"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hacker
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
 
-                        {errors.leaderRole?.message && (
-                          <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
-                            {errors.leaderRole.message}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  />
+                            <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                              <SelectItem
+                                value="Hustler"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hustler
+                              </SelectItem>
+                              <SelectItem
+                                value="Hipster"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hipster
+                              </SelectItem>
+                              <SelectItem
+                                value="Hacker"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hacker
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
 
-                  <EditableInput
-                    register={register}
-                    name="github_url"
-                    placeholder="Github URL (optional)"
-                    className={inputClassName}
-                    error={errors.github_url?.message}
-                  />
+                          {errors.leaderRole?.message && (
+                            <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                              {errors.leaderRole.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
 
-                  <EditableInput
-                    register={register}
-                    name="requirementLink"
-                    placeholder="Requirement URL"
-                    className={inputClassName}
-                    error={errors.requirementLink?.message}
-                  />
-
-                  <EditableInput
-                    register={register}
-                    name="whatsapp_number"
-                    placeholder="62812345678"
-                    type="tel"
-                    className={inputClassName}
-                    error={errors.whatsapp_number?.message}
-                  />
-                </CardContent>
-              </Card>
-
+                    <EditableInput
+                      register={register}
+                      name="requirementLink"
+                      placeholder="Requirement URL"
+                      className={inputClassName}
+                      error={errors.requirementLink?.message}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="whatsapp_number"
+                      placeholder="62812345678"
+                      type="tel"
+                      className={inputClassName}
+                      error={errors.whatsapp_number?.message}
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Members */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
@@ -869,15 +826,6 @@ export default function TeamProfilePage() {
                           placeholder="Member email"
                           className={inputClassName}
                           error={errors.members?.[index]?.email?.message}
-                        />
-
-                        {/* === Member Github === */}
-                        <EditableInput
-                          register={register}
-                          name={`members.${index}.github_url`}
-                          placeholder="Member github"
-                          className={inputClassName}
-                          error={errors.members?.[index]?.github_url?.message}
                         />
 
                         {/* === Requirement Link === */}
