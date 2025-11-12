@@ -46,7 +46,7 @@ import { EditableInput } from "./EditableInput";
 const teamMemberSchema = z.object({
   name: z.string(),
   email: z.email("Invalid email").nonempty("Email is required"),
-  github: z.string().optional(),
+  github_url: z.string().optional(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
 }) satisfies z.ZodType<TeamMember>;
@@ -57,7 +57,7 @@ const teamDataSchema = z.object({
   institution: z.string().min(1, "Institution is required"),
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-  leaderGithub: z.string().optional(),
+  github_url: z.string().optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
   members: z
@@ -100,13 +100,13 @@ export default function TeamProfilePage() {
         institution: "",
         leaderName: "",
         leaderRole: undefined,
-        leaderGithub: "", 
+        github_url: "", 
         whatsapp_number: "62",
         requirementLink: "",
         members: Array(2).fill({
           name: "",
           email: "",
-          github: "", 
+          github_url: "", 
           requirementLink: "",
           member_role: undefined,
         }),
@@ -796,10 +796,10 @@ export default function TeamProfilePage() {
 
                   <EditableInput
                     register={register}
-                    name="leaderGithub"
+                    name="github_url"
                     placeholder="Github URL (optional)"
                     className={inputClassName}
-                    error={errors.leaderGithub?.message}
+                    error={errors.github_url?.message}
                   />
 
                   <EditableInput
@@ -857,10 +857,10 @@ export default function TeamProfilePage() {
                         {/* === Member Github === */}
                         <EditableInput
                           register={register}
-                          name={`members.${index}.github`}
+                          name={`members.${index}.github_url`}
                           placeholder="Member github"
                           className={inputClassName}
-                          error={errors.members?.[index]?.github?.message}
+                          error={errors.members?.[index]?.github_url?.message}
                         />
 
                         {/* === Requirement Link === */}
