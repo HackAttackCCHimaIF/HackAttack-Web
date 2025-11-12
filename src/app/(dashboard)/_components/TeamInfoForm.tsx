@@ -39,6 +39,7 @@ import {
 import Team from "@/lib/types/team";
 import { Members } from "@/lib/types/teamMember";
 import { EditableInput } from "./EditableInput";
+import { LinkableField } from "@/components/LinkableField";
 
 // =====================
 // Schema
@@ -365,11 +366,11 @@ export default function TeamProfilePage() {
 
   // Read-only team information display if team data existed
   const renderReadOnlyTeamInfo = () => (
-    <div className="overflow-y-auto w-full min-h-screen text-white">
+    <div className="overflow-y-auto w-full min-h-screen text-white pt-12 md:pt-0">
       <HeaderDashboard topText="Team" bottomText="Information" />
 
       <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-7xl">
+        <div className="w-full max-w-7xl px-3">
           {/* Team Information */}
           <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
             <CardHeader className="grid grid-cols-2 w-full">
@@ -559,7 +560,7 @@ export default function TeamProfilePage() {
   }
 
   return (
-    <div className="overflow-y-auto w-full min-h-screen text-white">
+    <div className="overflow-y-auto w-full min-h-screen text-white pt-12 md:pt-0">
       <HeaderDashboard topText="Team" bottomText="Registration" />
 
       <div className="flex h-full items-center justify-center">
@@ -734,74 +735,94 @@ export default function TeamProfilePage() {
                 </CardHeader>
 
                 {/* Grid Responsive */}
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-3">
+                <CardContent
+  className="
+    grid grid-cols-1 sm:grid-cols-2 
+    gap-4 sm:gap-5 
+    items-start
+  "
+>
+  {/* === Leader Name === */}
+  <EditableInput
+    register={register}
+    name="leaderName"
+    placeholder="Leader name"
+    className={inputClassName}
+    error={errors.leaderName?.message}
+  />
+
+  {/* === Leader Role (kanan atas) === */}
+  <Controller
+    name="leaderRole"
+    control={control}
+    render={({ field }) => (
+      <div className="flex flex-col w-full">
+        <Select
+          onValueChange={field.onChange}
+          value={field.value || ""}
+        >
+          <SelectTrigger
+            className={cn(
+              "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
+              errors.leaderRole?.message
+                ? "border-red-500/70 focus-visible:ring-red-500/40"
+                : "border-white/10"
+            )}
+          >
+            <SelectValue placeholder="Select Role" />
+          </SelectTrigger>
+
+          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+            <SelectItem
+              value="Hustler"
+              className="hover:bg-pink-500/30 cursor-pointer"
+            >
+              Hustler
+            </SelectItem>
+            <SelectItem
+              value="Hipster"
+              className="hover:bg-pink-500/30 cursor-pointer"
+            >
+              Hipster
+            </SelectItem>
+            <SelectItem
+              value="Hacker"
+              className="hover:bg-pink-500/30 cursor-pointer"
+            >
+              Hacker
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
+        {errors.leaderRole?.message && (
+          <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+            {errors.leaderRole.message}
+          </span>
+        )}
+        </div>
+        )}
+      />
+
+                  {/* === Github URL (kiri tengah) === */}
                   <EditableInput
                     register={register}
-                    name="leaderName"
-                    placeholder="Leader name"
-                    className={inputClassName}
-                    error={errors.leaderName?.message}
-                  />
-
-                  <Controller
-                    name="leaderRole"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="flex flex-col w-full">
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value || ""}
-                        >
-                          <SelectTrigger
-                            className={cn(
-                              "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
-                              errors.leaderRole?.message
-                                ? "border-red-500/70 focus-visible:ring-red-500/40"
-                                : "border-white/10"
-                            )}
-                          >
-                            <SelectValue placeholder="Select Role" />
-                          </SelectTrigger>
-
-                          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-                            <SelectItem
-                              value="Hustler"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hustler
-                            </SelectItem>
-                            <SelectItem
-                              value="Hipster"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hipster
-                            </SelectItem>
-                            <SelectItem
-                              value="Hacker"
-                              className="hover:bg-pink-500/30 cursor-pointer"
-                            >
-                              Hacker
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-
-                        {errors.leaderRole?.message && (
-                          <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
-                            {errors.leaderRole.message}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  />
-
-                  <EditableInput
-                    register={register}
-                    name="leaderGithub"
+                    name="github_url"
                     placeholder="Github URL (optional)"
                     className={inputClassName}
                     error={errors.leaderGithub?.message}
                   />
 
+                  {/* === Publication Materials (kanan tengah, tapi span 2 baris di sm+) === */}
+                  <div className="flex flex-col gap-1 sm:row-span-2 sm:self-stretch">
+                    <LinkableField
+                      label="Publication Materials"
+                      openInNewTab
+                      href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
+                      className="bg-white/10 hover:bg-white/20 border border-white/10 rounded-full px-5 py-4 text-white transition-all duration-200 truncate flex items-center justify-between"
+                    />
+                  </div>
+
+                  {/* === Requirement URL (kiri bawah) === */}
                   <EditableInput
                     register={register}
                     name="requirementLink"
@@ -810,6 +831,7 @@ export default function TeamProfilePage() {
                     error={errors.requirementLink?.message}
                   />
 
+                  {/* === WhatsApp Number (kanan bawah) === */}
                   <EditableInput
                     register={register}
                     name="whatsapp_number"
@@ -862,6 +884,15 @@ export default function TeamProfilePage() {
                           className={inputClassName}
                           error={errors.members?.[index]?.github?.message}
                         />
+
+                        <div className="flex flex-col gap-1 sm:row-span-2 sm:self-stretch">
+                          <LinkableField
+                            label="Publication Materials"
+                            openInNewTab
+                            href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
+                            className="bg-white/10 hover:bg-white/20 border border-white/10 rounded-full px-5 py-4 text-white transition-all duration-200 truncate flex items-center justify-between"
+                          />
+                        </div>
 
                         {/* === Requirement Link === */}
                         <EditableInput
