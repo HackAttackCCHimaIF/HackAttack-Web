@@ -11,14 +11,13 @@ export async function POST(req: Request) {
       institution,
       leaderName,
       requirementLink,
+      github_url,
       leaderRole,
       whatsapp_number,
       members,
       paymentproof_url,
-      github_url,
     } = body;
 
-    
     // Check if leaderEmail exists in Users table
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
@@ -31,8 +30,9 @@ export async function POST(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          name: leaderName,
-        }, { onConflict: "email" })
+          username: leaderName,
+          role: "TeamLeader",
+        })
         .select()
         .single();
 
@@ -72,7 +72,6 @@ export async function POST(req: Request) {
         name: leaderName,
         email: leaderEmail,
         requirementLink: requirementLink,
-        github_url: github_url,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -81,7 +80,6 @@ export async function POST(req: Request) {
         name: member.name,
         email: member.email,
         requirementLink: member.requirementLink,
-        github_url: member.github_url,
         member_role: member.member_role,
         is_leader: false,
       })),
@@ -192,8 +190,8 @@ export async function PUT(req: Request) {
       institution,
       leaderName,
       requirementLink,
-      leaderRole,
       github_url,
+      leaderRole,
       whatsapp_number,
       members,
       paymentproof_url,
@@ -256,7 +254,6 @@ export async function PUT(req: Request) {
         name: leaderName,
         email: leaderEmail,
         requirementLink: requirementLink,
-        github_url: github_url,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -265,7 +262,6 @@ export async function PUT(req: Request) {
         name: member.name,
         email: member.email,
         requirementLink: member.requirementLink,
-        github_url: member.github_url,
         member_role: member.member_role,
         is_leader: false,
       })),

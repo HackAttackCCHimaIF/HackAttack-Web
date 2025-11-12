@@ -7,7 +7,7 @@ export default interface TeamMember {
   role: TeamMemberRole;
   created_at: string;
   requirementLink: string;
-  github_url?: string;
+  github_url: string;
 }
 
 export interface Members {
@@ -15,7 +15,7 @@ export interface Members {
   name: string;
   email: string;
   requirementLink: string;
+  github_url: string;
   member_role?: TeamMemberRole | undefined;
   is_leader: boolean;
-  github_url?: string
 }
