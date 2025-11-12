@@ -15,6 +15,7 @@ export async function POST(req: Request) {
       whatsapp_number,
       members,
       paymentproof_url,
+      github_url,
     } = body;
 
     // Check if leaderEmail exists in Users table
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
         name: leaderName,
         email: leaderEmail,
         requirementLink: requirementLink,
+        github_url: github_url,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -78,6 +80,7 @@ export async function POST(req: Request) {
         name: member.name,
         email: member.email,
         requirementLink: member.requirementLink,
+        github_url: member.github_url,
         member_role: member.member_role,
         is_leader: false,
       })),
@@ -189,6 +192,7 @@ export async function PUT(req: Request) {
       leaderName,
       requirementLink,
       leaderRole,
+      github_url,
       whatsapp_number,
       members,
       paymentproof_url,
@@ -251,6 +255,7 @@ export async function PUT(req: Request) {
         name: leaderName,
         email: leaderEmail,
         requirementLink: requirementLink,
+        github_url: github_url,
         member_role: leaderRole,
         is_leader: true,
       },
@@ -259,6 +264,7 @@ export async function PUT(req: Request) {
         name: member.name,
         email: member.email,
         requirementLink: member.requirementLink,
+        github_url: member.github_url,
         member_role: member.member_role,
         is_leader: false,
       })),
