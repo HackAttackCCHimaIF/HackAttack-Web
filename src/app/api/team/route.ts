@@ -88,23 +88,54 @@ export async function POST(req: Request) {
     ];
 
     // --- Upsert all members ---
-    const { data: membersData, error: membersError } = await supabaseServer
-      .from("TeamMember")
-      .upsert(allMembers);
+    try {
+      // --- Hapus semua member lama ---
+      const { error: deleteError } = await supabaseServer
+        .from("TeamMember")
+        .delete()
+        .eq("team_id", teamData.id);
 
-    if (membersError) {
-      console.error("Failed add Member:", membersError);
-      return NextResponse.json({ error: membersError.message }, { status: 400 });
+      if (deleteError) {
+        console.error("Failed to delete old members:", deleteError);
+        return NextResponse.json(
+          { error: deleteError.message },
+          { status: 400 }
+        );
+      }
+
+      // --- Insert member baru ---
+      const { data: membersData, error: membersError } = await supabaseServer
+        .from("TeamMember")
+        .insert(allMembers)
+        .select();
+
+      if (membersError) {
+        console.error("Failed add Member:", membersError);
+        return NextResponse.json(
+          { error: membersError.message },
+          { status: 400 }
+        );
+      }
+
+      // --- Success response ---
+      return NextResponse.json({
+        status: 201,
+        data: { teamData, membersData },
+        message: "Team and members created successfully",
+      });
+    } catch (error) {
+      console.error("API error:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
     }
-
-    return NextResponse.json({
-      status: 201,
-      data: { teamData, membersData },
-      message: "Team and members created successfully",
-    });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
