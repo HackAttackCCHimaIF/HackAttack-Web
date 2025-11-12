@@ -2,17 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  User,
-  BookMarked,
-  Send,
-  LogOut,
-  Code2,
-  Menu,
-  X,
-  LogIn,
-  UserPlus,
-} from "lucide-react";
+import { User, FileText, BookMarked, Send, LogOut, Code2, Menu, X, LogIn, UserPlus } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utility/utils";
@@ -30,22 +20,10 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
 
   const menuItems = [
     { label: "Profile", href: "/dashboard/peserta", icon: <User size={18} /> },
-    {
-      label: "Theme",
-      href: "/dashboard/peserta/theme",
-      icon: <Code2 size={18} />,
-    },
-    // { label: "Guide Book", href: "/dashboard/peserta/guide-book", icon: <FileText size={18} /> },
-    {
-      label: "Rule Book",
-      href: "/dashboard/peserta/rule-book",
-      icon: <BookMarked size={18} />,
-    },
-    {
-      label: "Submission",
-      href: "/dashboard/peserta/submission",
-      icon: <Send size={18} />,
-    },
+    { label: "Theme", href: "/dashboard/peserta/theme", icon: <Code2 size={18} /> },
+    { label: "Guide Book", href: "/dashboard/peserta/guide-book", icon: <FileText size={18} /> },
+    { label: "Rule Book", href: "/dashboard/peserta/rule-book", icon: <BookMarked size={18} /> },
+    { label: "Submission", href: "/dashboard/peserta/submission", icon: <Send size={18} /> },
   ];
 
   return (
@@ -70,13 +48,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
         {/* Logo & Navigation */}
         <div className="flex flex-col h-full items-start pt-12 gap-12 text-white text-xl font-bold">
           <div className="flex flex-row items-center px-6">
-            <Image
-              src="/dashboard/logo.svg"
-              alt="Logo"
-              className="w-9 h-9"
-              width={36}
-              height={36}
-            />
+            <Image src="/dashboard/logo.svg" alt="Logo" className="w-9 h-9" width={36} height={36} />
             <div className="leading-none ml-2">
               <p>HACKATTACK</p>
               <p className="text-sm">2025</p>
@@ -89,9 +61,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                 key={item.label}
                 href={item.href}
                 className={`flex items-center gap-3 p-3 pb-2 pl-6 rounded-lg text-gray-300 hover:text-white relative transition
-                  ${
-                    pathname === item.href ? "text-[#EF4B72] font-semibold" : ""
-                  }`}
+                  ${pathname === item.href ? "text-[#EF4B72] font-semibold" : ""}`}
               >
                 {pathname === item.href && (
                   <div className="absolute left-1 top-0 h-full w-1 bg-[#EF4B72] rounded-md"></div>
@@ -124,20 +94,14 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
             <>
               <Link
                 href="/login"
-                className={buttonVariants({
-                  className:
-                    "!bg-[#EF4B72]/60 hover:!bg-[#EF4B72]/80 text-white !px-4 !py-6",
-                })}
+                className={buttonVariants({className: "!bg-[#EF4B72]/60 hover:!bg-[#EF4B72]/80 text-white !px-4 !py-6"})}
               >
                 <LogIn size={18} />
                 <span>Login</span>
               </Link>
               <Link
                 href="/register"
-                className={buttonVariants({
-                  className:
-                    "bg-white/10 hover:bg-white/20 text-white !px-4 !py-6",
-                })}
+                className={buttonVariants({className: "bg-white/10 hover:bg-white/20 text-white !px-4 !py-6"})}
               >
                 <UserPlus size={18} />
                 <span>Register</span>
@@ -168,18 +132,10 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
             >
               <div className="flex justify-between items-center px-6 py-4">
                 <div className="flex items-center gap-2 font-bold">
-                  <Image
-                    src="/dashboard/logo.svg"
-                    alt="Logo"
-                    width={36}
-                    height={36}
-                  />
+                  <Image src="/dashboard/logo.svg" alt="Logo" width={36} height={36} />
                   <span>HACKATTACK</span>
                 </div>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-white/20 rounded-lg"
-                >
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/20 rounded-lg">
                   <X size={24} />
                 </button>
               </div>
@@ -191,11 +147,7 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
                     href={item.href}
                     onClick={() => setIsOpen(false)}
                     className={`flex items-center gap-3 p-3 rounded-lg text-gray-300 hover:text-white relative transition
-                      ${
-                        pathname === item.href
-                          ? "text-[#EF4B72] font-semibold"
-                          : ""
-                      }`}
+                      ${pathname === item.href ? "text-[#EF4B72] font-semibold" : ""}`}
                   >
                     {pathname === item.href && (
                       <div className="absolute left-0 top-0 h-full w-1 bg-[#EF4B72] rounded-r-md"></div>
