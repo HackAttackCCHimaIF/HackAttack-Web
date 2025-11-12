@@ -834,7 +834,7 @@ export default function TeamProfilePage() {
                   {/* === Github URL (kiri tengah) === */}
                   <EditableInput
                     register={register}
-                    name="github_url"
+                    name="leaderGithub"
                     placeholder="Github URL (optional)"
                     className={inputClassName}
                     error={errors.leaderGithub?.message}

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/config/supabase-server";
 import { Members } from "@/lib/types/teamMember";
 
+// ===============================
+// POST: Create Team
+// ===============================
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -9,16 +12,16 @@ export async function POST(req: Request) {
       leaderEmail,
       teamName,
       institution,
+      leaderGithub, 
       leaderName,
       requirementLink,
-      github_url,
       leaderRole,
       whatsapp_number,
       members,
       paymentproof_url,
     } = body;
 
-    // Check if leaderEmail exists in Users table
+    // --- Check or create user ---
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
       .select("id")
@@ -38,16 +41,13 @@ export async function POST(req: Request) {
 
       if (usersError) {
         console.error("Failed add User:", usersError);
-        return NextResponse.json(
-          { error: usersError.message },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: usersError.message }, { status: 400 });
       }
       userData = users;
       userError = null;
     }
 
-    // Insert team data into the database
+    // --- Insert or upsert team ---
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .upsert({
@@ -65,12 +65,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: teamError.message }, { status: 400 });
     }
 
-    // Collect all members with team leader
+    // --- Combine leader and members ---
     const allMembers = [
       {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
+        github_url: leaderGithub || "", 
         requirementLink: requirementLink,
         member_role: leaderRole,
         is_leader: true,
@@ -79,30 +80,56 @@ export async function POST(req: Request) {
         team_id: teamData.id,
         name: member.name,
         email: member.email,
+        github_url: member.github_url || "", 
         requirementLink: member.requirementLink,
         member_role: member.member_role,
         is_leader: false,
       })),
     ];
 
-    // Upsert all members into the database
-    const { data: membersData, error: membersError } = await supabaseServer
-      .from("TeamMember")
-      .upsert(allMembers);
+    // --- Upsert all members ---
+    try {
+      // --- Hapus semua member lama ---
+      const { error: deleteError } = await supabaseServer
+        .from("TeamMember")
+        .delete()
+        .eq("team_id", teamData.id);
 
-    if (membersError) {
-      console.error("Failed add Member:", membersError);
+      if (deleteError) {
+        console.error("Failed to delete old members:", deleteError);
+        return NextResponse.json(
+          { error: deleteError.message },
+          { status: 400 }
+        );
+      }
+
+      // --- Insert member baru ---
+      const { data: membersData, error: membersError } = await supabaseServer
+        .from("TeamMember")
+        .insert(allMembers)
+        .select();
+
+      if (membersError) {
+        console.error("Failed add Member:", membersError);
+        return NextResponse.json(
+          { error: membersError.message },
+          { status: 400 }
+        );
+      }
+
+      // --- Success response ---
+      return NextResponse.json({
+        status: 201,
+        data: { teamData, membersData },
+        message: "Team and members created successfully",
+      });
+    } catch (error) {
+      console.error("API error:", error);
       return NextResponse.json(
-        { error: membersError.message },
-        { status: 400 }
+        { error: "Internal server error" },
+        { status: 500 }
       );
     }
-
-    return NextResponse.json({
-      status: 201,
-      data: { teamData, membersData },
-      message: "Team and members created successfully",
-    });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
@@ -112,6 +139,9 @@ export async function POST(req: Request) {
   }
 }
 
+// ===============================
+// GET: Get Team Info
+// ===============================
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -174,13 +204,13 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
+// ===============================
+// PUT: Update Team Info
+// ===============================
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -188,16 +218,16 @@ export async function PUT(req: Request) {
       leaderEmail,
       teamName,
       institution,
+      leaderGithub, 
       leaderName,
       requirementLink,
-      github_url,
       leaderRole,
       whatsapp_number,
       members,
       paymentproof_url,
     } = body;
 
-    // Check if leaderEmail exists in Users table
+    // --- Check user ---
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
       .select("id")
@@ -209,7 +239,7 @@ export async function PUT(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          name: leaderName,
+          username: leaderName,
           updated_at: new Date(),
         })
         .select()
@@ -226,7 +256,7 @@ export async function PUT(req: Request) {
       userError = null;
     }
 
-    // Update team data
+    // --- Update team ---
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .update({
@@ -247,12 +277,13 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: teamError.message }, { status: 400 });
     }
 
-    // Collect all members with team leader
+    // --- Prepare members data ---
     const allMembers = [
       {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
+        github_url: leaderGithub || "", 
         requirementLink: requirementLink,
         member_role: leaderRole,
         is_leader: true,
@@ -261,13 +292,14 @@ export async function PUT(req: Request) {
         team_id: teamData.id,
         name: member.name,
         email: member.email,
+        github_url: member.github_url || "", 
         requirementLink: member.requirementLink,
         member_role: member.member_role,
         is_leader: false,
       })),
     ];
 
-    // --- Upsert members ---
+    // --- Upsert ---
     const { data: membersData, error: membersError } = await supabaseServer
       .from("TeamMember")
       .upsert(allMembers, { onConflict: "email" })
@@ -288,9 +320,6 @@ export async function PUT(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
