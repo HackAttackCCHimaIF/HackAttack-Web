@@ -11,6 +11,7 @@ export async function POST(req: Request) {
       institution,
       leaderName,
       requirementLink,
+      github_url,
       leaderRole,
       whatsapp_number,
       members,
@@ -29,7 +30,8 @@ export async function POST(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          name: leaderName,
+          username: leaderName,
+          role: "TeamLeader",
         })
         .select()
         .single();
@@ -188,6 +190,7 @@ export async function PUT(req: Request) {
       institution,
       leaderName,
       requirementLink,
+      github_url,
       leaderRole,
       whatsapp_number,
       members,

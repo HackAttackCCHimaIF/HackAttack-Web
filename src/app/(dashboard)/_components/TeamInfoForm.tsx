@@ -47,9 +47,9 @@ import { LinkableField } from "@/components/LinkableField";
 const teamMemberSchema = z.object({
   name: z.string(),
   email: z.email("Invalid email").nonempty("Email is required"),
-  github: z.string().optional(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
 }) satisfies z.ZodType<TeamMember>;
 
 // Separate schema for member data only
@@ -58,9 +58,9 @@ const teamDataSchema = z.object({
   institution: z.string().min(1, "Institution is required"),
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-  leaderGithub: z.string().optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
   members: z
     .array(teamMemberSchema)
     .min(1, "At least one member required")
@@ -79,7 +79,7 @@ export default function TeamProfilePage() {
   const [, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [institutionPrice, setInstitutionPrice] = useState<string | null>(null);
-  const [, setIsSubmitted] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setSubmittedData] = useState<TeamFormValues | null>(null);
   const [teamData, setTeamData] = useState<Team | null>(null);
@@ -94,25 +94,18 @@ export default function TeamProfilePage() {
     reset,
     trigger,
     formState: { errors },
-      } = useForm<TeamFormValues>({
-        resolver: zodResolver(teamDataSchema),
-        defaultValues: {
-        teamName: "",
-        institution: "",
-        leaderName: "",
-        leaderRole: undefined,
-        leaderGithub: "", 
-        whatsapp_number: "62",
+  } = useForm<TeamFormValues>({
+    resolver: zodResolver(teamDataSchema),
+    defaultValues: {
+      whatsapp_number: "62",
+      members: Array(2).fill({
+        name: "",
+        email: "",
         requirementLink: "",
-        members: Array(2).fill({
-          name: "",
-          email: "",
-          github: "", 
-          requirementLink: "",
-          member_role: undefined,
-        }),
-        paymentproof_url: "",
-      },
+        member_role: null,
+        github_url: "",
+      }),
+    },
   });
 
   const { fields, replace } = useFieldArray({
@@ -169,6 +162,22 @@ export default function TeamProfilePage() {
     };
   }, []);
 
+  const refreshTeamData = async (leaderEmail: string) => {
+    try {
+      const response = await fetch(
+        `/api/team?userEmail=${encodeURIComponent(leaderEmail)}`
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setTeamData(result.data.teamData);
+        setTeamMembers(result.data.membersData || []);
+        setEditRejected(false);
+      }
+    } catch (error) {
+      console.error("Error refreshing team data:", error);
+    }
+  };
+
   const handleRejectionClick = () => {
     setIsSubmitting(false);
 
@@ -194,6 +203,7 @@ export default function TeamProfilePage() {
           email: member.email || "",
           requirementLink: member.requirementLink || "",
           member_role: member.member_role || undefined,
+          github_url: member.github_url,
         }))
       );
 
@@ -218,6 +228,8 @@ export default function TeamProfilePage() {
     const leaderEmail = user?.email;
     if (!leaderEmail) {
       toast.error("User not authenticated.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -225,6 +237,8 @@ export default function TeamProfilePage() {
 
     if (!paymentProof) {
       toast.error("Please upload payment proof.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -249,6 +263,8 @@ export default function TeamProfilePage() {
       toast.success("Form resubmitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -299,6 +315,8 @@ export default function TeamProfilePage() {
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
+
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -346,6 +364,7 @@ export default function TeamProfilePage() {
           .map(() => ({
             name: "",
             email: "",
+            github_url: "",
             requirementLink: "",
             member_role: "Hustler",
           }))
@@ -370,28 +389,34 @@ export default function TeamProfilePage() {
       <HeaderDashboard topText="Team" bottomText="Information" />
 
       <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-7xl px-3">
-          {/* Team Information */}
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
-            <CardHeader className="grid grid-cols-2 w-full">
-              <CardTitle className="text-white text-2xl font-semibold justify-self-start">
-                Team Information
-              </CardTitle>
+        <div className="w-full max-w-7xl">
+          <div className="w-full px-8 py-10">
+            {/* Team Status Badge */}
+            <div className="flex justify-center mb-8">
               <button
                 disabled={teamData?.approvalstatus !== "Rejected"}
                 onClick={() => handleRejectionClick()}
                 className={cn(
-                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors justify-self-end",
+                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors",
                   teamData?.approvalstatus === "Accepted"
                     ? "bg-green-600 text-white cursor-default"
                     : teamData?.approvalstatus === "Rejected"
-                    ? "bg-red-600 hover:bg-red-800 text-white"
+                    ? "bg-red-600 hover:bg-red-700 text-white"
                     : "bg-blue-600 text-white cursor-default",
                   teamData?.approvalstatus !== "Rejected"
                 )}
               >
                 Status: {teamData?.approvalstatus}
               </button>
+            </div>
+          </div>
+
+          {/* Team Information */}
+          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
+            <CardHeader>
+              <CardTitle className="text-white text-2xl font-semibold">
+                Team Information
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -463,6 +488,17 @@ export default function TeamProfilePage() {
                     <p className="text-white text-lg">{leader.member_role}</p>
                   </div>
                   <div>
+                    <Label className="text-white/70 text-sm">Github URL</Label>
+                    <a
+                      href={leader.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-pink-400 hover:text-pink-300 underline"
+                    >
+                      View Github Profile
+                    </a>
+                  </div>{" "}
+                  <div>
                     <Label className="text-white/70 text-sm">
                       Requirement Document
                     </Label>
@@ -523,6 +559,19 @@ export default function TeamProfilePage() {
                           </div>
                           <div>
                             <Label className="text-white/70 text-sm">
+                              Github
+                            </Label>
+                            <a
+                              href={member.github_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-pink-400 hover:text-pink-300 underline text-sm"
+                            >
+                              View Github Profile
+                            </a>
+                          </div>
+                          <div>
+                            <Label className="text-white/70 text-sm">
                               Requirement
                             </Label>
                             <a
@@ -548,11 +597,12 @@ export default function TeamProfilePage() {
 
   // Conditional rendering based on approval status and edit state
   const shouldShowReadOnly =
-    teamData?.approvalstatus &&
-    ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
-      teamData.approvalstatus
-    ) &&
-    !editRejected;
+    (teamData?.approvalstatus &&
+      ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
+        teamData.approvalstatus
+      ) &&
+      !editRejected) ||
+    isSubmitted;
 
   // Show read-only view if team is submitted/accepted and not in edit mode
   if (shouldShowReadOnly) {
@@ -703,19 +753,23 @@ export default function TeamProfilePage() {
             {step === 3 && (
               <div className="space-y-8 w-full">
                 <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-2 text-white text-lg sm:text-xl flex-wrap">
-                    <div className="flex items-center gap-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white text-xl">
                       <UserIcon className="size-6 text-pink-500/50" />
-                      <span>Leader Information</span>
-                    </div>
-
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            className="text-white/60 hover:text-white transition-colors"
+                      Leader Information
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-white/60 hover:text-white"
+                            >
+                              <InfoIcon className="size-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="max-w-xs text-sm"
                           >
                             <InfoIcon className="size-4" />
                           </button>
@@ -843,6 +897,62 @@ export default function TeamProfilePage() {
                 </CardContent>
               </Card>
 
+                            <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                              <SelectItem
+                                value="Hustler"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hustler
+                              </SelectItem>
+                              <SelectItem
+                                value="Hipster"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hipster
+                              </SelectItem>
+                              <SelectItem
+                                value="Hacker"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hacker
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+
+                          {errors.leaderRole?.message && (
+                            <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                              {errors.leaderRole.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </CardContent>
+                  <CardContent className="grid grid-cols-3 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="github_url"
+                      placeholder="Github URL"
+                      className={inputClassName}
+                      error={errors.github_url?.message}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="requirementLink"
+                      placeholder="Requirement URL"
+                      className={inputClassName}
+                      error={errors.requirementLink?.message}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="whatsapp_number"
+                      placeholder="62812345678"
+                      type="tel"
+                      className={inputClassName}
+                      error={errors.whatsapp_number?.message}
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Members */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
@@ -903,6 +1013,15 @@ export default function TeamProfilePage() {
                           error={
                             errors.members?.[index]?.requirementLink?.message
                           }
+                        />
+
+                        {/* === Github URL === */}
+                        <EditableInput
+                          register={register}
+                          name={`members.${index}.github_url`}
+                          placeholder="Github URL"
+                          className={inputClassName}
+                          error={errors.members?.[index]?.github_url?.message}
                         />
 
                         {/* === Member Role (Dropdown) === */}
