@@ -64,7 +64,7 @@ const teamDataSchema = z.object({
     .array(teamMemberSchema)
     .min(1, "At least one member required")
     .max(5, "Maximum 5 members allowed"),
-  paymentproof_url: z.string(),
+  paymentproof_url: z.url(),
 });
 
 type TeamFormValues = z.infer<typeof teamDataSchema>;
@@ -137,38 +137,21 @@ export default function TeamProfilePage() {
           );
 
           if (response.ok && isMounted) {
-  const result = await response.json();
+            const result = await response.json();
+            if (result.data?.teamData) {
+              setTeamData(result.data.teamData);
+              setTeamMembers(result.data.membersData || []);
 
-  console.log("%c[API RESPONSE] /api/team →", "color:#00d9ff;font-weight:bold;", result);
-
-  if (result.data?.teamData) {
-    console.log("%c✅ TEAM DATA FETCHED", "color:#4ade80;font-weight:bold;", result.data.teamData);
-    console.log("%c👥 MEMBERS DATA:", "color:#facc15;font-weight:bold;", result.data.membersData);
-
-    setTeamData(result.data.teamData);
-    setTeamMembers(result.data.membersData || []);
-
-    // Debug approval status
-    console.log(
-      "%c🔎 APPROVAL STATUS:",
-      "color:#a78bfa;font-weight:bold;",
-      result.data.teamData.approvalstatus
-    );
-
-    if (
-      result.data.teamData.approvalstatus &&
-      ["Approved", "Rejected", "Submitted"].includes(result.data.teamData.approvalstatus)
-    ) {
-      setIsSubmitted(true);
-    }
-    else {
-      console.log("%c⚠️ approvalstatus not matched:", "color:orange;", result.data.teamData.approvalstatus);
-    }
-  } else {
-    console.log("%c❌ No team data found in API result", "color:red;font-weight:bold;", result);
-  }
-}
-
+              // If the team already submitted, set as submitted
+              if (
+                result.data.teamData.approvalstatus.includes("Approved") ||
+                result.data.teamData.approvalstatus.includes("Rejected") ||
+                result.data.teamData.approvalstatus.includes("Submitted")
+              ) {
+                setIsSubmitted(true);
+              }
+            }
+          }
         } catch (error) {
           console.error("Error fetching team data:", error);
         }
@@ -386,7 +369,7 @@ export default function TeamProfilePage() {
       <HeaderDashboard topText="Team" bottomText="Information" />
 
       <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-7xl px-3">
+        <div className="w-full max-w-7xl">
           {/* Team Information */}
           <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
             <CardHeader className="grid grid-cols-2 w-full">
