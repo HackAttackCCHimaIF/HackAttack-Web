@@ -18,6 +18,7 @@ export async function POST(req: Request) {
       github_url,
     } = body;
 
+    
     // Check if leaderEmail exists in Users table
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
@@ -31,7 +32,7 @@ export async function POST(req: Request) {
         .upsert({
           email: leaderEmail,
           name: leaderName,
-        })
+        }, { onConflict: "email" })
         .select()
         .single();
 
