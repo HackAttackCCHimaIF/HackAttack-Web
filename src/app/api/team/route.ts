@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/config/supabase-server";
 import { Members } from "@/lib/types/teamMember";
 
+// ===============================
+// POST: Create Team
+// ===============================
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -9,6 +12,7 @@ export async function POST(req: Request) {
       leaderEmail,
       teamName,
       institution,
+      leaderGithub, 
       leaderName,
       requirementLink,
       leaderRole,
@@ -89,7 +93,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // Collect all members with team leader
+    // --- Combine leader and members ---
     const allMembers = [
       {
         team_id: teamData.id,
@@ -136,12 +140,6 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-
-    return NextResponse.json({
-      status: 201,
-      data: { teamData, membersData },
-      message: "Team and members created successfully",
-    });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
@@ -151,6 +149,9 @@ export async function POST(req: Request) {
   }
 }
 
+// ===============================
+// GET: Get Team Info
+// ===============================
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -213,13 +214,13 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
+// ===============================
+// PUT: Update Team Info
+// ===============================
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -227,6 +228,7 @@ export async function PUT(req: Request) {
       leaderEmail,
       teamName,
       institution,
+      leaderGithub, 
       leaderName,
       requirementLink,
       leaderRole,
@@ -271,7 +273,7 @@ export async function PUT(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          name: leaderName,
+          username: leaderName,
           updated_at: new Date(),
         })
         .select()
@@ -310,7 +312,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Update team data
+    // --- Update team ---
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .update({
@@ -348,7 +350,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    // Collect all members with team leader
+    // --- Prepare members data ---
     const allMembers = [
       {
         team_id: teamData.id,
@@ -400,9 +402,6 @@ export async function PUT(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
