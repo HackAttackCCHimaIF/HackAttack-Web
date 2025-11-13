@@ -163,17 +163,40 @@ export async function GET(req: Request) {
       );
     }
 
-    const { data: userData, error: userError } = await supabaseServer
-      .from("Users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
+    // Find user by email with retry logic for timing issues
+    let userData = null;
+    let userError = null;
 
-    if (userError || !userData) {
+    // Try multiple times in case user was just created
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const result = await supabaseServer
+        .from("Users")
+        .select("id")
+        .eq("email", userEmail)
+        .single();
+
+      if (!result.error && result.data) {
+        userData = result.data;
+        break;
+      }
+
+      userError = result.error;
+
+      // Wait before retrying
+      if (attempt < 2) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (attempt + 1))
+        );
+      }
+    }
+
+    if (!userData) {
+      console.error("User not found after retries:", userError);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { data: teamData, error: teamError } = await supabaseServer
+    // eslint-disable-next-line prefer-const
+    let { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .select("*")
       .eq("created_by", userData.id)
@@ -185,11 +208,34 @@ export async function GET(req: Request) {
     }
 
     if (!teamData) {
-      return NextResponse.json({
-        status: 404,
-        data: null,
-        message: "No team found",
-      });
+      // Also try to find team by leader email as fallback
+      const { data: teamByEmail, error: emailError } = await supabaseServer
+        .from("TeamMember")
+        .select("team_id")
+        .eq("email", userEmail)
+        .eq("is_leader", true)
+        .maybeSingle();
+
+      if (teamByEmail && !emailError) {
+        const { data: teamDataByEmail, error: teamErrorByEmail } =
+          await supabaseServer
+            .from("Team")
+            .select("*")
+            .eq("id", teamByEmail.team_id)
+            .single();
+
+        if (teamDataByEmail && !teamErrorByEmail) {
+          teamData = teamDataByEmail;
+        }
+      }
+
+      if (!teamData) {
+        return NextResponse.json({
+          status: 404,
+          data: null,
+          message: "No team found",
+        });
+      }
     }
 
     const { data: membersData, error: membersError } = await supabaseServer

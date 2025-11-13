@@ -117,7 +117,7 @@ export default function TeamProfilePage() {
     let isMounted = true;
     const abortController = new AbortController();
 
-    const init = async () => {
+    const init = async (attempt = 1) => {
       try {
         const {
           data: { session },
@@ -127,12 +127,17 @@ export default function TeamProfilePage() {
         // Fetch team data if user is authenticated
         if (session?.user?.email) {
           try {
+            // Add cache-busting parameter to prevent stale data
+            const cacheBuster = Date.now();
             const response = await fetch(
-              `/api/team?userEmail=${encodeURIComponent(session.user.email)}`,
+              `/api/team?userEmail=${encodeURIComponent(
+                session.user.email
+              )}&_=${cacheBuster}`,
               {
                 signal: abortController.signal,
                 headers: {
-                  "Cache-Control": "no-cache",
+                  "Cache-Control": "no-cache, no-store, must-revalidate",
+                  Pragma: "no-cache",
                 },
               }
             );
@@ -153,14 +158,33 @@ export default function TeamProfilePage() {
                   )
                 ) {
                   setIsSubmitted(true);
+                } else {
+                  setIsSubmitted(false);
                 }
+              } else {
+                // No team data found, ensure we're in edit mode
+                setIsSubmitted(false);
               }
             } else {
               console.error("Failed to fetch team data:", response.status);
+
+              // Retry logic for transient failures
+              if (attempt < 3 && isMounted) {
+                setTimeout(() => init(attempt + 1), 1000 * attempt);
+                return;
+              }
             }
           } catch (error) {
-            if (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+              console.log("Fetch aborted");
+            } else {
               console.error("Error fetching team data:", error);
+
+              // Retry logic for transient failures
+              if (attempt < 3 && isMounted) {
+                setTimeout(() => init(attempt + 1), 1000 * attempt);
+                return;
+              }
             }
           }
         }
@@ -181,19 +205,101 @@ export default function TeamProfilePage() {
     };
   }, [setIsSubmitted]);
 
-  const refreshTeamData = async (leaderEmail: string) => {
+  // // Verify that data was actually saved to database
+  // const verifyDataSaved = async (
+  //   leaderEmail: string,
+  //   submittedData: TeamFormValues
+  // ): Promise<boolean> => {
+  //   try {
+  //     // Wait a moment for database to commit
+  //     await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  //     const response = await fetch(
+  //       `/api/team?userEmail=${encodeURIComponent(leaderEmail)}}`
+  //     );
+
+  //     if (!response.ok) {
+  //       console.error("Verification fetch failed:", response.status);
+  //       return false;
+  //     }
+
+  //     const result = await response.json();
+
+  //     // Check if team data exists
+  //     if (!result.data?.teamData) {
+  //       console.error("No team data found in verification response");
+  //       return false;
+  //     }
+
+  //     const savedTeam = result.data.teamData;
+  //     const savedMembers = result.data.membersData || [];
+
+  //     console.log("Verification debug - Submitted:", {
+  //       teamName: submittedData.teamName,
+  //       memberCount: submittedData.members.length,
+  //     });
+
+  //     console.log("Verification debug - Saved:", {
+  //       teamName: savedTeam.team_name,
+  //       memberCount: savedMembers.length,
+  //       savedTeam: savedTeam,
+  //       savedMembers: savedMembers,
+  //     });
+
+  //     // More lenient verification - check if we have any team data at all
+  //     const hasTeamData = !!savedTeam && !!savedTeam.team_name;
+  //     const hasMembers = savedMembers.length > 0;
+
+  //     // If we have team data and at least some members, consider it successful
+  //     return hasTeamData && hasMembers;
+  //   } catch (error) {
+  //     console.error("Data verification failed:", error);
+  //     return false;
+  //   }
+  // };
+
+  const refreshTeamData = async (leaderEmail: string, attempt = 1) => {
     try {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = Date.now();
       const response = await fetch(
-        `/api/team?userEmail=${encodeURIComponent(leaderEmail)}`
+        `/api/team?userEmail=${encodeURIComponent(
+          leaderEmail
+        )}&_=${cacheBuster}`,
+        {
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        }
       );
       if (response.ok) {
         const result = await response.json();
-        setTeamData(result.data.teamData);
-        setTeamMembers(result.data.membersData || []);
-        setEditRejected(false);
+        if (result.data?.teamData) {
+          setTeamData(result.data.teamData);
+          setTeamMembers(result.data.membersData || []);
+          setEditRejected(false);
+
+          // Update isSubmitted state based on approval status
+          if (
+            result.data.teamData.approvalstatus &&
+            ["Approved", "Rejected", "Submitted", "Resubmitted"].includes(
+              result.data.teamData.approvalstatus
+            )
+          ) {
+            setIsSubmitted(true);
+          } else {
+            setIsSubmitted(false);
+          }
+        }
       }
     } catch (error) {
       console.error("Error refreshing team data:", error);
+
+      // Retry logic for refresh
+      if (attempt < 2) {
+        setTimeout(() => refreshTeamData(leaderEmail, attempt + 1), 1000);
+      }
     }
   };
 
@@ -274,9 +380,14 @@ export default function TeamProfilePage() {
       }
 
       const res = await submitData.json();
-
       if (res.error) {
         toast.error(res.error);
+        return;
+      }
+
+      // Check if the response indicates success
+      if (res.status !== 201 && res.status !== 200) {
+        toast.error("Submission failed: " + (res.message || "Unknown error"));
         return;
       }
       toast.success("Form resubmitted successfully!");
@@ -331,6 +442,19 @@ export default function TeamProfilePage() {
         toast.error(res.error);
         return;
       }
+
+      // // Verify data was actually saved to database
+      // const verificationSuccess = await verifyDataSaved(
+      //   leaderEmail,
+      //   currentValues
+      // );
+
+      // if (!verificationSuccess) {
+      //   toast.error("Failed to verify data save. Please check your team data.");
+      //   setIsSubmitting(false);
+      //   return;
+      // }
+
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
