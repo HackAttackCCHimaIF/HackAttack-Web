@@ -25,7 +25,7 @@ const UnderMaintenance = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-black relative overflow-hidden">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden">
 
       {/* Logo */}
       <div className="absolute top-6 left-6 flex items-center gap-3 z-20">
