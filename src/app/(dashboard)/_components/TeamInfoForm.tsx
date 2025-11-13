@@ -78,7 +78,7 @@ export default function TeamProfilePage() {
   const [, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [institutionPrice, setInstitutionPrice] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [, setSubmittedData] = useState<TeamFormValues | null>(null);
   const [teamData, setTeamData] = useState<Team | null>(null);
@@ -115,51 +115,71 @@ export default function TeamProfilePage() {
   // Auth and team data fetch
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
 
-      // Fetch team data if user is authenticated
-      if (session?.user?.email) {
-        try {
-          const response = await fetch(
-            `/api/team?userEmail=${encodeURIComponent(session.user.email)}`
-          );
-
-          if (response.ok && isMounted) {
-            const result = await response.json();
-            if (result.data?.teamData) {
-              setTeamData(result.data.teamData);
-              setTeamMembers(result.data.membersData || []);
-
-              // If the team already submitted, set as submitted
-              if (
-                result.data.teamData.approvalstatus.includes("Approved") ||
-                result.data.teamData.approvalstatus.includes("Rejected") ||
-                result.data.teamData.approvalstatus.includes("Submitted")
-              ) {
-                setIsSubmitted(true);
+        // Fetch team data if user is authenticated
+        if (session?.user?.email) {
+          try {
+            const response = await fetch(
+              `/api/team?userEmail=${encodeURIComponent(session.user.email)}`,
+              {
+                signal: abortController.signal,
+                headers: {
+                  "Cache-Control": "no-cache",
+                },
               }
+            );
+
+            if (!isMounted) return;
+
+            if (response.ok) {
+              const result = await response.json();
+              if (result.data?.teamData) {
+                setTeamData(result.data.teamData);
+                setTeamMembers(result.data.membersData || []);
+
+                // If the team already submitted, set as submitted
+                if (
+                  result.data.teamData.approvalstatus &&
+                  ["Approved", "Rejected", "Submitted", "Resubmitted"].includes(
+                    result.data.teamData.approvalstatus
+                  )
+                ) {
+                  setIsSubmitted(true);
+                }
+              }
+            } else {
+              console.error("Failed to fetch team data:", response.status);
+            }
+          } catch (error) {
+            if (error) {
+              console.error("Error fetching team data:", error);
             }
           }
-        } catch (error) {
-          console.error("Error fetching team data:", error);
+        }
+      } catch (error) {
+        console.error("Error in init function:", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
         }
       }
-
-      if (isMounted) {
-        setLoading(false);
-      }
     };
+
     init();
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
-  }, []);
+  }, [setIsSubmitted]);
 
   const refreshTeamData = async (leaderEmail: string) => {
     try {
@@ -356,7 +376,7 @@ export default function TeamProfilePage() {
       );
     }
 
-    if (step === 2 && getValues("members").length === 0) {
+    if (step === 2) {
       replace(
         Array(memberCount)
           .fill(null)
@@ -384,38 +404,32 @@ export default function TeamProfilePage() {
 
   // Read-only team information display if team data existed
   const renderReadOnlyTeamInfo = () => (
-    <div className="overflow-y-auto w-full min-h-screen text-white">
+    <div className="overflow-y-auto w-full min-h-screen text-white pt-12 md:pt-0">
       <HeaderDashboard topText="Team" bottomText="Information" />
 
       <div className="flex h-full items-center justify-center">
-        <div className="w-full max-w-7xl">
-          <div className="w-full px-8 py-10">
-            {/* Team Status Badge */}
-            <div className="flex justify-center mb-8">
+        <div className="w-full max-w-7xl px-3">
+          {/* Team Information */}
+          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
+            <CardHeader className="grid grid-cols-2 w-full">
+              <CardTitle className="text-white text-2xl font-semibold justify-self-start">
+                Team Information
+              </CardTitle>
               <button
                 disabled={teamData?.approvalstatus !== "Rejected"}
                 onClick={() => handleRejectionClick()}
                 className={cn(
-                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors",
+                  "px-6 py-2 rounded-full text-lg font-semibold transition-colors justify-self-end",
                   teamData?.approvalstatus === "Accepted"
                     ? "bg-green-600 text-white cursor-default"
                     : teamData?.approvalstatus === "Rejected"
-                    ? "bg-red-600 hover:bg-red-700 text-white"
+                    ? "bg-red-600 hover:bg-red-800 text-white"
                     : "bg-blue-600 text-white cursor-default",
                   teamData?.approvalstatus !== "Rejected"
                 )}
               >
                 Status: {teamData?.approvalstatus}
               </button>
-            </div>
-          </div>
-
-          {/* Team Information */}
-          <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full mb-6">
-            <CardHeader>
-              <CardTitle className="text-white text-2xl font-semibold">
-                Team Information
-              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -487,17 +501,6 @@ export default function TeamProfilePage() {
                     <p className="text-white text-lg">{leader.member_role}</p>
                   </div>
                   <div>
-                    <Label className="text-white/70 text-sm">Github URL</Label>
-                    <a
-                      href={leader.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-pink-400 hover:text-pink-300 underline"
-                    >
-                      View Github Profile
-                    </a>
-                  </div>{" "}
-                  <div>
                     <Label className="text-white/70 text-sm">
                       Requirement Document
                     </Label>
@@ -558,19 +561,6 @@ export default function TeamProfilePage() {
                           </div>
                           <div>
                             <Label className="text-white/70 text-sm">
-                              Github
-                            </Label>
-                            <a
-                              href={member.github_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-pink-400 hover:text-pink-300 underline text-sm"
-                            >
-                              View Github Profile
-                            </a>
-                          </div>
-                          <div>
-                            <Label className="text-white/70 text-sm">
                               Requirement
                             </Label>
                             <a
@@ -596,16 +586,25 @@ export default function TeamProfilePage() {
 
   // Conditional rendering based on approval status and edit state
   const shouldShowReadOnly =
-    (teamData?.approvalstatus &&
-      ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
-        teamData.approvalstatus
-      ) &&
-      !editRejected) ||
-    isSubmitted;
+    !loading &&
+    teamData?.approvalstatus &&
+    ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
+      teamData.approvalstatus
+    ) &&
+    !editRejected;
 
   // Show read-only view if team is submitted/accepted and not in edit mode
   if (shouldShowReadOnly) {
     return renderReadOnlyTeamInfo();
+  }
+
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div className="text-white flex justify-center items-center h-screen">
+        Loading team information...
+      </div>
+    );
   }
 
   return (
