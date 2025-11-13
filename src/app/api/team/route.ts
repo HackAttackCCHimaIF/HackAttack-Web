@@ -19,9 +19,33 @@ export async function POST(req: Request) {
       whatsapp_number,
       members,
       paymentproof_url,
+      github_url,
     } = body;
 
-    // --- Check or create user ---
+    // Validate required fields
+    if (
+      !leaderEmail ||
+      !teamName ||
+      !institution ||
+      !leaderName ||
+      !whatsapp_number
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate member count
+    if (!members || members.length === 0 || members.length > 5) {
+      return NextResponse.json(
+        { error: "Team must have between 1 and 5 members" },
+        { status: 400 }
+      );
+    }
+
+    // Check if leaderEmail exists in Users table
+    // eslint-disable-next-line prefer-const
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
       .select("id")
@@ -33,21 +57,22 @@ export async function POST(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          username: leaderName,
-          role: "TeamLeader",
+          name: leaderName,
         })
         .select()
         .single();
 
       if (usersError) {
-        console.error("Failed add User:", usersError);
-        return NextResponse.json({ error: usersError.message }, { status: 400 });
+        console.error("Failed to create user:", usersError);
+        return NextResponse.json(
+          { error: "Failed to create user: " + usersError.message },
+          { status: 400 }
+        );
       }
       userData = users;
-      userError = null;
     }
 
-    // --- Insert or upsert team ---
+    // Use transaction for atomic team + member operations
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .upsert({
@@ -61,8 +86,11 @@ export async function POST(req: Request) {
       .single();
 
     if (teamError) {
-      console.error("Failed add Team:", teamError);
-      return NextResponse.json({ error: teamError.message }, { status: 400 });
+      console.error("Failed to create team:", teamError);
+      return NextResponse.json(
+        { error: "Failed to create team: " + teamError.message },
+        { status: 400 }
+      );
     }
 
     // --- Combine leader and members ---
@@ -71,63 +99,45 @@ export async function POST(req: Request) {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
-        github_url: leaderGithub || "", 
-        requirementLink: requirementLink,
-        member_role: leaderRole,
+        requirementLink: requirementLink || "",
+        github_url: github_url || "",
+        member_role: leaderRole || "Hustler",
         is_leader: true,
       },
       ...members.map((member: Members) => ({
         team_id: teamData.id,
-        name: member.name,
-        email: member.email,
-        github_url: member.github_url || "", 
-        requirementLink: member.requirementLink,
-        member_role: member.member_role,
+        name: member.name || "",
+        email: member.email || "",
+        requirementLink: member.requirementLink || "",
+        github_url: member.github_url || "",
+        member_role: member.member_role || "Hustler",
         is_leader: false,
       })),
     ];
 
-    // --- Upsert all members ---
-    try {
-      // --- Hapus semua member lama ---
-      const { error: deleteError } = await supabaseServer
-        .from("TeamMember")
-        .delete()
-        .eq("team_id", teamData.id);
-
-      if (deleteError) {
-        console.error("Failed to delete old members:", deleteError);
-        return NextResponse.json(
-          { error: deleteError.message },
-          { status: 400 }
-        );
-      }
-
-      // --- Insert member baru ---
-      const { data: membersData, error: membersError } = await supabaseServer
-        .from("TeamMember")
-        .insert(allMembers)
-        .select();
-
-      if (membersError) {
-        console.error("Failed add Member:", membersError);
-        return NextResponse.json(
-          { error: membersError.message },
-          { status: 400 }
-        );
-      }
-
-      // --- Success response ---
-      return NextResponse.json({
-        status: 201,
-        data: { teamData, membersData },
-        message: "Team and members created successfully",
-      });
-    } catch (error) {
-      console.error("API error:", error);
+    // Validate all member emails are provided
+    const invalidMembers = allMembers.filter((m) => !m.email);
+    if (invalidMembers.length > 0) {
       return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 }
+        { error: "All team members must have an email address" },
+        { status: 400 }
+      );
+    }
+
+    // Upsert all members with proper conflict handling
+    const { data: membersData, error: membersError } = await supabaseServer
+      .from("TeamMember")
+      .upsert(allMembers, { onConflict: "email" });
+
+    if (membersError) {
+      console.error("Failed to create members:", membersError);
+
+      // Attempt to cleanup the team if member creation failed
+      await supabaseServer.from("Team").delete().eq("id", teamData.id);
+
+      return NextResponse.json(
+        { error: "Failed to create team members: " + membersError.message },
+        { status: 400 }
       );
     }
   } catch (error) {
@@ -222,12 +232,36 @@ export async function PUT(req: Request) {
       leaderName,
       requirementLink,
       leaderRole,
+      github_url,
       whatsapp_number,
       members,
       paymentproof_url,
     } = body;
 
-    // --- Check user ---
+    // Validate required fields
+    if (
+      !leaderEmail ||
+      !teamName ||
+      !institution ||
+      !leaderName ||
+      !whatsapp_number
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Validate member count
+    if (!members || members.length === 0 || members.length > 5) {
+      return NextResponse.json(
+        { error: "Team must have between 1 and 5 members" },
+        { status: 400 }
+      );
+    }
+
+    // Check if leaderEmail exists in Users table
+    // eslint-disable-next-line prefer-const
     let { data: userData, error: userError } = await supabaseServer
       .from("Users")
       .select("id")
@@ -246,14 +280,36 @@ export async function PUT(req: Request) {
         .single();
 
       if (usersError) {
-        console.error("Failed add User:", usersError);
+        console.error("Failed to update user:", usersError);
         return NextResponse.json(
-          { error: usersError.message },
+          { error: "Failed to update user: " + usersError.message },
           { status: 400 }
         );
       }
       userData = users;
-      userError = null;
+    }
+
+    // First get existing team to ensure we have the team ID
+    const { data: existingTeam, error: existingTeamError } =
+      await supabaseServer
+        .from("Team")
+        .select("id")
+        .eq("created_by", userData?.id)
+        .single();
+
+    if (existingTeamError && existingTeamError.code !== "PGRST116") {
+      console.error("Failed to find existing team:", existingTeamError);
+      return NextResponse.json(
+        { error: "Failed to find team: " + existingTeamError.message },
+        { status: 400 }
+      );
+    }
+
+    if (!existingTeam) {
+      return NextResponse.json(
+        { error: "Team not found for update" },
+        { status: 404 }
+      );
     }
 
     // --- Update team ---
@@ -268,13 +324,30 @@ export async function PUT(req: Request) {
         approvalstatus: "Resubmitted",
         updated_at: new Date(),
       })
-      .eq("created_by", userData?.id)
+      .eq("id", existingTeam.id)
       .select()
       .single();
 
     if (teamError) {
-      console.error("Failed Update Team:", teamError);
-      return NextResponse.json({ error: teamError.message }, { status: 400 });
+      console.error("Failed to update team:", teamError);
+      return NextResponse.json(
+        { error: "Failed to update team: " + teamError.message },
+        { status: 400 }
+      );
+    }
+
+    // Delete existing members first to handle member removals
+    const { error: deleteError } = await supabaseServer
+      .from("TeamMember")
+      .delete()
+      .eq("team_id", teamData.id);
+
+    if (deleteError) {
+      console.error("Failed to delete existing members:", deleteError);
+      return NextResponse.json(
+        { error: "Failed to cleanup existing members: " + deleteError.message },
+        { status: 400 }
+      );
     }
 
     // --- Prepare members data ---
@@ -283,32 +356,41 @@ export async function PUT(req: Request) {
         team_id: teamData.id,
         name: leaderName,
         email: leaderEmail,
-        github_url: leaderGithub || "", 
-        requirementLink: requirementLink,
-        member_role: leaderRole,
+        requirementLink: requirementLink || "",
+        github_url: github_url || "",
+        member_role: leaderRole || "Hustler",
         is_leader: true,
       },
       ...members.map((member: Members) => ({
         team_id: teamData.id,
-        name: member.name,
-        email: member.email,
-        github_url: member.github_url || "", 
-        requirementLink: member.requirementLink,
-        member_role: member.member_role,
+        name: member.name || "",
+        email: member.email || "",
+        requirementLink: member.requirementLink || "",
+        github_url: member.github_url || "",
+        member_role: member.member_role || "Hustler",
         is_leader: false,
       })),
     ];
 
-    // --- Upsert ---
+    // Validate all member emails are provided
+    const invalidMembers = allMembers.filter((m) => !m.email);
+    if (invalidMembers.length > 0) {
+      return NextResponse.json(
+        { error: "All team members must have an email address" },
+        { status: 400 }
+      );
+    }
+
+    // Insert all new members
     const { data: membersData, error: membersError } = await supabaseServer
       .from("TeamMember")
-      .upsert(allMembers, { onConflict: "email" })
-      .select();
+      .insert(allMembers);
 
     if (membersError) {
-      console.error("Failed Update Member:", membersError);
+      console.error("Failed to create members:", membersError);
+
       return NextResponse.json(
-        { error: membersError.message },
+        { error: "Failed to create team members: " + membersError.message },
         { status: 400 }
       );
     }

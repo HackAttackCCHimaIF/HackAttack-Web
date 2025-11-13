@@ -161,51 +161,71 @@ export default function TeamProfilePage() {
   // Auth and team data fetch
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
     const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
 
-      // Fetch team data if user is authenticated
-      if (session?.user?.email) {
-        try {
-          const response = await fetch(
-            `/api/team?userEmail=${encodeURIComponent(session.user.email)}`
-          );
-
-          if (response.ok && isMounted) {
-            const result = await response.json();
-            if (result.data?.teamData) {
-              setTeamData(result.data.teamData);
-              setTeamMembers(result.data.membersData || []);
-
-              // If the team already submitted, set as submitted
-              if (
-                result.data.teamData.approvalstatus.includes("Approved") ||
-                result.data.teamData.approvalstatus.includes("Rejected") ||
-                result.data.teamData.approvalstatus.includes("Submitted")
-              ) {
-                setIsSubmitted(true);
+        // Fetch team data if user is authenticated
+        if (session?.user?.email) {
+          try {
+            const response = await fetch(
+              `/api/team?userEmail=${encodeURIComponent(session.user.email)}`,
+              {
+                signal: abortController.signal,
+                headers: {
+                  "Cache-Control": "no-cache",
+                },
               }
+            );
+
+            if (!isMounted) return;
+
+            if (response.ok) {
+              const result = await response.json();
+              if (result.data?.teamData) {
+                setTeamData(result.data.teamData);
+                setTeamMembers(result.data.membersData || []);
+
+                // If the team already submitted, set as submitted
+                if (
+                  result.data.teamData.approvalstatus &&
+                  ["Approved", "Rejected", "Submitted", "Resubmitted"].includes(
+                    result.data.teamData.approvalstatus
+                  )
+                ) {
+                  setIsSubmitted(true);
+                }
+              }
+            } else {
+              console.error("Failed to fetch team data:", response.status);
+            }
+          } catch (error) {
+            if (error) {
+              console.error("Error fetching team data:", error);
             }
           }
-        } catch (error) {
-          console.error("Error fetching team data:", error);
+        }
+      } catch (error) {
+        console.error("Error in init function:", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
         }
       }
-
-      if (isMounted) {
-        setLoading(false);
-      }
     };
+
     init();
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
-  }, []);
+  }, [setIsSubmitted]);
 
   const handleRejectionClick = () => {
     setIsSubmitting(false);
@@ -377,6 +397,20 @@ export default function TeamProfilePage() {
       const inst = getValues("institution");
       setInstitutionPrice(
         inst.toLowerCase().includes("telkom") ? "Rp 200.000" : "Rp 220.000"
+      );
+    }
+
+    if (step === 2) {
+      replace(
+        Array(memberCount)
+          .fill(null)
+          .map(() => ({
+            name: "",
+            email: "",
+            github_url: "",
+            requirementLink: "",
+            member_role: "Hustler",
+          }))
       );
     }
 
@@ -576,6 +610,7 @@ export default function TeamProfilePage() {
 
   // Conditional rendering based on approval status and edit state
   const shouldShowReadOnly =
+    !loading &&
     teamData?.approvalstatus &&
     ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
       teamData.approvalstatus
@@ -585,6 +620,15 @@ export default function TeamProfilePage() {
   // Show read-only view if team is submitted/accepted and not in edit mode
   if (shouldShowReadOnly) {
     return renderReadOnlyTeamInfo();
+  }
+
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div className="text-white flex justify-center items-center h-screen">
+        Loading team information...
+      </div>
+    );
   }
 
   return (
