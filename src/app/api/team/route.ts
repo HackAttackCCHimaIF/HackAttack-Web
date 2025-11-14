@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { supabaseServer } from "@/lib/config/supabase-server";
 import { Members } from "@/lib/types/teamMember";
 
-// ===============================
-// POST: Create Team
-// ===============================
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -12,7 +9,6 @@ export async function POST(req: Request) {
       leaderEmail,
       teamName,
       institution,
-      leaderGithub, 
       leaderName,
       requirementLink,
       leaderRole,
@@ -93,7 +89,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // --- Combine leader and members ---
+    // Collect all members with team leader
     const allMembers = [
       {
         team_id: teamData.id,
@@ -140,6 +136,12 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    return NextResponse.json({
+      status: 201,
+      data: { teamData, membersData },
+      message: "Team and members created successfully",
+    });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
@@ -149,9 +151,6 @@ export async function POST(req: Request) {
   }
 }
 
-// ===============================
-// GET: Get Team Info
-// ===============================
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
@@ -164,17 +163,40 @@ export async function GET(req: Request) {
       );
     }
 
-    const { data: userData, error: userError } = await supabaseServer
-      .from("Users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
+    // Find user by email with retry logic for timing issues
+    let userData = null;
+    let userError = null;
 
-    if (userError || !userData) {
+    // Try multiple times in case user was just created
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const result = await supabaseServer
+        .from("Users")
+        .select("id")
+        .eq("email", userEmail)
+        .single();
+
+      if (!result.error && result.data) {
+        userData = result.data;
+        break;
+      }
+
+      userError = result.error;
+
+      // Wait before retrying
+      if (attempt < 2) {
+        await new Promise((resolve) =>
+          setTimeout(resolve, 500 * (attempt + 1))
+        );
+      }
+    }
+
+    if (!userData) {
+      console.error("User not found after retries:", userError);
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const { data: teamData, error: teamError } = await supabaseServer
+    // eslint-disable-next-line prefer-const
+    let { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .select("*")
       .eq("created_by", userData.id)
@@ -186,11 +208,34 @@ export async function GET(req: Request) {
     }
 
     if (!teamData) {
-      return NextResponse.json({
-        status: 404,
-        data: null,
-        message: "No team found",
-      });
+      // Also try to find team by leader email as fallback
+      const { data: teamByEmail, error: emailError } = await supabaseServer
+        .from("TeamMember")
+        .select("team_id")
+        .eq("email", userEmail)
+        .eq("is_leader", true)
+        .maybeSingle();
+
+      if (teamByEmail && !emailError) {
+        const { data: teamDataByEmail, error: teamErrorByEmail } =
+          await supabaseServer
+            .from("Team")
+            .select("*")
+            .eq("id", teamByEmail.team_id)
+            .single();
+
+        if (teamDataByEmail && !teamErrorByEmail) {
+          teamData = teamDataByEmail;
+        }
+      }
+
+      if (!teamData) {
+        return NextResponse.json({
+          status: 404,
+          data: null,
+          message: "No team found",
+        });
+      }
     }
 
     const { data: membersData, error: membersError } = await supabaseServer
@@ -214,13 +259,13 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
-// ===============================
-// PUT: Update Team Info
-// ===============================
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -228,7 +273,6 @@ export async function PUT(req: Request) {
       leaderEmail,
       teamName,
       institution,
-      leaderGithub, 
       leaderName,
       requirementLink,
       leaderRole,
@@ -273,7 +317,7 @@ export async function PUT(req: Request) {
         .from("Users")
         .upsert({
           email: leaderEmail,
-          username: leaderName,
+          name: leaderName,
           updated_at: new Date(),
         })
         .select()
@@ -312,7 +356,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    // --- Update team ---
+    // Update team data
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .update({
@@ -350,7 +394,7 @@ export async function PUT(req: Request) {
       );
     }
 
-    // --- Prepare members data ---
+    // Collect all members with team leader
     const allMembers = [
       {
         team_id: teamData.id,
@@ -402,6 +446,9 @@ export async function PUT(req: Request) {
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

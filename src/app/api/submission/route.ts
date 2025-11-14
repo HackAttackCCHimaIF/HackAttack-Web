@@ -5,29 +5,18 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { proposal_url, userEmail } = body;
+    const { team_name, proposal_url } = body;
 
-    if (!proposal_url || !userEmail) {
+    if (!team_name || !proposal_url) {
       return NextResponse.json(
-        { error: "Proposal URL and user email are required" },
+        { error: "Team name and proposal URL are required" },
         { status: 400 }
       );
     }
-
-    const { data: userData, error: userError } = await supabaseServer
-      .from("Users")
-      .select("id")
-      .eq("email", userEmail)
-      .single();
-
-    if (userError || !userData) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
       .select("id")
-      .eq("created_by", userData.id)
+      .eq("team_name", team_name)
       .single();
 
     if (teamError || !teamData) {
@@ -37,58 +26,26 @@ export async function POST(req: Request) {
       );
     }
 
-    const { data: existingSubmission, error: selectError } =
-      await supabaseServer
-        .from("Submission")
-        .select("*")
-        .eq("team_id", teamData.id)
-        .maybeSingle();
-
-    if (selectError && selectError.code !== "PGRST116") {
-      console.error("Database error:", selectError);
-      return NextResponse.json({ error: selectError.message }, { status: 400 });
-    }
-
-    if (existingSubmission) {
-      const { data, error } = await supabaseServer
-        .from("Submission")
-        .update({
+    const submissionId = uuidv4();
+    const { data, error } = await supabaseServer
+      .from("Submission")
+      .insert([
+        {
+          id: submissionId,
+          team_id: teamData.id,
           proposal_url: proposal_url,
           status: "Pending",
-          updated_at: new Date(),
-        })
-        .eq("team_id", teamData.id)
-        .select()
-        .single();
+        },
+      ])
+      .select()
+      .single();
 
-      if (error) {
-        console.error("Update error:", error);
-        return NextResponse.json({ error: error.message }, { status: 400 });
-      }
-
-      return NextResponse.json({ success: true, data, updated: true });
-    } else {
-      const submissionId = uuidv4();
-      const { data, error } = await supabaseServer
-        .from("Submission")
-        .insert([
-          {
-            id: submissionId,
-            proposal_url: proposal_url,
-            status: "Pending",
-            team_id: teamData.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Insert error:", error);
-        return NextResponse.json({ error: error.message }, { status: 400 });
-      }
-
-      return NextResponse.json({ success: true, data, created: true });
+    if (error) {
+      console.error("Insert error:", error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
+
+    return NextResponse.json({ success: true, data, created: true });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
@@ -119,7 +76,7 @@ export async function GET(req: Request) {
       .single();
 
     if (userError || !userData) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ status: 404, error: "User not found" });
     }
 
     // Get team ID
@@ -130,37 +87,39 @@ export async function GET(req: Request) {
       .single();
 
     if (teamError || !teamData) {
-      return NextResponse.json({ error: "Team not found" }, { status: 404 });
+      return NextResponse.json({ status: 404, error: "Team not found" });
     }
 
     // Get submission data
     const { data: submissionData, error: submissionError } =
       await supabaseServer
         .from("Submission")
-        .select("*")
+        .select("id, proposal_url")
         .eq("team_id", teamData.id)
         .maybeSingle();
 
     if (submissionError && submissionError.code !== "PGRST116") {
       console.error("Database error:", submissionError);
-      return NextResponse.json(
-        { error: submissionError.message },
-        { status: 400 }
-      );
+      return NextResponse.json({ status: 400, error: submissionError.message });
+    }
+
+    if (!submissionData) {
+      return NextResponse.json({
+        status: 200,
+        data: teamData,
+        message: "No submission found for this team",
+      });
     }
 
     return NextResponse.json({
-      success: true,
+      status: 200,
       data: {
-        submission: submissionData,
-        team: teamData,
+        submissionData,
+        teamData,
       },
     });
   } catch (error) {
     console.error("API error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ status: 500, error: "Internal server error" });
   }
 }

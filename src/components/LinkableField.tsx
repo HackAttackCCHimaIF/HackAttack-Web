@@ -32,7 +32,7 @@ export function LinkableField({
   return (
     <div className="flex flex-col gap-3">
       {label && (
-        <label className="text-sm font-medium text-white">
+        <label className="text-sm font-medium">
           {renderLabel(label)}
         </label>
       )}

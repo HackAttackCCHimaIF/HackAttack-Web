@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   User,
@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utility/utils";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { supabase } from "@/lib/config/supabase";
 
 interface SidebarProps {
   isLoggedIn: boolean;
@@ -27,6 +28,7 @@ interface SidebarProps {
 export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [disableSubmission, setDisableSubmission] = useState(false);
 
   const menuItems = [
     { label: "Profile", href: "/dashboard/peserta", icon: <User size={18} /> },
@@ -46,6 +48,34 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
       icon: <Send size={18} />,
     },
   ];
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      const userEmail = session?.user?.email;
+      if (userEmail) {
+        try {
+          const response = await fetch(
+            `/api/users-profile?userEmail=${encodeURIComponent(userEmail)}`
+          );
+
+          const userData = await response.json();
+          if (!userData.data?.team_name || !userData.data?.id) {
+            setDisableSubmission(true);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      } else {
+        setDisableSubmission(true);
+      }
+    };
+
+    getUser();
+  }, []);
 
   return (
     <>
@@ -83,29 +113,44 @@ export default function Sidebar({ isLoggedIn, onSignOut }: SidebarProps) {
           </div>
 
           <nav className="flex flex-col gap-3">
-            {menuItems.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 p-3 pb-2 pl-6 rounded-lg text-gray-300 hover:text-white relative transition
-                  ${
-                    pathname === item.href ? "text-[#EF4B72] font-semibold" : ""
-                  }`}
-              >
-                {pathname === item.href && (
-                  <div className="absolute left-1 top-0 h-full w-1 bg-[#EF4B72] rounded-md"></div>
-                )}
-                <div
+            {menuItems.map((item) => {
+              const isActive = pathname === item.href;
+              const isSubmission = item.label === "Submission";
+              const isDisabled = isSubmission && disableSubmission;
+
+              return (
+                <a
+                  key={item.label}
+                  href={isDisabled ? "#" : item.href}
+                  onClick={(e) => {
+                    if (isDisabled) e.preventDefault();
+                  }}
                   className={cn(
-                    `text-white p-2 rounded-full`,
-                    pathname === item.href ? " bg-[#EF4B72]/60" : "bg-white/10"
+                    `flex items-center gap-3 p-3 pb-2 pl-6 rounded-lg text-gray-300 hover:text-white relative transition`,
+                    isActive && "text-[#EF4B72] font-semibold",
+                    isDisabled &&
+                      "opacity-40 pointer-events-none cursor-not-allowed"
                   )}
                 >
-                  {item.icon}
-                </div>
-                <span>{item.label}</span>
-              </a>
-            ))}
+                  {isActive && !isDisabled && (
+                    <div className="absolute left-1 top-0 h-full w-1 bg-[#EF4B72] rounded-md"></div>
+                  )}
+
+                  <div
+                    className={cn(
+                      `text-white p-2 rounded-full`,
+                      isActive && !isDisabled
+                        ? "bg-[#EF4B72]/60"
+                        : "bg-white/10"
+                    )}
+                  >
+                    {item.icon}
+                  </div>
+
+                  <span>{item.label}</span>
+                </a>
+              );
+            })}
           </nav>
         </div>
 
