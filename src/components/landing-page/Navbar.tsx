@@ -8,6 +8,9 @@ import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/config/supabase";
 import { User } from "@supabase/supabase-js";
+import { Dialog, DialogTrigger } from "../ui/dialog";
+import SubmissionDialog from "../SubmissionDialog";
+import SubmissionDialogNoOTP from "../SubmissionDialogNoOTP";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -179,6 +182,9 @@ const Navbar = () => {
                     </Button>
                   )}
                 </div>
+                <div>
+                  <SubmissionDialogNoOTP/>
+                </div>
               </>
             )}
           </div>
@@ -277,6 +283,7 @@ const Navbar = () => {
                     Guide Book
                   </Button>
                 </Link>
+                
                 <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
                   {!loading && (
                     <Link
@@ -287,6 +294,7 @@ const Navbar = () => {
                         {user ? "Dashboard" : "Register Now"}
                       </Button>
                     </Link>
+                    
                   )}
                   {loading && (
                     <Button
@@ -296,6 +304,10 @@ const Navbar = () => {
                       Loading...
                     </Button>
                   )}
+                </div>
+
+                <div className="w-full">
+                  <SubmissionDialogNoOTP/>
                 </div>
               </>
             )}
