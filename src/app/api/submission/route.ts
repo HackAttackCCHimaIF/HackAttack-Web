@@ -5,35 +5,57 @@ import { v4 as uuidv4 } from "uuid";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { team_name, proposal_url } = body;
+    const { team_name, proposal_url, leader_email } = body;
 
-    if (!team_name || !proposal_url) {
+    if (!team_name || !proposal_url || !leader_email) {
       return NextResponse.json(
-        { error: "Team name and proposal URL are required" },
+        { error: "team_name, proposal_url, and leader_email are required" },
         { status: 400 }
       );
     }
+    const { data: userData, error: userError } = await supabaseServer
+      .from("Users")
+      .select("id")
+      .eq("email", leader_email)
+      .single();
+
+    if (userError || !userData) {
+      return NextResponse.json(
+        {
+          error: "Email Leader tidak ditemukan, gunakan email yang sesuai",
+        },
+        { status: 404 }
+      );
+    }
+
+    const userId = userData.id;
+
     const { data: teamData, error: teamError } = await supabaseServer
       .from("Team")
-      .select("id")
+      .select("id, created_by")
       .eq("team_name", team_name)
+      .eq("created_by", userId)
       .single();
 
     if (teamError || !teamData) {
       return NextResponse.json(
-        { error: "Team not found for this user" },
+        {
+          error:
+            "Email Leader tidak sesuai dengan data Tim yang dipilih, gunakan email yang sesuai",
+        },
         { status: 404 }
       );
     }
 
     const submissionId = uuidv4();
+
     const { data, error } = await supabaseServer
       .from("Submission")
       .insert([
         {
           id: submissionId,
           team_id: teamData.id,
-          proposal_url: proposal_url,
+          proposal_url,
           status: "Pending",
         },
       ])
