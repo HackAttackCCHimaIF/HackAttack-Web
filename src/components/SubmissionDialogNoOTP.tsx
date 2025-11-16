@@ -182,23 +182,8 @@ export default function SubmissionDialogNoOTP({
               label="Team Leader Email"
               placeholder="leader@email.com"
               error={errors.leader_email?.message}
+              tooltip="Gunakan Email Ketua Tim"
             />
-
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className="text-white/60 hover:text-white"
-                  >
-                    <InfoIcon className="size-4" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-xs text-sm">
-                  <p>Gunakan Email Ketua Tim</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
           </div>
 
           {/* AGREEMENT */}
