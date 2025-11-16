@@ -1,6 +1,12 @@
-import { Pencil } from "lucide-react";
+import { InfoIcon, Pencil } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utility/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface EditableInputProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,6 +18,7 @@ interface EditableInputProps {
   type?: string;
   error?: string;
   label?: string;
+  tooltip?: string;
 }
 
 export const EditableInput = ({
@@ -23,11 +30,31 @@ export const EditableInput = ({
   type = "text",
   error,
   label,
+  tooltip,
   ...props
 }: EditableInputProps) => {
   return (
     <div className="flex flex-col w-full gap-1">
-      {label && <span className="text-white text-sm">{label}</span>}
+      <div className="flex items-center gap-2">
+        {label && <span className="text-white text-sm">{label}</span>}
+        {tooltip && (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="text-white/60 hover:text-white"
+                >
+                  <InfoIcon className="size-4" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="max-w-xs text-sm">
+                <p>{tooltip}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
 
       <div className="relative">
         <Input
