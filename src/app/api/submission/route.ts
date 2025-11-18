@@ -49,25 +49,48 @@ export async function POST(req: Request) {
 
     const submissionId = uuidv4();
 
-    const { data, error } = await supabaseServer
+    const insertRes = await supabaseServer
       .from("Submission")
       .insert([
         {
           id: submissionId,
           team_id: teamData.id,
           proposal_url,
-          status: "Pending",
         },
       ])
-      .select()
-      .single();
+      .select();
 
-    if (error) {
-      console.error("Insert error:", error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (insertRes.error) {
+      return NextResponse.json(
+        { error: insertRes.error.message },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ success: true, data, created: true });
+    const inserted = insertRes.data;
+
+    if (inserted && inserted.length > 0) {
+      return NextResponse.json({
+        success: true,
+        data: inserted[0],
+        created: true,
+      });
+    }
+
+    const { data: existing, error: existingError } = await supabaseServer
+      .from("Submission")
+      .select("id, team_id, proposal_url, status")
+      .eq("team_id", teamData.id)
+      .single();
+
+    if (existingError) {
+      return NextResponse.json(
+        { error: existingError.message },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json({ success: true, data: existing, created: false });
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
