@@ -15,6 +15,11 @@ const Navbar = () => {
   const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const pathname = usePathname();
 
+  const submissionDeadlineUTC = new Date("2025-11-19T02:00:00Z");
+  const isSubmissionClosed = Date.now() >= submissionDeadlineUTC.getTime();
+  const closedMsg =
+    "Submission ditutup, sudah melewati deadline pukul 09:00 WIB 19 November 2025";
+
   const iconList = ["hima", "telkom", "cci", "hack"];
 
   const homeSubItems = [
@@ -163,7 +168,11 @@ const Navbar = () => {
                   </Button>
                 </Link>
                 <div>
-                  <SubmissionDialogNoOTP teams={teams} />
+                  <SubmissionDialogNoOTP
+                    teams={teams}
+                    isDeadline={isSubmissionClosed}
+                    isDeadlineMessage={closedMsg}
+                  />
                 </div>
               </>
             )}
@@ -265,7 +274,11 @@ const Navbar = () => {
                 </Link>
 
                 <div className="w-full">
-                  <SubmissionDialogNoOTP teams={teams} />
+                  <SubmissionDialogNoOTP
+                    teams={teams}
+                    isDeadline={isSubmissionClosed}
+                    isDeadlineMessage={closedMsg}
+                  />
                 </div>
               </>
             )}

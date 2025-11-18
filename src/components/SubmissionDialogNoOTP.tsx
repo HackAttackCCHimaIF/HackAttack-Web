@@ -45,11 +45,18 @@ const submissionSchema = z.object({
 type SubmissionValues = z.infer<typeof submissionSchema>;
 
 interface SubmissionDialogNoOTPProps {
-  teams: { id: string; name: string }[];
+  teams: {
+    id: string;
+    name: string;
+  }[];
+  isDeadline: boolean;
+  isDeadlineMessage: string;
 }
 
 export default function SubmissionDialogNoOTP({
   teams,
+  isDeadline,
+  isDeadlineMessage,
 }: SubmissionDialogNoOTPProps) {
   const {
     register,
@@ -65,41 +72,72 @@ export default function SubmissionDialogNoOTP({
 
   const agreeChecked = watch("agree");
 
-  // Teams data is now passed as prop from parent component
-
-  const onSubmit = (data: SubmissionValues) => {
+  const onSubmit = async (data: SubmissionValues) => {
     setIsSubmitting(true);
-    const submitData = fetch("/api/submission", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        team_name: data.team_name,
-        proposal_url: data.proposal_url,
-        leader_email: data.leader_email,
-      }),
-    });
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000);
 
-    submitData.then(async (res) => {
-      const result = await res.json();
+      const res = await fetch("/api/submission", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          team_name: data.team_name,
+          proposal_url: data.proposal_url,
+          leader_email: data.leader_email,
+        }),
+        signal: controller.signal,
+        cache: "no-store",
+      });
+
+      clearTimeout(timeout);
+
+      const result = await res.json().catch(() => ({}));
 
       if (res.ok) {
         toast.success("Submission successful!", { duration: 3000 });
-        setTimeout(() => window.location.reload(), 3000);
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         toast.error(result.error || "Submission failed.", { duration: 3000 });
       }
-    });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error("Network error. Please try again.", { duration: 3000 });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button className="rounded-full w-full bg-[#EF4B72A3]/50 transition-all duration-200 hover:bg-[#EF4B72A3] backdrop-blur-sm">
-          Submission
-        </Button>
-      </DialogTrigger>
+      {!isDeadline ? (
+        <DialogTrigger asChild>
+          <Button className="rounded-full w-full bg-[#EF4B72A3]/50 transition-all duration-200 hover:bg-[#EF4B72A3] backdrop-blur-sm">
+            Submission
+          </Button>
+        </DialogTrigger>
+      ) : (
+        <TooltipProvider delayDuration={100}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span>
+                <Button
+                  disabled
+                  className="rounded-full w-full bg-[#EF4B72A3]/50 transition-all duration-200 hover:bg-[#EF4B72A3] backdrop-blur-sm"
+                >
+                  Submission
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs text-sm">
+              <p>{isDeadlineMessage}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
 
       <DialogContent className="max-w-sm md:max-w-md bg-stone-950/90 backdrop-blur-2xl rounded-xl border border-white/10">
         <DialogHeader>
@@ -210,8 +248,12 @@ export default function SubmissionDialogNoOTP({
               disabled={!agreeChecked || isSubmitting}
               className="w-1/3 flex items-center justify-center gap-2"
             >
-              <SendHorizonal className="text-[#EF4B72A3]" />
-              Submit
+              {isSubmitting ? (
+                <Loader2 className="animate-spin text-[#EF4B72A3]" />
+              ) : (
+                <SendHorizonal className="text-[#EF4B72A3]" />
+              )}
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </div>
         </form>
