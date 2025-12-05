@@ -23,6 +23,11 @@ const SponsorPage = () => {
       img: "/sponsor/RumahMarta.jpg",
       desc: "Rumah Marta",
     },
+    {
+      label: "Seeds",
+      img: "/sponsor/seeds.png",
+      desc: "Seeds",
+    },
   ]
 
   return (

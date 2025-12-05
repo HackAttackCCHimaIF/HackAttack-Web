@@ -764,72 +764,72 @@ export default function TeamProfilePage() {
 
                 {/* Grid Responsive */}
                 <CardContent
-  className="
-    grid grid-cols-1 sm:grid-cols-2 
-    gap-4 sm:gap-5 
-    items-start
-  "
->
-  {/* === Leader Name === */}
-  <EditableInput
-    register={register}
-    name="leaderName"
-    placeholder="Leader name"
-    className={inputClassName}
-    error={errors.leaderName?.message}
-  />
-
-  {/* === Leader Role (kanan atas) === */}
-  <Controller
-    name="leaderRole"
-    control={control}
-    render={({ field }) => (
-      <div className="flex flex-col w-full">
-        <Select
-          onValueChange={field.onChange}
-          value={field.value || ""}
-        >
-          <SelectTrigger
-            className={cn(
-              "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
-              errors.leaderRole?.message
-                ? "border-red-500/70 focus-visible:ring-red-500/40"
-                : "border-white/10"
-            )}
-          >
-            <SelectValue placeholder="Select Role" />
-          </SelectTrigger>
-
-          <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-            <SelectItem
-              value="Hustler"
-              className="hover:bg-pink-500/30 cursor-pointer"
+              className="
+                grid grid-cols-1 sm:grid-cols-2 
+                gap-4 sm:gap-5 
+                items-start
+              "
             >
-              Hustler
-            </SelectItem>
-            <SelectItem
-              value="Hipster"
-              className="hover:bg-pink-500/30 cursor-pointer"
-            >
-              Hipster
-            </SelectItem>
-            <SelectItem
-              value="Hacker"
-              className="hover:bg-pink-500/30 cursor-pointer"
-            >
-              Hacker
-            </SelectItem>
-          </SelectContent>
-        </Select>
+              {/* === Leader Name === */}
+              <EditableInput
+                register={register}
+                name="leaderName"
+                placeholder="Leader name"
+                className={inputClassName}
+                error={errors.leaderName?.message}
+              />
 
-        {errors.leaderRole?.message && (
-          <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
-            {errors.leaderRole.message}
-          </span>
-        )}
-        </div>
-        )}
-      />
+              {/* === Leader Role (kanan atas) === */}
+              <Controller
+                name="leaderRole"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex flex-col w-full">
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger
+                        className={cn(
+                          "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
+                          errors.leaderRole?.message
+                            ? "border-red-500/70 focus-visible:ring-red-500/40"
+                            : "border-white/10"
+                        )}
+                      >
+                        <SelectValue placeholder="Select Role" />
+                      </SelectTrigger>
+
+                      <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                        <SelectItem
+                          value="Hustler"
+                          className="hover:bg-pink-500/30 cursor-pointer"
+                        >
+                          Hustler
+                        </SelectItem>
+                        <SelectItem
+                          value="Hipster"
+                          className="hover:bg-pink-500/30 cursor-pointer"
+                        >
+                          Hipster
+                        </SelectItem>
+                        <SelectItem
+                          value="Hacker"
+                          className="hover:bg-pink-500/30 cursor-pointer"
+                        >
+                          Hacker
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {errors.leaderRole?.message && (
+                      <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                        {errors.leaderRole.message}
+                      </span>
+                    )}
+                    </div>
+                    )}
+                  />
 
                   {/* === Github URL (kiri tengah) === */}
                   <EditableInput

@@ -8,8 +8,6 @@ import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { supabase } from "@/lib/config/supabase";
 import { User } from "@supabase/supabase-js";
-import { Dialog, DialogTrigger } from "../ui/dialog";
-import SubmissionDialog from "../SubmissionDialog";
 import SubmissionDialogNoOTP from "../SubmissionDialogNoOTP";
 
 const Navbar = () => {
