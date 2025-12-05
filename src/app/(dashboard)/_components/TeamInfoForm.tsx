@@ -39,7 +39,6 @@ import {
 import Team from "@/lib/types/team";
 import { Members } from "@/lib/types/teamMember";
 import { EditableInput } from "./EditableInput";
-import { LinkableField } from "@/components/LinkableField";
 
 // =====================
 // Schema
@@ -47,9 +46,9 @@ import { LinkableField } from "@/components/LinkableField";
 const teamMemberSchema = z.object({
   name: z.string(),
   email: z.email("Invalid email").nonempty("Email is required"),
-  github_url: z.string(),
   member_role: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
 }) satisfies z.ZodType<TeamMember>;
 
 // Separate schema for member data only
@@ -58,9 +57,9 @@ const teamDataSchema = z.object({
   institution: z.string().min(1, "Institution is required"),
   leaderName: z.string().min(1, "Nama Ketua wajib diisi"),
   leaderRole: z.enum(["Hustler", "Hipster", "Hacker"]).optional(),
-  leaderGithub: z.string().optional(),
   whatsapp_number: z.string().regex(/^62\d{8,13}$/, "Invalid WhatsApp number"),
   requirementLink: z.url("URL berkas persyaratan wajib diisi"),
+  github_url: z.url("URL GitHub tidak valid"),
   members: z
     .array(teamMemberSchema)
     .min(1, "At least one member required")
@@ -94,25 +93,18 @@ export default function TeamProfilePage() {
     reset,
     trigger,
     formState: { errors },
-      } = useForm<TeamFormValues>({
-        resolver: zodResolver(teamDataSchema),
-        defaultValues: {
-        teamName: "",
-        institution: "",
-        leaderName: "",
-        leaderRole: undefined,
-        leaderGithub: "", 
-        whatsapp_number: "62",
+  } = useForm<TeamFormValues>({
+    resolver: zodResolver(teamDataSchema),
+    defaultValues: {
+      whatsapp_number: "62",
+      members: Array(2).fill({
+        name: "",
+        email: "",
         requirementLink: "",
-        members: Array(2).fill({
-          name: "",
-          email: "",
-          github_url: "", 
-          requirementLink: "",
-          member_role: undefined,
-        }),
-        paymentproof_url: "",
-      },
+        member_role: null,
+        github_url: "",
+      }),
+    },
   });
 
   const { fields, replace } = useFieldArray({
@@ -120,92 +112,196 @@ export default function TeamProfilePage() {
     name: "members",
   });
 
-  useEffect(() => {
-    // Hindari replace saat pertama kali render (default 2)
-    if (memberCount < 1) return;
-
-    replace(
-      Array(memberCount)
-        .fill(null)
-        .map(() => ({
-          name: "",
-          email: "",
-          github_url: "",
-          requirementLink: "",
-          member_role: undefined,
-        }))
-    );
-  }, [memberCount, replace]);
-
-  const refreshTeamData = async () => {
-  try {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-    const leaderEmail = session?.user?.email;
-
-    if (!leaderEmail) return;
-
-    const response = await fetch(`/api/team?userEmail=${encodeURIComponent(leaderEmail)}`);
-    if (response.ok) {
-      const result = await response.json();
-      setTeamData(result.data.teamData || null);
-      setTeamMembers(result.data.membersData || []);
-    }
-  } catch (error) {
-    console.error("Error refreshing team data:", error);
-  }
-};
-
-
   // Auth and team data fetch
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
 
-    const init = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+    const init = async (attempt = 1) => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
 
-      // Fetch team data if user is authenticated
-      if (session?.user?.email) {
-        try {
-          const response = await fetch(
-            `/api/team?userEmail=${encodeURIComponent(session.user.email)}`
-          );
+        // Fetch team data if user is authenticated
+        if (session?.user?.email) {
+          try {
+            // Add cache-busting parameter to prevent stale data
+            const cacheBuster = Date.now();
+            const response = await fetch(
+              `/api/team?userEmail=${encodeURIComponent(
+                session.user.email
+              )}&_=${cacheBuster}`,
+              {
+                signal: abortController.signal,
+                headers: {
+                  "Cache-Control": "no-cache, no-store, must-revalidate",
+                  Pragma: "no-cache",
+                },
+              }
+            );
 
-          if (response.ok && isMounted) {
-            const result = await response.json();
-            if (result.data?.teamData) {
-              setTeamData(result.data.teamData);
-              setTeamMembers(result.data.membersData || []);
+            if (!isMounted) return;
 
-              // If the team already submitted, set as submitted
-              if (
-                result.data.teamData.approvalstatus.includes("Approved") ||
-                result.data.teamData.approvalstatus.includes("Rejected") ||
-                result.data.teamData.approvalstatus.includes("Submitted")
-              ) {
-                setIsSubmitted(true);
+            if (response.ok) {
+              const result = await response.json();
+              if (result.data?.teamData) {
+                setTeamData(result.data.teamData);
+                setTeamMembers(result.data.membersData || []);
+
+                // If the team already submitted, set as submitted
+                if (
+                  result.data.teamData.approvalstatus &&
+                  ["Approved", "Rejected", "Submitted", "Resubmitted"].includes(
+                    result.data.teamData.approvalstatus
+                  )
+                ) {
+                  setIsSubmitted(true);
+                } else {
+                  setIsSubmitted(false);
+                }
+              } else {
+                // No team data found, ensure we're in edit mode
+                setIsSubmitted(false);
+              }
+            } else {
+              console.error("Failed to fetch team data:", response.status);
+
+              // Retry logic for transient failures
+              if (attempt < 3 && isMounted) {
+                setTimeout(() => init(attempt + 1), 1000 * attempt);
+                return;
+              }
+            }
+          } catch (error) {
+            if (error instanceof DOMException && error.name === "AbortError") {
+              console.log("Fetch aborted");
+            } else {
+              console.error("Error fetching team data:", error);
+
+              // Retry logic for transient failures
+              if (attempt < 3 && isMounted) {
+                setTimeout(() => init(attempt + 1), 1000 * attempt);
+                return;
               }
             }
           }
-        } catch (error) {
-          console.error("Error fetching team data:", error);
+        }
+      } catch (error) {
+        console.error("Error in init function:", error);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
         }
       }
-
-      if (isMounted) {
-        setLoading(false);
-      }
     };
+
     init();
 
     return () => {
       isMounted = false;
+      abortController.abort();
     };
-  }, []);
+  }, [setIsSubmitted]);
+
+  // // Verify that data was actually saved to database
+  // const verifyDataSaved = async (
+  //   leaderEmail: string,
+  //   submittedData: TeamFormValues
+  // ): Promise<boolean> => {
+  //   try {
+  //     // Wait a moment for database to commit
+  //     await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  //     const response = await fetch(
+  //       `/api/team?userEmail=${encodeURIComponent(leaderEmail)}}`
+  //     );
+
+  //     if (!response.ok) {
+  //       console.error("Verification fetch failed:", response.status);
+  //       return false;
+  //     }
+
+  //     const result = await response.json();
+
+  //     // Check if team data exists
+  //     if (!result.data?.teamData) {
+  //       console.error("No team data found in verification response");
+  //       return false;
+  //     }
+
+  //     const savedTeam = result.data.teamData;
+  //     const savedMembers = result.data.membersData || [];
+
+  //     console.log("Verification debug - Submitted:", {
+  //       teamName: submittedData.teamName,
+  //       memberCount: submittedData.members.length,
+  //     });
+
+  //     console.log("Verification debug - Saved:", {
+  //       teamName: savedTeam.team_name,
+  //       memberCount: savedMembers.length,
+  //       savedTeam: savedTeam,
+  //       savedMembers: savedMembers,
+  //     });
+
+  //     // More lenient verification - check if we have any team data at all
+  //     const hasTeamData = !!savedTeam && !!savedTeam.team_name;
+  //     const hasMembers = savedMembers.length > 0;
+
+  //     // If we have team data and at least some members, consider it successful
+  //     return hasTeamData && hasMembers;
+  //   } catch (error) {
+  //     console.error("Data verification failed:", error);
+  //     return false;
+  //   }
+  // };
+
+  const refreshTeamData = async (leaderEmail: string, attempt = 1) => {
+    try {
+      // Add cache-busting parameter to prevent stale data
+      const cacheBuster = Date.now();
+      const response = await fetch(
+        `/api/team?userEmail=${encodeURIComponent(
+          leaderEmail
+        )}&_=${cacheBuster}`,
+        {
+          headers: {
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            Pragma: "no-cache",
+          },
+        }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        if (result.data?.teamData) {
+          setTeamData(result.data.teamData);
+          setTeamMembers(result.data.membersData || []);
+          setEditRejected(false);
+
+          // Update isSubmitted state based on approval status
+          if (
+            result.data.teamData.approvalstatus &&
+            ["Approved", "Rejected", "Submitted", "Resubmitted"].includes(
+              result.data.teamData.approvalstatus
+            )
+          ) {
+            setIsSubmitted(true);
+          } else {
+            setIsSubmitted(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error refreshing team data:", error);
+
+      // Retry logic for refresh
+      if (attempt < 2) {
+        setTimeout(() => refreshTeamData(leaderEmail, attempt + 1), 1000);
+      }
+    }
+  };
 
   const handleRejectionClick = () => {
     setIsSubmitting(false);
@@ -232,7 +328,7 @@ export default function TeamProfilePage() {
           email: member.email || "",
           requirementLink: member.requirementLink || "",
           member_role: member.member_role || undefined,
-          github_url: member.github_url || "",
+          github_url: member.github_url,
         }))
       );
 
@@ -257,6 +353,8 @@ export default function TeamProfilePage() {
     const leaderEmail = user?.email;
     if (!leaderEmail) {
       toast.error("User not authenticated.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -264,6 +362,8 @@ export default function TeamProfilePage() {
 
     if (!paymentProof) {
       toast.error("Please upload payment proof.");
+      setIsSubmitting(false);
+
       return;
     }
 
@@ -280,15 +380,21 @@ export default function TeamProfilePage() {
       }
 
       const res = await submitData.json();
-
       if (res.error) {
         toast.error(res.error);
+        return;
+      }
+
+      // Check if the response indicates success
+      if (res.status !== 201 && res.status !== 200) {
+        toast.error("Submission failed: " + (res.message || "Unknown error"));
         return;
       }
       toast.success("Form resubmitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
-      await refreshTeamData();
+
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -336,10 +442,24 @@ export default function TeamProfilePage() {
         toast.error(res.error);
         return;
       }
+
+      // // Verify data was actually saved to database
+      // const verificationSuccess = await verifyDataSaved(
+      //   leaderEmail,
+      //   currentValues
+      // );
+
+      // if (!verificationSuccess) {
+      //   toast.error("Failed to verify data save. Please check your team data.");
+      //   setIsSubmitting(false);
+      //   return;
+      // }
+
       toast.success("Form submitted successfully!");
       setSubmittedData(currentValues);
       setIsSubmitted(true);
-      await refreshTeamData();
+
+      await refreshTeamData(leaderEmail);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -377,6 +497,20 @@ export default function TeamProfilePage() {
       const inst = getValues("institution");
       setInstitutionPrice(
         inst.toLowerCase().includes("telkom") ? "Rp 200.000" : "Rp 220.000"
+      );
+    }
+
+    if (step === 2) {
+      replace(
+        Array(memberCount)
+          .fill(null)
+          .map(() => ({
+            name: "",
+            email: "",
+            github_url: "",
+            requirementLink: "",
+            member_role: "Hustler",
+          }))
       );
     }
 
@@ -576,6 +710,7 @@ export default function TeamProfilePage() {
 
   // Conditional rendering based on approval status and edit state
   const shouldShowReadOnly =
+    !loading &&
     teamData?.approvalstatus &&
     ["Submitted", "Resubmitted", "Accepted", "Rejected"].includes(
       teamData.approvalstatus
@@ -587,8 +722,17 @@ export default function TeamProfilePage() {
     return renderReadOnlyTeamInfo();
   }
 
+  // Show loading state while fetching data
+  if (loading) {
+    return (
+      <div className="text-white flex justify-center items-center h-screen">
+        Loading team information...
+      </div>
+    );
+  }
+
   return (
-    <div className="overflow-y-auto w-full min-h-screen text-white pt-12 md:pt-0">
+    <div className="overflow-y-auto w-full min-h-screen text-white">
       <HeaderDashboard topText="Team" bottomText="Registration" />
 
       <div className="flex h-full items-center justify-center">
@@ -731,146 +875,117 @@ export default function TeamProfilePage() {
             {step === 3 && (
               <div className="space-y-8 w-full">
                 <Card className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl w-full">
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between gap-2 text-white text-lg sm:text-xl flex-wrap">
-                    <div className="flex items-center gap-2">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-white text-xl">
                       <UserIcon className="size-6 text-pink-500/50" />
-                      <span>Leader Information</span>
-                    </div>
-
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            className="text-white/60 hover:text-white transition-colors"
+                      Leader Information
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-white/60 hover:text-white"
+                            >
+                              <InfoIcon className="size-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent
+                            side="right"
+                            className="max-w-xs text-sm"
                           >
-                            <InfoIcon className="size-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="right"
-                          className="max-w-xs text-sm"
-                        >
-                          <p>
-                            Pemberitahuan terkait data Tim akan dikirimkan ke
-                            email yang digunakan untuk Login/Signin.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </CardTitle>
-                </CardHeader>
-
-                {/* Grid Responsive */}
-                <CardContent
-              className="
-                grid grid-cols-1 sm:grid-cols-2 
-                gap-4 sm:gap-5 
-                items-start
-              "
-            >
-              {/* === Leader Name === */}
-              <EditableInput
-                register={register}
-                name="leaderName"
-                placeholder="Leader name"
-                className={inputClassName}
-                error={errors.leaderName?.message}
-              />
-
-              {/* === Leader Role (kanan atas) === */}
-              <Controller
-                name="leaderRole"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex flex-col w-full">
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <SelectTrigger
-                        className={cn(
-                          "bg-white/10 text-white placeholder:text-white/50 rounded-full py-4 px-5 border w-full transition-all duration-200 text-sm sm:text-base",
-                          errors.leaderRole?.message
-                            ? "border-red-500/70 focus-visible:ring-red-500/40"
-                            : "border-white/10"
-                        )}
-                      >
-                        <SelectValue placeholder="Select Role" />
-                      </SelectTrigger>
-
-                      <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
-                        <SelectItem
-                          value="Hustler"
-                          className="hover:bg-pink-500/30 cursor-pointer"
-                        >
-                          Hustler
-                        </SelectItem>
-                        <SelectItem
-                          value="Hipster"
-                          className="hover:bg-pink-500/30 cursor-pointer"
-                        >
-                          Hipster
-                        </SelectItem>
-                        <SelectItem
-                          value="Hacker"
-                          className="hover:bg-pink-500/30 cursor-pointer"
-                        >
-                          Hacker
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-
-                    {errors.leaderRole?.message && (
-                      <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
-                        {errors.leaderRole.message}
-                      </span>
-                    )}
-                    </div>
-                    )}
-                  />
-
-                  {/* === Github URL (kiri tengah) === */}
-                  <EditableInput
-                    register={register}
-                    name="leaderGithub"
-                    placeholder="Github URL (optional)"
-                    className={inputClassName}
-                    error={errors.leaderGithub?.message}
-                  />
-
-                  {/* === Publication Materials (kanan tengah, tapi span 2 baris di sm+) === */}
-                  <div className="flex flex-col gap-1 sm:row-span-2 sm:self-stretch">
-                    <LinkableField
-                      label="Publication Materials"
-                      openInNewTab
-                      href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
-                      className="bg-white/10 hover:bg-white/20 border border-white/10 rounded-full px-5 py-4 text-white transition-all duration-200 truncate flex items-center justify-between"
+                            <p>
+                              Pemberitahuan terkait data Tim akan dikirimkan ke
+                              email yang digunakan untuk Login/Signin.
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-2 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="leaderName"
+                      placeholder="Leader name"
+                      className={inputClassName}
+                      error={errors.leaderName?.message}
                     />
-                  </div>
+                    <Controller
+                      name="leaderRole"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="flex flex-col w-full">
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value || ""}
+                          >
+                            <SelectTrigger
+                              className={cn(
+                                "bg-white/10 text-white placeholder:text-white/50 rounded-full py-5 px-5 border w-full transition-all duration-200",
+                                errors.leaderRole?.message
+                                  ? "border-red-500/70 focus-visible:ring-red-500/40"
+                                  : "border-white/10"
+                              )}
+                            >
+                              <SelectValue placeholder="Select Role" />
+                            </SelectTrigger>
 
-                  {/* === Requirement URL (kiri bawah) === */}
-                  <EditableInput
-                    register={register}
-                    name="requirementLink"
-                    placeholder="Requirement URL"
-                    className={inputClassName}
-                    error={errors.requirementLink?.message}
-                  />
+                            <SelectContent className="bg-[#1A1C1E] text-white border border-white/20 rounded-lg shadow-xl">
+                              <SelectItem
+                                value="Hustler"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hustler
+                              </SelectItem>
+                              <SelectItem
+                                value="Hipster"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hipster
+                              </SelectItem>
+                              <SelectItem
+                                value="Hacker"
+                                className="hover:bg-pink-500/30 cursor-pointer"
+                              >
+                                Hacker
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
 
-                  {/* === WhatsApp Number (kanan bawah) === */}
-                  <EditableInput
-                    register={register}
-                    name="whatsapp_number"
-                    placeholder="62812345678"
-                    type="tel"
-                    className={inputClassName}
-                    error={errors.whatsapp_number?.message}
-                  />
-                </CardContent>
-              </Card>
-
+                          {errors.leaderRole?.message && (
+                            <span className="text-red-400 text-xs mt-1 ml-1 animate-fadeIn">
+                              {errors.leaderRole.message}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                  </CardContent>
+                  <CardContent className="grid grid-cols-3 gap-3">
+                    <EditableInput
+                      register={register}
+                      name="github_url"
+                      placeholder="Github URL"
+                      className={inputClassName}
+                      error={errors.github_url?.message}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="requirementLink"
+                      placeholder="Requirement URL"
+                      className={inputClassName}
+                      error={errors.requirementLink?.message}
+                    />
+                    <EditableInput
+                      register={register}
+                      name="whatsapp_number"
+                      placeholder="62812345678"
+                      type="tel"
+                      className={inputClassName}
+                      error={errors.whatsapp_number?.message}
+                    />
+                  </CardContent>
+                </Card>
 
                 {/* Members */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
@@ -904,24 +1019,6 @@ export default function TeamProfilePage() {
                           error={errors.members?.[index]?.email?.message}
                         />
 
-                        {/* === Member Github === */}
-                        <EditableInput
-                          register={register}
-                          name={`members.${index}.github_url`}
-                          placeholder="Member github"
-                          className={inputClassName}
-                          error={errors.members?.[index]?.github_url?.message}
-                        />
-
-                        <div className="flex flex-col gap-1 sm:row-span-2 sm:self-stretch">
-                          <LinkableField
-                            label="Publication Materials"
-                            openInNewTab
-                            href="https://drive.google.com/drive/folders/1_gu143PSRpXapjxORRrsk4ed5CCzadMr"
-                            className="bg-white/10 hover:bg-white/20 border border-white/10 rounded-full px-5 py-4 text-white transition-all duration-200 truncate flex items-center justify-between"
-                          />
-                        </div>
-
                         {/* === Requirement Link === */}
                         <EditableInput
                           register={register}
@@ -931,6 +1028,15 @@ export default function TeamProfilePage() {
                           error={
                             errors.members?.[index]?.requirementLink?.message
                           }
+                        />
+
+                        {/* === Github URL === */}
+                        <EditableInput
+                          register={register}
+                          name={`members.${index}.github_url`}
+                          placeholder="Github URL"
+                          className={inputClassName}
+                          error={errors.members?.[index]?.github_url?.message}
                         />
 
                         {/* === Member Role (Dropdown) === */}

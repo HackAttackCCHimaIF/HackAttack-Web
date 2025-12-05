@@ -1,19 +1,19 @@
-import React from 'react'
-import TeamProfilePage from '../../_components/TeamInfoForm'
-import UnderMaintenance from '../../_components/UnderMaintenance'
+import React from "react";
+import TeamProfilePage from "../../_components/TeamInfoForm";
+import UnderMaintenance from "../../_components/UnderMaintenance";
 
 const DashboardPesertaPage = () => {
-  const MAINTENANCE = true
+  const MAINTENANCE = true;
 
   if (MAINTENANCE) {
-    return <UnderMaintenance />
+    return <UnderMaintenance />;
   }
 
   return (
     <div>
-      <TeamProfilePage/>
+      <TeamProfilePage />
     </div>
-  )
-}
+  );
+};
 
-export default DashboardPesertaPage
+export default DashboardPesertaPage;

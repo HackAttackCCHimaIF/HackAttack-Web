@@ -20,49 +20,56 @@ import {
 import UnderMaintenance from "./_components/UnderMaintenance";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user] = useState<User | null>(null);
+  const [loading] = useState(true);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const { reset, setUser: setStoreUser } = useUserStore();
+  const { reset } = useUserStore();
   const router = useRouter();
 
-  const MAINTENANCE_MODE = false; 
+  const MAINTENANCE_MODE = false;
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      setUser(session?.user ?? null);
-
-      if (session?.user) {
-        setStoreUser(session.user);
-      } else {
-        setStoreUser(null);
-      }
-
-      setLoading(false);
+    const redirectToLandingPage = () => {
+      router.push("/");
     };
 
-    getUser();
+    // const getUser = async () => {
+    //   const {
+    //     data: { session },
+    //   } = await supabase.auth.getSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      setUser(session?.user ?? null);
+    //   setUser(session?.user ?? null);
 
-      if (session?.user) {
-        setStoreUser(session.user);
-      } else {
-        setStoreUser(null);
-      }
+    //   if (session?.user) {
+    //     setStoreUser(session.user);
+    //   } else {
+    //     setStoreUser(null);
+    //   }
 
-      setLoading(false);
-    });
+    //   setLoading(false);
+    // };
 
-    return () => subscription.unsubscribe();
-  }, [setStoreUser]);
+    // getUser();
+
+    // const {
+    //   data: { subscription },
+    // } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    //   setUser(session?.user ?? null);
+
+    //   if (session?.user) {
+    //     setStoreUser(session.user);
+    //   } else {
+    //     setStoreUser(null);
+    //   }
+
+    //   setLoading(false);
+    // });
+
+    // return () => subscription.unsubscribe();
+    redirectToLandingPage();
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSignOutClick = () => {
     setShowLogoutDialog(true);

@@ -6,17 +6,19 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/config/supabase";
-import { User } from "@supabase/supabase-js";
 import SubmissionDialogNoOTP from "../SubmissionDialogNoOTP";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [isHomeOpen, setIsHomeOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
   const pathname = usePathname();
+
+  const submissionDeadlineUTC = new Date("2025-11-19T02:00:00Z");
+  const isSubmissionClosed = Date.now() >= submissionDeadlineUTC.getTime();
+  const closedMsg =
+    "Submission ditutup, sudah melewati deadline pukul 09:00 WIB 19 November 2025";
 
   const iconList = ["hima", "telkom", "cci", "hack"];
 
@@ -29,20 +31,25 @@ const Navbar = () => {
     { href: "/#faq", label: "FAQ" },
   ];
 
+  const getTeamList = async () => {
+    try {
+      const response = await fetch("/api/team/lists");
+      const data = await response.json();
+      console.log("Team Data:", data.data.teamData);
+      return data.data.teamData;
+    } catch (error) {
+      console.error("Failed get Team:", error);
+      return [];
+    }
+  };
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    const fetchTeams = async () => {
+      const teamData = await getTeamList();
+      setTeams(teamData);
+    };
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
+    fetchTeams();
   }, []);
 
   return (
@@ -160,28 +167,12 @@ const Navbar = () => {
                     Guide Book
                   </Button>
                 </Link>
-                <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block">
-                  {!loading && (
-                    <Link
-                      href={user ? "/dashboard/peserta" : "/register"}
-                      className="w-full"
-                    >
-                      <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                        {user ? "Dashboard" : "Register Now"}
-                      </Button>
-                    </Link>
-                  )}
-                  {loading && (
-                    <Button
-                      className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
-                      disabled
-                    >
-                      Loading...
-                    </Button>
-                  )}
-                </div>
                 <div>
-                  <SubmissionDialogNoOTP/>
+                  <SubmissionDialogNoOTP
+                    teams={teams}
+                    isDeadline={isSubmissionClosed}
+                    isDeadlineMessage={closedMsg}
+                  />
                 </div>
               </>
             )}
@@ -281,31 +272,13 @@ const Navbar = () => {
                     Guide Book
                   </Button>
                 </Link>
-                
-                <div className="relative rounded-full p-[2px] bg-gradient-to-r from-blue-500 to-green-400 inline-block w-full">
-                  {!loading && (
-                    <Link
-                      href={user ? "/dashboard/peserta" : "/register"}
-                      className="w-full"
-                    >
-                      <Button className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800">
-                        {user ? "Dashboard" : "Register Now"}
-                      </Button>
-                    </Link>
-                    
-                  )}
-                  {loading && (
-                    <Button
-                      className="bg-stone-950 rounded-full w-full h-full text-white hover:bg-stone-800"
-                      disabled
-                    >
-                      Loading...
-                    </Button>
-                  )}
-                </div>
 
                 <div className="w-full">
-                  <SubmissionDialogNoOTP/>
+                  <SubmissionDialogNoOTP
+                    teams={teams}
+                    isDeadline={isSubmissionClosed}
+                    isDeadlineMessage={closedMsg}
+                  />
                 </div>
               </>
             )}
